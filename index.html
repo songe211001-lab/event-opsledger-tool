@@ -710,13 +710,22 @@ function extractEventIdFromUrl(url){
   return lastNum.slice(-4);
 }
 
-function getDefaultActiveEventMonthKey(){
+function nextCalendarMonthKey(){
   const now = new Date();
   let ny = now.getFullYear(), nm = now.getMonth() + 2; // 다음달 (0-indexed 보정 +1, 다음달 +1)
   if(nm > 12){ nm -= 12; ny += 1; }
-  const nextKey = `${ny}-${String(nm).padStart(2,'0')}`;
+  return `${ny}-${String(nm).padStart(2,'0')}`;
+}
+function getDefaultActiveEventMonthKey(){
+  const nextKey = nextCalendarMonthKey();
   if(STATE.eventMonths.some(m=>m.key===nextKey)) return nextKey;
   return STATE.eventMonths[STATE.eventMonths.length-1].key;
+}
+function getDefaultActiveBannerMonthKey(){
+  if(!STATE.bannerMonths.length) return null;
+  const nextKey = nextCalendarMonthKey();
+  if(STATE.bannerMonths.some(m=>m.key===nextKey)) return nextKey;
+  return STATE.bannerMonths[STATE.bannerMonths.length-1].key;
 }
 
 function logActivity(icon, action, detail, tab, monthKey){
@@ -1242,7 +1251,7 @@ function addNewEventMonth(){
    렌더: 배너 구좌 관리 탭
    ════════════════════════════════════════════════════════════ */
 function renderBannerTab(){
-  if(!activeBannerMonthKey) activeBannerMonthKey = STATE.bannerMonths[STATE.bannerMonths.length-1].key;
+  if(!activeBannerMonthKey) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   const container = document.getElementById('tab-banner');
   const chips = renderMonthChipsHtml(STATE.bannerMonths, activeBannerMonthKey, showAllBannerMonths);
 
@@ -1296,7 +1305,7 @@ function renderBannerTab(){
       const delLabel = el.parentElement.textContent.trim();
       showConfirmModal(`'${delLabel}' 배너 구좌 데이터를 삭제할까요?`, ()=>{
         STATE.bannerMonths = STATE.bannerMonths.filter(m=>m.key!==delKey);
-        if(activeBannerMonthKey===delKey) activeBannerMonthKey = STATE.bannerMonths[STATE.bannerMonths.length-1].key;
+        if(activeBannerMonthKey===delKey) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
         scheduleSave(); renderBannerTab();
       });
     });
@@ -1750,7 +1759,7 @@ function restoreFromPayload(json, onlyDomain){
   if(!onlyDomain && data.eventRequests) STATE.eventRequests = data.eventRequests;
   ensureStateShape();
   activeEventMonthKey = getDefaultActiveEventMonthKey();
-  activeBannerMonthKey = STATE.bannerMonths.length ? STATE.bannerMonths[STATE.bannerMonths.length-1].key : null;
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   scheduleSave();
   renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
 }
@@ -2627,7 +2636,7 @@ function handleXlsxImportFile(file, btn){
         STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
         ensureStateShape();
         activeEventMonthKey = getDefaultActiveEventMonthKey();
-        activeBannerMonthKey = STATE.bannerMonths.length ? STATE.bannerMonths[STATE.bannerMonths.length-1].key : null;
+        activeBannerMonthKey = getDefaultActiveBannerMonthKey();
         logActivity('📄', '엑셀 불러오기', `이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 ${imported.benefitBlocks.length}개 블록`, null);
         scheduleSave();
         renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
@@ -2728,7 +2737,7 @@ function handleJsonImportFile(file, btn){
       STATE = data;
       ensureStateShape();
       activeEventMonthKey = getDefaultActiveEventMonthKey();
-      activeBannerMonthKey = STATE.bannerMonths.length ? STATE.bannerMonths[STATE.bannerMonths.length-1].key : null;
+      activeBannerMonthKey = getDefaultActiveBannerMonthKey();
       scheduleSave();
       renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
       showToast('백업 데이터를 불러왔어요.');
@@ -2746,7 +2755,7 @@ function handleJsonImportFile(file, btn){
   await loadGithubConfig();
   if(!STORAGE_OK) renderSavebar('자동 저장 불가 — 이력 관리 탭에서 주기적으로 "백업 파일 다운로드"를 눌러 내려받아 두세요', true);
   activeEventMonthKey = getDefaultActiveEventMonthKey();
-  activeBannerMonthKey = STATE.bannerMonths.length ? STATE.bannerMonths[STATE.bannerMonths.length-1].key : null;
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   renderEventsTab();
   renderBannerTab();
   renderBenefitTab();
