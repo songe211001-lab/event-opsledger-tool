@@ -610,10 +610,20 @@ function ensureStateShape(){
   });
 }
 
+function hasClaudeStorage(){
+  return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function';
+}
+
 async function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY);
-    if(res && res.value){ STATE = JSON.parse(res.value); ensureStateShape(); return; }
+    if(hasClaudeStorage()){
+      const res = await window.storage.get(STORAGE_KEY);
+      if(res && res.value){ STATE = JSON.parse(res.value); ensureStateShape(); return; }
+    }else{
+      // Claude 아티팩트 환경이 아닌 곳(GitHub Pages 등 직접 호스팅)에서는 브라우저 localStorage를 사용한다.
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ STATE = JSON.parse(raw); ensureStateShape(); return; }
+    }
   }catch(err){ STORAGE_OK = false; }
   STATE = defaultState();
 }
@@ -624,7 +634,11 @@ function scheduleSave(){
 }
 async function doSave(){
   try{
-    await window.storage.set(STORAGE_KEY, JSON.stringify(STATE), false);
+    if(hasClaudeStorage()){
+      await window.storage.set(STORAGE_KEY, JSON.stringify(STATE), false);
+    }else{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+    }
     STORAGE_OK = true;
     renderSavebar('자동 저장됨', false);
   }catch(err){
@@ -1730,13 +1744,20 @@ let activeExportFilter = '전체';
 
 async function loadGithubConfig(){
   try{
-    const res = await window.storage.get('alddot_github_config');
-    if(res && res.value) GITHUB_CONFIG = JSON.parse(res.value);
+    if(hasClaudeStorage()){
+      const res = await window.storage.get('alddot_github_config');
+      if(res && res.value) GITHUB_CONFIG = JSON.parse(res.value);
+    }else{
+      const raw = localStorage.getItem('alddot_github_config');
+      if(raw) GITHUB_CONFIG = JSON.parse(raw);
+    }
   }catch(err){ /* 저장된 설정 없음 또는 스토리지 미지원 */ }
 }
 async function saveGithubConfig(){
-  try{ await window.storage.set('alddot_github_config', JSON.stringify(GITHUB_CONFIG), false); }
-  catch(err){ /* 무시: 다음 세션엔 다시 연결 필요 */ }
+  try{
+    if(hasClaudeStorage()) await window.storage.set('alddot_github_config', JSON.stringify(GITHUB_CONFIG), false);
+    else localStorage.setItem('alddot_github_config', JSON.stringify(GITHUB_CONFIG));
+  }catch(err){ /* 무시: 다음 세션엔 다시 연결 필요 */ }
 }
 function parseRepoInput(input){
   const cleaned = input.trim().replace(/^https?:\/\//,'').replace(/^github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
