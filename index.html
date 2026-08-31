@@ -235,6 +235,15 @@
     border:1px solid var(--line); border-radius:12px; margin-bottom:8px;
   }
   .template-name{font-size:13px; font-weight:600; color:var(--ink);}
+
+  .col-toggle-list{display:flex; flex-direction:column;}
+  .col-toggle-row{
+    display:flex; align-items:center; gap:10px; padding:8px 2px; font-size:13px; cursor:pointer;
+    border-bottom:1px solid var(--line); width:100%; box-sizing:border-box;
+  }
+  .col-toggle-row:last-child{border-bottom:none;}
+  .col-toggle-row input[type=checkbox]{flex:0 0 auto; width:16px; height:16px; accent-color:var(--primary); cursor:pointer;}
+  .col-toggle-row span{flex:1 1 auto; min-width:0; word-break:keep-all; white-space:normal; color:var(--ink);}
   .ehi-top{display:flex; align-items:center; gap:10px;}
   .ehi-name{font-size:13.5px; font-weight:700; color:var(--ink); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .ehi-actions{display:flex; gap:6px; flex-shrink:0;}
@@ -281,9 +290,9 @@
   .col-chip .del{cursor:pointer; opacity:.6;}
   .col-chip .del:hover{opacity:1; color:var(--fatal);}
 
-  .modal-overlay{position:fixed; inset:0; background:rgba(43,37,35,.4); display:flex; align-items:center; justify-content:center; z-index:50;}
+  .modal-overlay{position:fixed; inset:0; background:rgba(43,37,35,.4); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; overflow-y:auto;}
   #confirmModalOverlay, #promptModalOverlay{z-index:60;}
-  .modal{background:#fff; border-radius:20px; padding:24px; width:360px; max-width:90vw; box-shadow:var(--shadow-3);}
+  .modal{background:#fff; border-radius:20px; padding:24px; width:360px; max-width:90vw; max-height:85vh; overflow-y:auto; box-shadow:var(--shadow-3);}
   .modal h4{margin:0 0 12px; font-size:16px; font-weight:700;}
   .modal input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:12px; font-size:13px; margin-bottom:14px; font-family:inherit;}
   .modal .actions{display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;}
@@ -507,7 +516,7 @@
 <div id="columnsModalOverlay" class="modal-overlay hidden">
   <div class="modal" style="width:360px;">
     <h4>🙈 컬럼 표시 설정</h4>
-    <p class="sub" style="margin:0 0 12px;">체크 해제하면 표에서 숨겨져요. 이벤트명은 항상 보여요.</p>
+    <p class="sub" style="margin:0 0 12px;">체크 해제하면 표에서 숨겨져요. 데이터는 그대로 남아있어요.</p>
     <div id="columnsModalBody"></div>
     <div class="actions" style="margin-top:16px;">
       <button id="columnsModalCloseBtn">닫기</button>
@@ -642,6 +651,22 @@ const DONE_STATUSES = new Set(["완료","연장","비노출"]);
 const CARRY_STATUSES = new Set(["연장"]);
 const DEFAULT_BANNER_COLUMNS = ["메인 팝업","메인 상단","메인 하단","이벤트/썸네일"];
 
+const DEFAULT_PARTNER_NAME_MAP = {
+  "에넥스텔레콤담당(A모바일)": "A모바일",
+  "토스모바일본부": "토스모바일",
+  "인스코리아본부": "인스모바일",
+  "에이프러스본부": "아시아모바일",
+  "시월텔레콤담당": "시월모바일",
+  "찬스모바일본부": "찬스모바일",
+  "헬로모바일사업담당": "헬로모바일",
+  "코나아이본부": "모나",
+  "아이즈비전본부": "아이즈모바일",
+  "미디어로그담당": "유모바일",
+  "한국케이블텔레콤본부": "티플러스",
+  "CK커뮤스트리본부": "슈가모바일",
+  "인스코비담당(프리티)": "프리티",
+};
+
 const EVENT_TABLE_COLUMNS = [
   {key:'priority', label:'우선순위'},
   {key:'status', label:'상태'},
@@ -658,6 +683,15 @@ const EVENT_TABLE_COLUMNS = [
   {key:'note', label:'특이사항', minWidth:140},
 ];
 let hiddenEventColumns = new Set();
+function getAllEventColumns(){
+  const all = [...EVENT_TABLE_COLUMNS, ...(STATE.customEventColumns||[])];
+  const order = (STATE.uiPrefs && STATE.uiPrefs.eventColumnOrder) || [];
+  if(!order.length) return all;
+  const byKey = new Map(all.map(c=>[c.key,c]));
+  const ordered = order.map(k=>byKey.get(k)).filter(Boolean);
+  const remaining = all.filter(c=>!order.includes(c.key));
+  return [...ordered, ...remaining];
+}
 
 function defaultState(){
   const today = new Date();
@@ -671,7 +705,9 @@ function defaultState(){
     eventRequests: [],
     activityLog: [],
     eventTemplates: [],
-    uiPrefs: { hiddenEventColumns: [] },
+    uiPrefs: { hiddenEventColumns: [], eventColumnOrder: [] },
+    customEventColumns: [],
+    partnerNameMap: {...DEFAULT_PARTNER_NAME_MAP},
   };
 }
 function ensureStateShape(){
@@ -680,7 +716,11 @@ function ensureStateShape(){
   if(!STATE.exportHistory) STATE.exportHistory = [];
   if(!STATE.eventTemplates) STATE.eventTemplates = [];
   if(!STATE.uiPrefs) STATE.uiPrefs = { hiddenEventColumns: [] };
+  if(!STATE.customEventColumns) STATE.customEventColumns = [];
+  if(!STATE.partnerNameMap) STATE.partnerNameMap = {};
+  STATE.partnerNameMap = {...DEFAULT_PARTNER_NAME_MAP, ...STATE.partnerNameMap};
   if(!STATE.uiPrefs.hiddenEventColumns) STATE.uiPrefs.hiddenEventColumns = [];
+  if(!STATE.uiPrefs.eventColumnOrder) STATE.uiPrefs.eventColumnOrder = [];
   hiddenEventColumns = new Set(STATE.uiPrefs.hiddenEventColumns);
   if(!STATE.eventMonths) STATE.eventMonths = defaultState().eventMonths;
   if(!STATE.bannerMonths) STATE.bannerMonths = defaultState().bannerMonths;
@@ -689,7 +729,17 @@ function ensureStateShape(){
     if(!mo.partners) mo.partners = [];
     if(!mo.preMarketingPartners) mo.preMarketingPartners = [];
     if(!mo.cycleWeeks) mo.cycleWeeks = 4;
-    mo.preMarketingPartners.forEach(p=>{ if(!p._uid) p._uid = uid(); });
+    if(!mo.hiddenColumns) mo.hiddenColumns = [];
+    mo.preMarketingPartners.forEach(p=>{
+      if(!p._uid) p._uid = uid();
+      if(p.name && STATE.partnerNameMap[p.name.trim()]) p.name = STATE.partnerNameMap[p.name.trim()];
+    });
+    mo.ranks.forEach(r=>{
+      Object.keys(r.values||{}).forEach(col=>{
+        const v = r.values[col];
+        if(v && STATE.partnerNameMap[String(v).trim()]) r.values[col] = STATE.partnerNameMap[String(v).trim()];
+      });
+    });
     if(!mo.weekAnchor) mo.weekAnchor = defaultWeekAnchor(mo.key);
     if(!mo.changeLog) mo.changeLog = [];
   });
@@ -1032,7 +1082,7 @@ function renderEventsTab(){
 function renderEventsTableHeader(){
   const headerRow = document.getElementById('eventsHeaderRow');
   if(!headerRow) return;
-  const visibleCols = EVENT_TABLE_COLUMNS.filter(c=>!hiddenEventColumns.has(c.key));
+  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
   headerRow.innerHTML = `
     <th style="width:32px;"><input type="checkbox" class="header-checkbox" id="eventsHeaderCheckbox" title="전체 선택"/></th>
     <th style="width:26px;"></th>
@@ -1079,7 +1129,7 @@ function renderEventFieldCell(ev, colKey){
 function renderEventsRows(){
   const mo = getEventMonth(activeEventMonthKey);
   const tbody = document.getElementById('eventsTbody');
-  const visibleCols = EVENT_TABLE_COLUMNS.filter(c=>!hiddenEventColumns.has(c.key));
+  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
   const colCount = visibleCols.length + 3; // 체크박스 + 드래그핸들 + 액션
   const visibleIndices = mo.events
     .map((ev,i)=>i)
@@ -1210,7 +1260,7 @@ function handleTablePaste(e, mo, startIdx, startField){
   e.preventDefault();
   const rows = text.replace(/\r/g,'').split('\n').filter((r,i,arr)=> !(i===arr.length-1 && r==='')).map(r=>r.split('\t'));
   // 화면에 숨긴 컬럼은 붙여넣기 대상에서도 건너뛴다 (보이는 순서와 실제로 채워지는 순서를 맞추기 위해)
-  const fieldOrder = EVENT_TABLE_COLUMNS.filter(c=>!hiddenEventColumns.has(c.key)).map(c=>c.key);
+  const fieldOrder = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key)).map(c=>c.key);
   const startFieldIdx = fieldOrder.indexOf(startField);
   if(startFieldIdx===-1) return;
 
@@ -1448,16 +1498,36 @@ document.getElementById('reportModalCopyBtn').addEventListener('click', async ()
 /* ════════════════════════════════════════════════════════════
    컬럼 표시 설정
    ════════════════════════════════════════════════════════════ */
+function attachDragAutoScroll(scrollEl){
+  if(!scrollEl || scrollEl.__autoScrollBound) return;
+  scrollEl.__autoScrollBound = true;
+  scrollEl.addEventListener('dragover', (e)=>{
+    const rect = scrollEl.getBoundingClientRect();
+    const threshold = 44;
+    if(e.clientY - rect.top < threshold) scrollEl.scrollTop -= 14;
+    else if(rect.bottom - e.clientY < threshold) scrollEl.scrollTop += 14;
+  });
+}
+
 function openColumnsModal(){
   const body = document.getElementById('columnsModalBody');
+  const customKeys = new Set((STATE.customEventColumns||[]).map(c=>c.key));
   body.innerHTML = `
-    <div style="margin-bottom:10px;"><button class="ghost sm" id="showAllColumnsBtn">모두 표시</button></div>
-    ${EVENT_TABLE_COLUMNS.map(c=>`
-    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; cursor:pointer;">
-      <input type="checkbox" class="col-toggle-cb" data-key="${c.key}" ${hiddenEventColumns.has(c.key)?'':'checked'}/>
-      ${escapeHtml(c.label)}
-    </label>
-  `).join('')}`;
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button class="ghost sm" id="showAllColumnsBtn">모두 표시</button>
+      <button class="primary sm" id="addCustomColumnBtn">➕ 새 컬럼 추가하기</button>
+    </div>
+    <p class="sub" style="margin:0 0 8px;">⠿를 드래그하면 표에 보이는 컬럼 순서를 바꿀 수 있어요.</p>
+    <div class="col-toggle-list">
+      ${getAllEventColumns().map(c=>`
+        <label class="col-toggle-row" data-key="${c.key}" draggable="true">
+          <span class="drag-dots" style="cursor:grab;">⠿</span>
+          <input type="checkbox" class="col-toggle-cb" data-key="${c.key}" ${hiddenEventColumns.has(c.key)?'':'checked'}/>
+          <span>${escapeHtml(c.label)}</span>
+          ${customKeys.has(c.key)?`<button type="button" class="ghost sm del-custom-col-btn" data-key="${c.key}" title="컬럼 삭제">🗑️</button>`:''}
+        </label>
+      `).join('')}
+    </div>`;
   body.querySelectorAll('.col-toggle-cb').forEach(cb=>{
     cb.addEventListener('change', ()=>{
       if(cb.checked) hiddenEventColumns.delete(cb.dataset.key);
@@ -1468,6 +1538,50 @@ function openColumnsModal(){
       renderEventsRows();
     });
   });
+  body.querySelectorAll('.del-custom-col-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const key = btn.dataset.key;
+      const col = (STATE.customEventColumns||[]).find(c=>c.key===key);
+      showConfirmModal(`'${col?col.label:'이'}' 컬럼을 삭제할까요? 해당 컬럼에 입력된 값도 함께 사라져요.`, ()=>{
+        STATE.customEventColumns = STATE.customEventColumns.filter(c=>c.key!==key);
+        hiddenEventColumns.delete(key);
+        STATE.uiPrefs.hiddenEventColumns = [...hiddenEventColumns];
+        STATE.uiPrefs.eventColumnOrder = (STATE.uiPrefs.eventColumnOrder||[]).filter(k=>k!==key);
+        scheduleSave();
+        renderEventsTableHeader(); renderEventsRows();
+        openColumnsModal();
+      });
+    });
+  });
+  body.querySelectorAll('.col-toggle-row').forEach(row=>{
+    row.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', row.dataset.key);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
+    row.addEventListener('dragover', (e)=>{ e.preventDefault(); row.classList.add('drag-over'); });
+    row.addEventListener('dragleave', ()=> row.classList.remove('drag-over'));
+    row.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      const fromKey = e.dataTransfer.getData('text/plain');
+      const toKey = row.dataset.key;
+      if(fromKey===toKey || !fromKey) return;
+      const keys = getAllEventColumns().map(c=>c.key);
+      const fromIdx = keys.indexOf(fromKey);
+      const toIdx = keys.indexOf(toKey);
+      if(fromIdx===-1 || toIdx===-1) return;
+      const [moved] = keys.splice(fromIdx,1);
+      keys.splice(toIdx,0,moved);
+      STATE.uiPrefs.eventColumnOrder = keys;
+      scheduleSave();
+      renderEventsTableHeader(); renderEventsRows();
+      openColumnsModal();
+    });
+  });
+  attachDragAutoScroll(body.closest('.modal'));
   document.getElementById('showAllColumnsBtn').addEventListener('click', ()=>{
     hiddenEventColumns.clear();
     STATE.uiPrefs.hiddenEventColumns = [];
@@ -1475,10 +1589,81 @@ function openColumnsModal(){
     renderEventsTableHeader(); renderEventsRows();
     openColumnsModal();
   });
+  document.getElementById('addCustomColumnBtn').addEventListener('click', ()=>{
+    showPromptModal('새 컬럼 이름을 입력하세요 (예: 담당자)', '', (name)=>{
+      if(!STATE.customEventColumns) STATE.customEventColumns = [];
+      const key = 'col_' + uid();
+      STATE.customEventColumns.push({key, label: name});
+      scheduleSave();
+      renderEventsTableHeader(); renderEventsRows();
+      openColumnsModal();
+      showToast(`'${name}' 컬럼을 추가했어요.`);
+    });
+  });
   document.getElementById('columnsModalOverlay').classList.remove('hidden');
 }
 document.getElementById('columnsModalCloseBtn').addEventListener('click', ()=> document.getElementById('columnsModalOverlay').classList.add('hidden'));
 document.getElementById('columnsModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='columnsModalOverlay') document.getElementById('columnsModalOverlay').classList.add('hidden'); });
+
+function openBannerColumnsModal(){
+  const mo = getBannerMonth(activeBannerMonthKey);
+  if(!mo.hiddenColumns) mo.hiddenColumns = [];
+  const body = document.getElementById('columnsModalBody');
+  body.innerHTML = `
+    <div style="margin-bottom:10px;"><button class="ghost sm" id="showAllBannerColumnsBtn">모두 표시</button></div>
+    <p class="sub" style="margin:0 0 8px;">⠿를 드래그하면 표에 보이는 구좌 순서를 바꿀 수 있어요.</p>
+    <div class="col-toggle-list">
+      ${mo.columns.map(col=>`
+        <label class="col-toggle-row" data-key="${escapeHtml(col)}" draggable="true">
+          <span class="drag-dots" style="cursor:grab;">⠿</span>
+          <input type="checkbox" class="banner-col-toggle-cb" data-key="${escapeHtml(col)}" ${mo.hiddenColumns.includes(col)?'':'checked'}/>
+          <span>${escapeHtml(col)}</span>
+        </label>
+      `).join('')}
+    </div>`;
+  body.querySelectorAll('.banner-col-toggle-cb').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const key = cb.dataset.key;
+      if(cb.checked) mo.hiddenColumns = mo.hiddenColumns.filter(c=>c!==key);
+      else mo.hiddenColumns.push(key);
+      scheduleSave();
+      renderBannerRows();
+    });
+  });
+  body.querySelectorAll('.col-toggle-row').forEach(row=>{
+    row.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', row.dataset.key);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
+    row.addEventListener('dragover', (e)=>{ e.preventDefault(); row.classList.add('drag-over'); });
+    row.addEventListener('dragleave', ()=> row.classList.remove('drag-over'));
+    row.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      const fromKey = e.dataTransfer.getData('text/plain');
+      const toKey = row.dataset.key;
+      if(fromKey===toKey || !fromKey) return;
+      const fromIdx = mo.columns.indexOf(fromKey);
+      const toIdx = mo.columns.indexOf(toKey);
+      if(fromIdx===-1 || toIdx===-1) return;
+      const [moved] = mo.columns.splice(fromIdx,1);
+      mo.columns.splice(toIdx,0,moved);
+      scheduleSave();
+      renderBannerRows(); renderBannerColsEditor();
+      openBannerColumnsModal();
+    });
+  });
+  attachDragAutoScroll(body.closest('.modal'));
+  document.getElementById('showAllBannerColumnsBtn').addEventListener('click', ()=>{
+    mo.hiddenColumns = [];
+    scheduleSave();
+    renderBannerRows();
+    openBannerColumnsModal();
+  });
+  document.getElementById('columnsModalOverlay').classList.remove('hidden');
+}
 
 /* ════════════════════════════════════════════════════════════
    자주 쓰는 이벤트 템플릿
@@ -1576,6 +1761,7 @@ function renderBannerTab(){
       <div id="pmManagementHolder"></div>
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <button class="primary sm" id="addBannerRowBtn">➕ 순위 행 추가하기</button>
+        <button class="sm" id="openBannerColumnsBtn">🙈 컬럼 표시 설정</button>
       </div>
       <div class="tblwrap">
         <table class="edittable" id="bannerTable"></table>
@@ -1585,6 +1771,7 @@ function renderBannerTab(){
   renderBannerColsEditor();
   renderBannerRows();
   renderPmManagementPanel();
+  document.getElementById('openBannerColumnsBtn').addEventListener('click', openBannerColumnsModal);
 
   const convertBtn = document.getElementById('convertRawBtn');
   const rawInput = document.getElementById('rawFileInput');
@@ -1661,10 +1848,12 @@ function renderBannerColsEditor(){
 function renderBannerRows(){
   const mo = getBannerMonth(activeBannerMonthKey);
   const table = document.getElementById('bannerTable');
-  const head = `<thead><tr><th style="width:26px;"></th><th style="width:50px;">순위</th>${mo.columns.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
+  const hidden = mo.hiddenColumns||[];
+  const visibleCols = mo.columns.filter(c=>!hidden.includes(c));
+  const head = `<thead><tr><th style="width:26px;"></th><th style="width:50px;">순위</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
   let body;
   if(!mo.ranks.length){
-    body = `<tbody><tr><td colspan="${mo.columns.length+3}"><div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div></td></tr></tbody>`;
+    body = `<tbody><tr><td colspan="${visibleCols.length+3}"><div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div></td></tr></tbody>`;
   }else{
     body = '<tbody>' + mo.ranks.map((r,idx)=>`
       <tr data-idx="${idx}" draggable="true">
@@ -1676,7 +1865,7 @@ function renderBannerRows(){
           </div>
         </td>
         <td class="mono" style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
-        ${mo.columns.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
+        ${visibleCols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
         <td><button class="ghost del-row-btn">🗑️</button></td>
       </tr>`).join('') + '</tbody>';
   }
@@ -1688,6 +1877,14 @@ function renderBannerRows(){
       inp.addEventListener('input', ()=>{
         mo.ranks[idx].values[inp.dataset.col] = inp.value;
         scheduleSave();
+      });
+      inp.addEventListener('blur', ()=>{
+        const mapped = applyPartnerNameMap(inp.value);
+        if(mapped !== inp.value){
+          inp.value = mapped;
+          mo.ranks[idx].values[inp.dataset.col] = mapped;
+          scheduleSave();
+        }
       });
     });
     const delBtn = tr.querySelector('.del-row-btn');
@@ -1769,7 +1966,7 @@ function renderPmManagementPanel(){
     <details id="pmDetails">
       <summary class="section-toggle">🎯 프리마케팅 배너 관리 <span class="muted-inline">(수동 편집)</span></summary>
       <div class="section-toggle-body">
-        <p class="sub" style="margin:0 0 6px;">"프리 주차별 N위" 자리를 채울 파트너를 주차별로 한눈에 보고 바로 수정할 수 있어요.</p>
+        <p class="sub" style="margin:0 0 6px;">"프리 주차별 N위" 자리를 채울 파트너를 주차별로 한눈에 보고 바로 수정할 수 있어요. 회사명을 입력하면 통신사명으로 자동 변환돼요.</p>
         <div id="pmStatusGridHolder"></div>
         <div id="pmWeekPreviewHolder"></div>
       </div>
@@ -1778,6 +1975,13 @@ function renderPmManagementPanel(){
 
   renderPmStatusGrid();
   renderPmWeekPreview();
+}
+
+function applyPartnerNameMap(name){
+  if(!name) return name;
+  const trimmed = name.trim();
+  const map = STATE.partnerNameMap || {};
+  return map[trimmed] || name;
 }
 
 function renderPmStatusGrid(){
@@ -1868,6 +2072,15 @@ function renderPmWeekPreview(){
       }
       entry.name = inp.value;
       scheduleSave();
+    });
+    inp.addEventListener('blur', ()=>{
+      const mapped = applyPartnerNameMap(inp.value);
+      if(mapped !== inp.value){
+        inp.value = mapped;
+        const w = +inp.dataset.week, rk = +inp.dataset.rank;
+        const entry = mo.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk);
+        if(entry){ entry.name = mapped; scheduleSave(); }
+      }
     });
   });
 }
@@ -2179,7 +2392,7 @@ function renderHistoryTab(){
       <details id="githubDetails">
         <summary class="section-toggle">🔗 GitHub에 외부 저장 <span class="muted-inline">(팀과 공유되는 이력 저장소)</span></summary>
         <div class="section-toggle-body">
-          <p class="sub" style="margin:0 0 14px;">아래 정보를 채우고 저장소에 연결하면 팀과 이력을 공유할 수 있어요.</p>
+          <p class="sub" style="margin:0 0 14px;">아래 정보를 채우고 저장소에 연결하면 팀과 이력을 공유할 수 있어요. <b>주의:</b> 토큰은 이 브라우저에만 저장돼서, 팀원마다 각자 자신의 토큰으로 따로 연결해야 해요. 저장소가 비공개라면 팀원을 협업자로 초대해두어야 접속할 수 있어요 (초대 안 된 팀원은 404 오류가 떠요).</p>
           <div class="gh-step">
             <span class="gh-step-num">1</span>
             <input type="password" id="ghTokenInput" placeholder="발급받은 토큰(ghp_...) 붙여넣기" value="${escapeHtml(GITHUB_CONFIG.token||'')}"/>
@@ -2420,7 +2633,7 @@ async function pullFromGithub(){
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${branch}`, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
     });
-    if(!res.ok){ throw new Error(res.status===404 ? '저장소에 아직 백업 파일이 없어요.' : `상태 코드 ${res.status}`); }
+    if(!res.ok){ throw new Error(res.status===404 ? '파일을 찾을 수 없어요. 아직 저장된 백업이 없거나, 이 토큰에 저장소 접근 권한이 없을 수 있어요.' : `상태 코드 ${res.status}`); }
     const data = await res.json();
     const json = decodeURIComponent(escape(atob(data.content.replace(/\s/g,''))));
     resetBtn(btn);
@@ -3065,9 +3278,10 @@ function handleXlsxExport(btn){
   setTimeout(()=>{
     try{
       const wb = XLSX.utils.book_new();
+      const customCols = STATE.customEventColumns||[];
       STATE.eventMonths.forEach(mo=>{
-        const rows = [ ["우선순위","작업상태","이벤트명","작업유형","구분","반영예정일","반영상태","소스수급","검수용URL","URL유형","운영URL","이벤트ID","특이사항"] ];
-        mo.events.forEach(ev=> rows.push([ev.priority,ev.status,ev.name,ev.workType,ev.category,ev.dueDate,ev.reflectStatus,ev.source,ev.reviewUrl,ev.urlType,ev.opUrl,ev.id,ev.note]));
+        const rows = [ ["우선순위","작업상태","이벤트명","작업유형","구분","반영예정일","반영상태","소스수급","검수용URL","URL유형","운영URL","이벤트ID","특이사항", ...customCols.map(c=>c.label)] ];
+        mo.events.forEach(ev=> rows.push([ev.priority,ev.status,ev.name,ev.workType,ev.category,ev.dueDate,ev.reflectStatus,ev.source,ev.reviewUrl,ev.urlType,ev.opUrl,ev.id,ev.note, ...customCols.map(c=>ev[c.key]||'')]));
         const ws = XLSX.utils.aoa_to_sheet(rows);
         XLSX.utils.book_append_sheet(wb, ws, (mo.label + " 이벤트 관리").slice(0,31));
       });
