@@ -3235,7 +3235,8 @@ function handleXlsxImportFile(file, btn){
       const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array', cellDates:false});
       const imported = importFromWorkbook(wb);
       if(!imported.eventMonths.length){
-        showError("'NN년 N월 이벤트 관리' 형식의 시트를 찾지 못했어요. 파일 구조를 확인해주세요.");
+        const sheetList = wb.SheetNames.join(', ');
+        showError(`'NN년 N월 이벤트 관리' 형식의 시트를 찾지 못했어요. 이 파일의 시트 이름: ${sheetList}`);
         resetBtn(btn); return;
       }
 
