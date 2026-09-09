@@ -1067,16 +1067,17 @@ function renderEventsTab(){
   const collapseChip = container.querySelector('.chip[data-action="collapse"]');
   if(collapseChip) collapseChip.addEventListener('click', ()=>{ showAllEventMonths = false; renderEventsTab(); });
 
-  document.getElementById('addEventMonthChip').addEventListener('click', addNewEventMonth);
-  document.getElementById('addEventRowBtn').addEventListener('click', ()=>{
+  const addMonthBtn = document.getElementById('addEventMonthChip'); if(addMonthBtn) addMonthBtn.addEventListener('click', addNewEventMonth);
+  const addRowBtn = document.getElementById('addEventRowBtn');
+  if(addRowBtn) addRowBtn.addEventListener('click', ()=>{
     const mo = getEventMonth(activeEventMonthKey);
     mo.events.push({_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""});
     scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox();
   });
-  document.getElementById('openCalendarBtn').addEventListener('click', openCalendarModal);
-  document.getElementById('openReportBtn').addEventListener('click', openReportModal);
-  document.getElementById('openColumnsBtn').addEventListener('click', openColumnsModal);
-  document.getElementById('openTemplateBtn').addEventListener('click', openTemplateModal);
+  const calBtn = document.getElementById('openCalendarBtn'); if(calBtn) calBtn.addEventListener('click', openCalendarModal);
+  const repBtn = document.getElementById('openReportBtn'); if(repBtn) repBtn.addEventListener('click', openReportModal);
+  const colBtn = document.getElementById('openColumnsBtn'); if(colBtn) colBtn.addEventListener('click', openColumnsModal);
+  const tplBtn = document.getElementById('openTemplateBtn'); if(tplBtn) tplBtn.addEventListener('click', openTemplateModal);
 }
 
 function renderEventsTableHeader(){
@@ -1771,7 +1772,7 @@ function renderBannerTab(){
   renderBannerColsEditor();
   renderBannerRows();
   renderPmManagementPanel();
-  document.getElementById('openBannerColumnsBtn').addEventListener('click', openBannerColumnsModal);
+  const bcolBtn = document.getElementById('openBannerColumnsBtn'); if(bcolBtn) bcolBtn.addEventListener('click', openBannerColumnsModal);
 
   const convertBtn = document.getElementById('convertRawBtn');
   const rawInput = document.getElementById('rawFileInput');
@@ -1813,8 +1814,9 @@ function renderBannerTab(){
   const collapseChip = container.querySelector('.chip[data-action="collapse"]');
   if(collapseChip) collapseChip.addEventListener('click', ()=>{ showAllBannerMonths = false; renderBannerTab(); });
 
-  document.getElementById('addBannerMonthChip').addEventListener('click', addNewBannerMonth);
-  document.getElementById('addBannerRowBtn').addEventListener('click', ()=>{
+  const addBMonthBtn = document.getElementById('addBannerMonthChip'); if(addBMonthBtn) addBMonthBtn.addEventListener('click', addNewBannerMonth);
+  const addBRowBtn = document.getElementById('addBannerRowBtn');
+  if(addBRowBtn) addBRowBtn.addEventListener('click', ()=>{
     const mo = getBannerMonth(activeBannerMonthKey);
     mo.ranks.push({_uid:uid(), values:{}});
     scheduleSave(); renderBannerRows();
@@ -1836,7 +1838,8 @@ function renderBannerColsEditor(){
       });
     });
   });
-  document.getElementById('addBannerColBtn').addEventListener('click', ()=>{
+  const addBColBtn = document.getElementById('addBannerColBtn');
+  if(addBColBtn) addBColBtn.addEventListener('click', ()=>{
     showPromptModal('새 구좌 이름을 입력하세요 (예: GNB 검색배너)', '', (name)=>{
       if(mo.columns.includes(name)){ showError('이미 있는 구좌명이에요.'); return; }
       mo.columns.push(name);
@@ -2023,11 +2026,13 @@ function renderPmStatusGrid(){
     </div>
   `;
 
-  document.getElementById('pmAnchorInput').addEventListener('change', (e)=>{
+  const pmAnchorInp = document.getElementById('pmAnchorInput');
+  if(pmAnchorInp) pmAnchorInp.addEventListener('change', (e)=>{
     mo.weekAnchor = e.target.value;
     scheduleSave(); renderPmStatusGrid(); renderPmWeekPreview();
   });
-  document.getElementById('pmCycleInput').addEventListener('change', (e)=>{
+  const pmCycleInp = document.getElementById('pmCycleInput');
+  if(pmCycleInp) pmCycleInp.addEventListener('change', (e)=>{
     const v = Math.max(1, Math.min(12, parseInt(e.target.value)||4));
     mo.cycleWeeks = v;
     scheduleSave(); renderPmStatusGrid(); renderPmWeekPreview();
@@ -2115,8 +2120,8 @@ function renderBenefitTab(){
     </div>
   `;
   renderBenefitBlocks();
-  document.getElementById('addBenefitMonthBtn').addEventListener('click', addNewBenefitMonth);
-  document.getElementById('addBenefitBlockBtn').addEventListener('click', addNewBenefitBlock);
+  const addBenMonthBtn = document.getElementById('addBenefitMonthBtn'); if(addBenMonthBtn) addBenMonthBtn.addEventListener('click', addNewBenefitMonth);
+  const addBenBlockBtn = document.getElementById('addBenefitBlockBtn'); if(addBenBlockBtn) addBenBlockBtn.addEventListener('click', addNewBenefitBlock);
 }
 
 function addNewBenefitMonth(){
@@ -2329,6 +2334,13 @@ function buildBackupPayload(){
     benefitBlocks: STATE.benefitBlocks, eventRequests: STATE.eventRequests||[]
   }, null, 2);
 }
+function safeRenderAll(){
+  try{ renderEventsTab(); }catch(err){ console.error('renderEventsTab 오류:', err); }
+  try{ renderBannerTab(); }catch(err){ console.error('renderBannerTab 오류:', err); }
+  try{ renderBenefitTab(); }catch(err){ console.error('renderBenefitTab 오류:', err); }
+  try{ renderHomeTab(); }catch(err){ console.error('renderHomeTab 오류:', err); }
+}
+
 function restoreFromPayload(json, onlyDomain){
   const data = JSON.parse(json);
   if(!data.eventMonths && !data.bannerMonths && !data.benefitBlocks) throw new Error('올바른 백업 데이터가 아니에요.');
@@ -2340,7 +2352,7 @@ function restoreFromPayload(json, onlyDomain){
   activeEventMonthKey = getDefaultActiveEventMonthKey();
   activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   scheduleSave();
-  renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
+  safeRenderAll();
 }
 
 function recordExportSnapshot(channel, label){
@@ -2710,9 +2722,9 @@ function renderHomeTab(){
   if(hlD) hlD.addEventListener('click', ()=>{ switchMainTab('events'); });
   const hlB = document.getElementById('homeHighlightBenefit');
   if(hlB) hlB.addEventListener('click', ()=>{ switchMainTab('benefit'); });
-  document.getElementById('homeCardEvents').addEventListener('click', ()=> switchMainTab('events'));
-  document.getElementById('homeCardBanner').addEventListener('click', ()=> switchMainTab('banner'));
-  document.getElementById('homeCardBenefit').addEventListener('click', ()=> switchMainTab('benefit'));
+  const hcEvents = document.getElementById('homeCardEvents'); if(hcEvents) hcEvents.addEventListener('click', ()=> switchMainTab('events'));
+  const hcBanner = document.getElementById('homeCardBanner'); if(hcBanner) hcBanner.addEventListener('click', ()=> switchMainTab('banner'));
+  const hcBenefit = document.getElementById('homeCardBenefit'); if(hcBenefit) hcBenefit.addEventListener('click', ()=> switchMainTab('benefit'));
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -3244,7 +3256,7 @@ function handleXlsxImportFile(file, btn){
         activeBannerMonthKey = getDefaultActiveBannerMonthKey();
         logActivity('📄', '엑셀 불러오기', `이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 ${imported.benefitBlocks.length}개 블록`, null);
         scheduleSave();
-        renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
+        safeRenderAll();
         const skipNote = imported.skippedSheets && imported.skippedSheets.length ? ` (인식 못한 시트 ${imported.skippedSheets.length}개는 건너뜀: ${imported.skippedSheets.join(', ')})` : '';
         const bannerSkipNote = imported.skippedBannerBlocks && imported.skippedBannerBlocks.length ? ` (구좌명 헤더가 없는 배너 이력 ${imported.skippedBannerBlocks.length}개는 건너뜀)` : '';
         showToast(`불러오기 완료! 이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 블록 ${imported.benefitBlocks.length}개 · 자동으로 옮겨온 내용이니 한 번 검수해주세요.${skipNote}${bannerSkipNote}`);
@@ -3345,7 +3357,7 @@ function handleJsonImportFile(file, btn){
       activeEventMonthKey = getDefaultActiveEventMonthKey();
       activeBannerMonthKey = getDefaultActiveBannerMonthKey();
       scheduleSave();
-      renderEventsTab(); renderBannerTab(); renderBenefitTab(); renderHomeTab();
+      safeRenderAll();
       showToast('백업 데이터를 불러왔어요.');
     }catch(err){ showError('백업 파일을 읽는 중 문제가 발생했어요: ' + err.message); }
     resetBtn(btn);
