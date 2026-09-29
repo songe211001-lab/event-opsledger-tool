@@ -62,45 +62,55 @@
 
   .topbar{display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
   .brand .eyebrow{font-size:11px; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; font-weight:600;}
-  .brand h1{font-weight:700; font-size:24px; margin:2px 0 0;}
-  .topbar-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .brand h1{font-weight:800; font-size:30px; letter-spacing:-0.02em; margin:2px 0 0; color:var(--ink); line-height:1.25;}
+  .brand .subtitle{font-size:13.5px; color:var(--muted); margin:6px 0 0; line-height:1.6; font-weight:400;}
+  .topbar-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
 
-  button{font-family:'Pretendard',sans-serif; font-size:13px; font-weight:600; border-radius:12px; border:1px solid var(--line); transition:background .12s var(--ease), border-color .12s var(--ease);
+  button{font-family:'Pretendard',sans-serif; font-size:13px; font-weight:600; border-radius:7px; border:1px solid var(--line); transition:background .12s var(--ease), border-color .12s var(--ease);
     background:var(--panel); color:var(--ink-soft); padding:8px 14px; cursor:pointer; transition:all .12s ease;}
   button:hover{border-color:var(--primary); color:var(--primary-dark);}
-  button.primary{background:var(--primary); color:#fff; border-color:var(--primary);}
+  button.primary{background:var(--primary); color:#fff; border-color:var(--primary); transition:background .15s var(--ease), border-color .15s var(--ease);}
+  button.primary.copied{background:var(--pass); border-color:var(--pass);}
   button.primary:hover{background:var(--primary-dark); border-color:var(--primary-dark); color:#fff;}
   button.ghost{background:transparent; border-color:transparent; color:var(--muted); padding:6px 8px;}
   button.ghost:hover{color:var(--primary-dark); border-color:transparent;}
+  .icon-btn{display:inline-flex; align-items:center; justify-content:center; vertical-align:middle;}
+  .icon-btn.del-row-btn:hover{color:var(--fatal);}
   button.sm{padding:5px 10px; font-size:12px;}
   button:disabled{opacity:.35; cursor:not-allowed;}
 
-  .savebar{
+  .sync-status{
     font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:6px; font-weight:600;
-    margin-bottom:14px;
+    padding:0 10px; white-space:nowrap;
   }
-  .savebar .dot{width:7px;height:7px;border-radius:50%; background:var(--pass); flex-shrink:0;}
-  .savebar.warn .dot{background:var(--fatal);}
-  .savebar.warn{color:var(--primary-dark);}
+  .sync-status .dot{width:7px;height:7px;border-radius:50%; background:var(--pass); flex-shrink:0;}
+  .sync-status.warn .dot{background:var(--fatal);}
+  .sync-status.warn{color:var(--primary-dark);}
+  .sync-status.saving .dot{background:var(--minor); animation:save-pulse 0.9s ease-in-out infinite;}
+  @keyframes save-pulse{ 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.4; transform:scale(.7);} }
 
-  .statusboard{background:var(--primary); border-radius:16px; padding:18px 24px; display:flex; flex-wrap:wrap; gap:0; margin-bottom:18px;}
+  .statusboard{background:var(--primary); border-radius:9px; padding:18px 24px; display:flex; flex-wrap:wrap; gap:0; margin-bottom:18px;}
   .sb-item{flex:1; min-width:90px; padding:4px 18px; border-right:1px solid rgba(255,255,255,.22);}
   .sb-item:last-child{border-right:none;}
   .sb-label{font-size:10.5px; letter-spacing:.1em; color:rgba(255,255,255,.75); text-transform:uppercase; margin-bottom:4px; font-weight:600;}
   .sb-value{font-weight:700; font-size:26px; color:#fff; line-height:1;}
 
-  .maintabs{display:flex; gap:6px; margin-bottom:14px; border-bottom:1px solid var(--line);}
-  .maintab-btn{background:transparent; color:var(--muted); font-weight:600; padding:10px 16px; border:none; border-bottom:2.5px solid transparent; border-radius:12px 12px 0 0;}
+  .maintabs-row{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:14px;}
+  .maintabs{display:flex; gap:6px;}
+  .maintabs-actions{display:flex; gap:8px; padding-bottom:8px; flex-wrap:wrap;}
+  .maintab-btn{background:transparent; color:var(--muted); font-weight:600; padding:10px 16px; border:none; border-bottom:2.5px solid transparent; border-radius:7px 7px 0 0;}
   .maintab-btn.active{color:var(--primary-dark); border-bottom-color:var(--primary);}
 
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px; min-height:220px;}
-  .panel h3{font-size:18px; margin:0 0 4px; font-weight:700; letter-spacing:-0.01em;}
+  .panel{border-radius:9px; padding:24px; min-height:220px;}
+  .panel h3{font-size:18px; margin:0 0 16px; font-weight:700; letter-spacing:-0.01em;}
+  .panel-head-row{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:16px;}
+  .panel-head-actions{display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0;}
   .panel .sub{color:var(--muted); font-size:12.5px; line-height:1.6; margin:0 0 18px;}
 
   .month-chips{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:16px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
   .chip{
-    font-size:12px; font-weight:600; padding:8px 14px; border-radius:99px; border:1px solid var(--line);
-    background:var(--bg); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:600; padding:8px 14px; border-radius:6px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:6px;
     transition:border-color .12s var(--ease), color .12s var(--ease);
   }
   .chip:hover{border-color:var(--primary); color:var(--primary-dark);}
@@ -112,7 +122,7 @@
 
   table.edittable{width:100%; border-collapse:collapse; font-size:12.5px;}
   table.edittable th{
-    text-align:left; font-size:11px; letter-spacing:.03em; text-transform:uppercase; font-weight:700;
+    text-align:left; font-size:12px; font-weight:600;
     color:var(--muted); padding:10px 8px; border-bottom:2px solid var(--line); white-space:nowrap;
     position:sticky; top:0; background:var(--panel); z-index:1;
   }
@@ -121,17 +131,30 @@
   table.edittable tbody tr:hover{background:var(--primary-soft);}
   table.edittable input[type=text], table.edittable input[type=date], table.edittable select{
     width:100%; border:1px solid transparent; background:transparent; font-family:inherit; font-size:12.5px;
-    padding:7px 7px; border-radius:6px; color:var(--ink); min-width:70px;
+    padding:7px 7px; border-radius:4px; color:var(--ink); min-width:70px;
   }
   table.edittable input:hover, table.edittable select:hover{border-color:var(--line); background:var(--panel);}
   table.edittable input:focus, table.edittable select:focus{outline:none; border-color:var(--primary); background:var(--panel);}
-  .tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px;}
+  .required-mark{color:var(--fatal); font-weight:700;}
+  table.edittable input.empty-required{border:1.5px dashed var(--fatal-border); background:var(--fatal-soft);}
+  table.edittable input.empty-required::placeholder{color:var(--fatal-text); opacity:.65;}
+  table.edittable input.empty-required:focus{border-style:solid; border-color:var(--primary); background:var(--panel);}
+  .tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:7px; background:var(--panel);}
   .tblwrap table.edittable{font-size:12.5px;}
-  .status-select.완료{color:var(--pass); font-weight:700;}
-  .status-select.진행{color:var(--minor); font-weight:700;}
-  .status-select.대기{color:var(--na); font-weight:700;}
-  .status-select.연장{color:var(--major); font-weight:700;}
-  .status-select.비노출{color:var(--hidden-muted); font-weight:700;}
+  .status-select, .priority-select{
+    border-radius:999px !important; padding:4px 12px !important; font-weight:700; font-size:12px !important;
+    text-align:center; text-align-last:center; border:1px solid transparent !important; width:auto !important; min-width:76px;
+    appearance:none; -webkit-appearance:none; -moz-appearance:none; background-image:none !important;
+  }
+  .status-select.완료{background:var(--pass-soft); color:var(--pass-text);}
+  .status-select.진행{background:var(--minor-soft); color:var(--minor-text);}
+  .status-select.대기{background:var(--na-soft); color:var(--ink-soft);}
+  .status-select.연장{background:var(--major-soft); color:var(--primary-dark);}
+  .status-select.비노출{background:var(--grey-100); color:var(--hidden-muted);}
+  .priority-select.상{background:var(--fatal-soft); color:var(--fatal-text);}
+  .priority-select.중{background:var(--minor-soft); color:var(--minor-text);}
+  .priority-select.하{background:var(--na-soft); color:var(--ink-soft);}
+  .status-select:focus, .priority-select:focus{outline:none; border-color:var(--primary) !important;}
 
   .idcell{display:flex; gap:4px; align-items:center;}
 
@@ -141,37 +164,17 @@
   /* 일괄 처리 바 */
   .bulk-bar{
     display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--primary-soft);
-    border:1px solid var(--primary); border-radius:12px; padding:10px 14px; margin-bottom:12px;
+    border:1px solid var(--primary); border-radius:7px; padding:10px 14px; margin-bottom:12px;
   }
   .bulk-bar .bulk-count{font-size:12.5px; font-weight:700; color:var(--primary-dark);}
   .bulk-bar .bulk-actions{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto;}
   .row-checkbox, .header-checkbox{width:17px; height:17px; cursor:pointer; accent-color:var(--primary);}
 
-  /* 캘린더 뷰 */
-  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
-  .cal-dow{text-align:center; font-size:11px; color:var(--muted); font-weight:700; padding-bottom:4px;}
-  .cal-cell{
-    min-height:64px; border:1px solid var(--line); border-radius:10px; padding:6px; font-size:11.5px;
-    background:var(--panel); cursor:pointer; transition:border-color .12s var(--ease);
-  }
-  .cal-cell.empty{background:transparent; border-color:transparent; cursor:default;}
-  .cal-cell:hover:not(.empty){border-color:var(--primary);}
-  .cal-cell.today{border-color:var(--primary); border-width:1.5px;}
-  .cal-cell .cal-daynum{font-weight:700; color:var(--ink-soft); margin-bottom:3px;}
-  .cal-dot-list{display:flex; flex-direction:column; gap:2px;}
-  .cal-dot{
-    font-size:10px; padding:1px 5px; border-radius:99px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .cal-dot.over{background:var(--fatal-soft); color:var(--fatal-text);}
-  .cal-dot.soon{background:var(--minor-soft); color:var(--minor-text);}
-  .cal-dot.normal{background:var(--na-soft); color:var(--ink-soft);}
-  .cal-detail-list{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);}
-
   /* 이력 관리: 데이터 백업·복원 / GitHub / 내보내기 이력 */
   .muted-inline{color:var(--muted); font-size:12px; font-weight:400;}
   .section-toggle{
-    cursor:pointer; font-size:14px; font-weight:700; color:var(--ink); list-style:none; padding:10px 0;
-    border-top:1px dashed var(--line); margin-top:6px;
+    cursor:pointer; font-size:13px; font-weight:700; color:var(--ink); list-style:none; padding:8px 12px;
+    background:var(--panel); border:1px solid var(--line); border-radius:9px; margin-top:6px;
   }
   .section-toggle::-webkit-details-marker{display:none;}
   .section-toggle::before{content:'▸ '; color:var(--muted);}
@@ -189,114 +192,75 @@
     font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
   }
   .gh-step input{
-    flex:1; height:40px; border:1px solid var(--line); border-radius:12px; padding:0 12px; font-size:13px; font-family:inherit;
+    flex:1; height:40px; border:1px solid var(--line); border-radius:7px; padding:0 12px; font-size:13px; font-family:inherit;
   }
   .gh-step input:focus{outline:none; border-color:var(--primary); background:var(--primary-soft);}
-  .gh-adv-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
-  .gh-adv-row label{width:70px; flex-shrink:0; font-size:12px; color:var(--muted);}
-  .gh-adv-row input{flex:1; height:34px; border:1px solid var(--line); border-radius:8px; padding:0 10px; font-size:12.5px; font-family:inherit;}
 
   /* 프리마케팅 배너 수동 관리 */
   .pm-status-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin:14px 0 18px;}
   .pm-status-item label{display:block; font-size:10.5px; color:var(--muted); font-weight:700; margin-bottom:5px; letter-spacing:.02em;}
-  .pm-status-item input{width:100%; height:36px; border:1px solid var(--line); border-radius:8px; padding:0 10px; font-size:12.5px; font-family:inherit;}
+  .pm-status-item input{width:100%; height:36px; border:1px solid var(--line); border-radius:4px; padding:0 10px; font-size:12.5px; font-family:inherit;}
   .pm-status-item .pm-readonly{
-    height:36px; display:flex; align-items:center; padding:0 10px; border-radius:8px; background:var(--bg);
+    height:36px; display:flex; align-items:center; padding:0 10px; border-radius:4px; background:var(--bg);
     font-size:12.5px; font-weight:700; color:var(--ink);
   }
   .pm-status-item .pm-readonly.badge-ready{color:var(--minor-text); background:var(--minor-soft);}
   .pm-status-item .pm-readonly.badge-live{color:var(--pass-text); background:var(--pass-soft);}
 
-  .pm-week-grid{display:flex; gap:10px; overflow-x:auto; padding-bottom:4px;}
-  .pm-week-col{
-    flex:1 0 150px; min-width:150px; border:1px solid var(--line); border-radius:12px; padding:10px;
-    background:var(--panel);
-  }
-  .pm-week-col.current{border-color:var(--primary); background:var(--primary-soft);}
-  .pm-week-title{font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:8px; text-align:center;}
-  .pm-week-col.current .pm-week-title{color:var(--primary-dark);}
-  .pm-week-row{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
-  .pm-week-rank{flex-shrink:0; width:26px; font-size:11px; font-weight:700; color:var(--muted); text-align:right;}
-  .pm-week-input{
-    flex:1; min-width:0; height:30px; border:1px solid var(--line); border-radius:7px; padding:0 8px;
-    font-size:12px; font-family:inherit; background:var(--panel);
-  }
-  .pm-week-input:focus{outline:none; border-color:var(--primary); background:var(--primary-soft);}
-
-  .tag-badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; flex-shrink:0;}
+  .tag-badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; flex-shrink:0;}
   .tag-badge.event{background:var(--ink); color:#fff;}
   .tag-badge.banner{background:var(--primary-soft); color:var(--primary-dark);}
   .tag-badge.benefit{background:var(--pass-soft); color:var(--pass-text);}
 
-  .export-item{border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;}
+  .export-item{border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:10px;}
 
   .template-item{
     display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
-    border:1px solid var(--line); border-radius:12px; margin-bottom:8px;
+    border:1px solid var(--line); border-radius:7px; margin-bottom:8px;
   }
   .template-name{font-size:13px; font-weight:600; color:var(--ink);}
 
-  .col-toggle-list{display:flex; flex-direction:column;}
-  .col-toggle-row{
-    display:flex; align-items:center; gap:10px; padding:8px 2px; font-size:13px; cursor:pointer;
-    border-bottom:1px solid var(--line); width:100%; box-sizing:border-box;
-  }
-  .col-toggle-row:last-child{border-bottom:none;}
-  .col-toggle-row input[type=checkbox]{flex:0 0 auto; width:16px; height:16px; accent-color:var(--primary); cursor:pointer;}
-  .col-toggle-row span{flex:1 1 auto; min-width:0; word-break:keep-all; white-space:normal; color:var(--ink);}
   .ehi-top{display:flex; align-items:center; gap:10px;}
   .ehi-name{font-size:13.5px; font-weight:700; color:var(--ink); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .ehi-actions{display:flex; gap:6px; flex-shrink:0;}
   .ehi-meta{font-size:11.5px; color:var(--muted); margin-top:6px;}
-  .ehi-bar{height:4px; background:var(--line); border-radius:99px; margin-top:8px; overflow:hidden;}
-  .ehi-bar-fill{height:100%; background:var(--pass); border-radius:99px;}
-
-  .cal-detail-item{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px;}
-  .cal-detail-item:last-child{border-bottom:none;}
-  .cal-detail-item .tag{
-    flex-shrink:0; font-family:inherit; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
-  }
-
-  /* 리포트 모달 */
-  .report-box{
-    white-space:pre-wrap; font-size:12.5px; line-height:1.7; background:var(--bg); border:1px solid var(--line);
-    border-radius:12px; padding:16px; max-height:420px; overflow-y:auto; font-family:inherit;
-  }
+  .ehi-bar{height:4px; background:var(--line); border-radius:6px; margin-top:8px; overflow:hidden;}
+  .ehi-bar-fill{height:100%; background:var(--pass); border-radius:6px;}
 
   /* 혜택 만료일 */
-  .benefit-expiry-badge{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; white-space:nowrap;}
+  .benefit-expiry-badge{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:6px; margin-left:6px; white-space:nowrap;}
   .benefit-expiry-badge.over{background:var(--fatal-soft); color:var(--fatal-text);}
   .benefit-expiry-badge.soon{background:var(--minor-soft); color:var(--minor-text);}
   .idcell input{width:56px !important; flex:none;}
 
-  .callout{background:var(--minor-soft); border:1px solid var(--minor-border); color:var(--minor-text); border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.6; margin-bottom:14px;}
+  .callout{background:var(--minor-soft); border:1px solid var(--minor-border); color:var(--minor-text); border-radius:7px; padding:12px 14px; font-size:12.5px; line-height:1.6; margin-bottom:14px;}
   .callout.ok{background:var(--pass-soft); border-color:var(--pass-border); color:var(--pass-text);}
   .empty-state{text-align:center; padding:48px 16px; color:var(--muted); font-size:13px; line-height:1.6;}
   .empty-state .big{font-size:32px; margin-bottom:10px; opacity:.85;}
 
-  .benefit-block{border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:12px;}
-  .benefit-block .bb-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; cursor:pointer;}
+  .benefit-block{border:1px solid var(--line); border-radius:9px; margin-bottom:10px; overflow:hidden;}
+  .benefit-block .bb-head{
+    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    background:var(--panel); padding:8px 14px;
+  }
   .benefit-block .bb-head:hover .bb-title{color:var(--primary-dark);}
+  .benefit-block .bb-title{font-weight:700; font-size:13px;}
+  .event-history-body{padding:12px 14px;}
   .accordion-chevron{display:inline-block; width:12px; color:var(--muted);}
-  .benefit-block .bb-title{font-weight:700; font-size:14.5px;}
-  .benefit-row{display:grid; grid-template-columns:1.6fr 2.4fr 0.9fr 1fr 28px; gap:8px; padding:6px 0; border-bottom:1px dashed var(--line); align-items:center;}
-  .benefit-row:last-child{border-bottom:none;}
-  .benefit-row input{border:1px solid var(--line); border-radius:6px; padding:6px 8px; font-size:12.5px; font-family:inherit;}
-  .benefit-row input:focus{outline:none; border-color:var(--primary);}
 
   .banner-columns-editor{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
 
-  .col-chip{font-size:11.5px; font-weight:600; background:var(--primary-soft); color:var(--primary-dark); padding:5px 10px; border-radius:99px; display:flex; align-items:center; gap:5px;}
+  .col-chip{font-size:11.5px; font-weight:600; background:var(--primary-soft); color:var(--primary-dark); padding:5px 10px; border-radius:6px; display:flex; align-items:center; gap:5px;}
   .col-chip .del{cursor:pointer; opacity:.6;}
   .col-chip .del:hover{opacity:1; color:var(--fatal);}
 
   .modal-overlay{position:fixed; inset:0; background:rgba(43,37,35,.4); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; overflow-y:auto;}
   #confirmModalOverlay, #promptModalOverlay{z-index:60;}
-  .modal{background:#fff; border-radius:20px; padding:24px; width:360px; max-width:90vw; max-height:85vh; overflow-y:auto; box-shadow:var(--shadow-3);}
+  .modal{background:#fff; border-radius:11px; padding:24px; width:360px; max-width:90vw; max-height:85vh; overflow-y:auto; box-shadow:var(--shadow-3);}
   .modal h4{margin:0 0 12px; font-size:16px; font-weight:700;}
-  .modal input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:12px; font-size:13px; margin-bottom:14px; font-family:inherit;}
+  .modal input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font-size:13px; margin-bottom:14px; font-family:inherit;}
   .modal .actions{display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;}
-  .modal .review-list{max-height:280px; overflow-y:auto; font-size:12.5px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:10px;}
+  .modal .review-list{max-height:280px; overflow-y:auto; font-size:12.5px; border:1px solid var(--line); border-radius:4px; padding:10px 12px; margin-top:10px;}
   .modal .review-list div{padding:3px 0;}
 
   footer{text-align:center; color:var(--muted); font-size:11px; margin-top:30px;}
@@ -305,7 +269,7 @@
 
   /* 인라인 에러 배너 (alert 대체) */
   .inline-error{
-    background:var(--fatal-soft); border:1px solid var(--fatal-border); color:var(--fatal-text); border-radius:12px;
+    background:var(--fatal-soft); border:1px solid var(--fatal-border); color:var(--fatal-text); border-radius:7px;
     padding:11px 14px; font-size:12.5px; margin-bottom:14px; display:flex; align-items:center; gap:8px;
   }
   .inline-error .close{margin-left:auto; cursor:pointer; opacity:.6;}
@@ -314,7 +278,7 @@
   /* 토스트 (완료 알림 - alert 대체) */
   #toastStack{position:fixed; right:20px; bottom:20px; display:flex; flex-direction:column; gap:8px; z-index:100;}
   .toast{
-    background:var(--ink); color:#fff; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; box-shadow:var(--shadow-toast);
+    background:var(--ink); color:#fff; padding:12px 16px; border-radius:7px; font-size:13px; font-weight:600; box-shadow:var(--shadow-toast);
     box-shadow:0 8px 24px rgba(43,37,35,.18); max-width:320px; line-height:1.5;
     animation:toast-in .18s ease;
   }
@@ -323,17 +287,22 @@
   .undo-toast{display:flex; align-items:center; gap:12px; max-width:360px;}
   .toast-undo-btn{
     flex-shrink:0; background:rgba(255,255,255,.18); border:none; color:#fff; font-weight:700; font-size:12px;
-    padding:6px 12px; border-radius:99px; cursor:pointer;
+    padding:6px 12px; border-radius:6px; cursor:pointer;
   }
   .toast-undo-btn:hover{background:rgba(255,255,255,.3);}
   @keyframes toast-in{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
   /* 행 드래그 정렬 */
-  .drag-handle{cursor:grab; text-align:center; color:var(--muted); font-size:14px; user-select:none;}
-  .row-move-controls{display:flex; flex-direction:column; align-items:center; gap:1px;}
-  .row-move-controls .drag-dots{font-size:12px; color:var(--muted); margin:1px 0;}
+  .drag-handle{cursor:grab; user-select:none;}
+  .order-cell{display:flex; align-items:center; gap:6px; justify-content:center;}
+  .order-badge{
+    display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:24px;
+    padding:0 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+    font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .order-arrows{display:flex; flex-direction:column; gap:0;}
   .move-up-btn, .move-down-btn{
-    background:none; border:none; padding:1px; font-size:9px; color:var(--muted); cursor:pointer; line-height:1;
+    background:none; border:none; padding:0 2px; font-size:9px; color:var(--muted); cursor:pointer; line-height:1.3;
   }
   .move-up-btn:hover, .move-down-btn:hover{color:var(--primary-dark);}
   .drag-handle:active{cursor:grabbing;}
@@ -358,44 +327,35 @@
   .flash-highlight{ animation:flash-pulse 1.6s ease; }
   tr.flash-highlight td{ animation:flash-pulse 1.6s ease; }
 
-  /* 홈 대시보드 */
-  .home-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin-bottom:18px;}
-  .home-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px 20px; cursor:pointer; transition:border-color .12s ease;}
-  .home-card:hover{border-color:var(--primary);}
-  .home-card .hc-label{font-size:11.5px; color:var(--muted); font-weight:700; letter-spacing:.03em; margin-bottom:8px;}
-  .home-card .hc-value{font-size:30px; font-weight:700; color:var(--ink); line-height:1; margin-bottom:8px;}
-  .home-card .hc-sub{font-size:12px; color:var(--ink-soft); display:flex; gap:8px; flex-wrap:wrap;}
-  .home-card .hc-sub span{background:var(--bg); padding:2px 8px; border-radius:99px;}
+  /* 만료 임박 안내 배너 (혜택 관리에서 사용) */
   .home-highlight{
-    background:var(--minor-soft); border:1px solid var(--minor-border); border-radius:16px; padding:16px 18px; margin-bottom:16px;
-    display:flex; align-items:center; gap:10px; font-size:13px; color:var(--minor-text); cursor:pointer;
+    background:var(--minor-soft); border:1px solid var(--minor-border); border-radius:9px; padding:16px 18px; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px; font-size:13px; color:var(--minor-text);
   }
-  .home-highlight:hover{ filter:brightness(0.97); }
-  .home-section-title{font-size:13px; font-weight:700; color:var(--ink-soft); margin:20px 0 10px;}
 
   /* 월 칩 더보기/접기 */
   .chip-more{color:var(--primary-dark); border-style:dashed;}
 
   /* 마감 임박/지연 알림 (컴팩트 요약형) */
-  .deadline-box{border-radius:16px; padding:14px 16px; margin-bottom:16px;}
+  .deadline-box{border-radius:9px; padding:14px 16px; margin-bottom:16px;}
   .deadline-box.has-overdue{background:var(--critical-soft); border:1px solid var(--fatal-border);}
   .deadline-box.only-soon{background:var(--minor-soft); border:1px solid var(--minor-border);}
   .deadline-box .db-title{
     font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
   }
   .db-pill{
-    font-family:inherit; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;
+    font-family:inherit; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px;
   }
   .db-pill.over{background:var(--fatal); color:#fff;}
   .db-pill.soon{background:var(--minor); color:var(--minor-text);}
   .deadline-rows{display:flex; flex-direction:column; gap:2px;}
   .deadline-row{
     display:flex; align-items:center; gap:8px; padding:6px 8px; font-size:12.5px; cursor:pointer;
-    border-radius:9px; transition:background .12s var(--ease);
+    border-radius:5px; transition:background .12s var(--ease);
   }
   .deadline-row:hover{background:rgba(255,255,255,.5);}
   .deadline-row .dtag{
-    flex-shrink:0; font-weight:700; font-size:10.5px; padding:2px 7px; border-radius:99px; min-width:38px; text-align:center;
+    flex-shrink:0; font-weight:700; font-size:10.5px; padding:2px 7px; border-radius:6px; min-width:38px; text-align:center;
   }
   .deadline-row .dtag.over{background:var(--fatal); color:#fff;}
   .deadline-row .dtag.soon{background:var(--minor); color:var(--minor-text);}
@@ -412,9 +372,7 @@
     .statusboard{flex-direction:column;}
     .sb-item{border-right:none; border-bottom:1px solid rgba(255,255,255,.18); padding:8px 4px;}
     .sb-item:last-child{border-bottom:none;}
-    .benefit-row{grid-template-columns:1fr; gap:4px;}
     table.edittable{min-width:900px;}
-    .home-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -423,13 +381,15 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="eyebrow">alddot event ops ledger</div>
-      <h1>알닷 이벤트 운영 관리대장</h1>
+      <h1>이벤트 운영 관리대장</h1>
+      <p class="subtitle">이벤트·배너 구좌·혜택 운영 현황을 한 곳에서 관리하고, 매달 반복되는 작업을 자동으로 정리해요.</p>
     </div>
     <div class="topbar-actions">
-      <button id="importXlsxBtn">📄 기존 엑셀 불러오기</button>
-      <button id="exportXlsxBtn">📊 엑셀로 내보내기</button>
-      <input type="file" id="xlsxFileInput" accept=".xlsx,.xlsm" />
+      <span class="sync-status" id="savebar"><span class="dot"></span><span id="savebarText">자동 저장됨</span></span>
+      <button class="sm" id="githubSetupBtn">🔗 GitHub 동기화</button>
+      <button id="exportDataBtn">⬇ 내보내기</button>
+      <button id="importDataBtn">⬆ 가져오기</button>
+      <input type="file" id="dataJsonFileInput" accept=".json" />
     </div>
   </div>
 
@@ -437,23 +397,22 @@
     <span>⚠️</span><span id="globalErrorText"></span><span class="close" id="globalErrorClose">✕</span>
   </div>
 
-  <div class="savebar" id="savebar"><span class="dot"></span><span id="savebarText">자동 저장됨</span></div>
-
-  <div class="maintabs" id="maintabs">
-    <button class="maintab-btn active" data-tab="home">홈</button>
-    <button class="maintab-btn" data-tab="events">이벤트 관리</button>
-    <button class="maintab-btn" data-tab="banner">배너 구좌 관리</button>
-    <button class="maintab-btn" data-tab="benefit">혜택 관리</button>
-    <button class="maintab-btn" data-tab="history">이력 관리</button>
+  <div class="maintabs-row">
+    <div class="maintabs" id="maintabs">
+      <button class="maintab-btn active" data-tab="events">이벤트 관리</button>
+      <button class="maintab-btn" data-tab="banner">배너 구좌 관리</button>
+      <button class="maintab-btn" data-tab="pm">프리마케팅 관리</button>
+      <button class="maintab-btn" data-tab="benefit">혜택 관리</button>
+    </div>
+    <div class="maintabs-actions" id="maintabsActions"></div>
   </div>
 
-  <div id="tab-home"></div>
-  <div id="tab-events" class="hidden"></div>
+  <div id="tab-events"></div>
   <div id="tab-banner" class="hidden"></div>
+  <div id="tab-pm" class="hidden"></div>
   <div id="tab-benefit" class="hidden"></div>
-  <div id="tab-history" class="hidden"></div>
 
-  <footer>모든 데이터는 이 브라우저(또는 대화) 안에 저장됩니다 · 이력 관리 탭에서 주기적으로 백업 파일을 내려받아두시는 걸 권장해요</footer>
+  <footer>모든 데이터는 이 브라우저(또는 대화) 안에 저장됩니다 · 상단의 "내보내기"로 주기적으로 백업 파일을 내려받아두시는 걸 권장해요</footer>
 </div>
 
 <div id="toastStack"></div>
@@ -492,45 +451,27 @@
   </div>
 </div>
 
-<div id="calendarModalOverlay" class="modal-overlay hidden">
-  <div class="modal" style="width:640px; max-width:94vw;">
-    <h4 id="calendarModalTitle">📅 캘린더 보기</h4>
-    <div id="calendarModalBody"></div>
-    <div class="actions" style="margin-top:16px;">
-      <button id="calendarModalCloseBtn">닫기</button>
+<div id="githubModalOverlay" class="modal-overlay hidden">
+  <div class="modal" style="width:480px; max-width:92vw;">
+    <h4>🔗 GitHub 동기화</h4>
+    <p class="sub" style="margin:0 0 14px;">토큰 대신, 관리자가 미리 배포해둔 작은 프록시 서버(Vercel)의 주소만 입력하면 돼요. 토큰은 그 서버에만 보관되고, 이 브라우저에는 전혀 저장되지 않아요.</p>
+    <div class="gh-step">
+      <span class="gh-step-num">1</span>
+      <input type="text" id="ghWorkerUrlInput" placeholder="프록시 서버 주소 (예: https://내프로젝트.vercel.app/api)"/>
     </div>
-  </div>
-</div>
-
-<div id="reportModalOverlay" class="modal-overlay hidden">
-  <div class="modal" style="width:520px; max-width:92vw;">
-    <h4>📊 요약 리포트</h4>
-    <div id="reportModalBody"></div>
-    <div class="actions" style="margin-top:16px;">
-      <button id="reportModalCloseBtn">닫기</button>
-      <button class="primary" id="reportModalCopyBtn">📋 복사하기</button>
+    <div class="gh-step">
+      <span class="gh-step-num">2</span>
+      <input type="password" id="ghSyncKeyInput" placeholder="접근 암구호 (관리자가 설정한 경우에만 입력)"/>
     </div>
-  </div>
-</div>
-
-<div id="columnsModalOverlay" class="modal-overlay hidden">
-  <div class="modal" style="width:360px;">
-    <h4>🙈 컬럼 표시 설정</h4>
-    <p class="sub" style="margin:0 0 12px;">체크 해제하면 표에서 숨겨져요. 데이터는 그대로 남아있어요.</p>
-    <div id="columnsModalBody"></div>
-    <div class="actions" style="margin-top:16px;">
-      <button id="columnsModalCloseBtn">닫기</button>
+    <div class="gh-step">
+      <span class="gh-step-num">3</span>
+      <button class="primary sm" id="ghConnectBtn">연결 테스트 후 저장</button>
+      <span id="ghStatusText" class="muted-inline"></span>
     </div>
-  </div>
-</div>
-
-<div id="templateModalOverlay" class="modal-overlay hidden">
-  <div class="modal" style="width:420px;">
-    <h4>🔖 템플릿에서 추가하기</h4>
-    <p class="sub" style="margin:0 0 12px;">자주 쓰는 이벤트를 템플릿으로 저장해두고, 아무 달에서나 눌러서 바로 추가할 수 있어요.</p>
-    <div id="templateModalBody"></div>
+    <p class="sub" style="margin:10px 0 0;">프록시 서버가 아직 없으신가요? 관리자에게 <code>alddot-sync-vercel</code> 폴더를 전달해서 Vercel에 배포해달라고 요청해주세요. (주소 뒤에 <code>/api</code>를 꼭 붙여서 입력해주세요)</p>
+    <div id="githubActionsHolder" style="margin-top:14px;"></div>
     <div class="actions" style="margin-top:16px;">
-      <button id="templateModalCloseBtn">닫기</button>
+      <button id="githubModalCloseBtn">닫기</button>
     </div>
   </div>
 </div>
@@ -673,14 +614,9 @@ const EVENT_TABLE_COLUMNS = [
   {key:'name', label:'이벤트명', minWidth:160},
   {key:'workType', label:'작업유형'},
   {key:'category', label:'구분'},
-  {key:'dueDate', label:'반영예정일'},
-  {key:'reflectStatus', label:'반영상태'},
-  {key:'source', label:'소스수급'},
-  {key:'reviewUrl', label:'검수URL', minWidth:140},
-  {key:'urlType', label:'URL유형'},
-  {key:'opUrl', label:'운영URL', minWidth:120},
+  {key:'dueDate', label:'시작'},
+  {key:'reflectStatus', label:'종료'},
   {key:'id', label:'이벤트ID'},
-  {key:'note', label:'특이사항', minWidth:140},
 ];
 let hiddenEventColumns = new Set();
 function getAllEventColumns(){
@@ -780,21 +716,117 @@ async function doSave(){
     }
     STORAGE_OK = true;
     renderSavebar('자동 저장됨', false);
-    scheduleGithubAutoSave();
+    scheduleGithubAutoSync();
   }catch(err){
     STORAGE_OK = false;
-    renderSavebar('자동 저장 불가 — 이력 관리 탭의 "백업 파일 다운로드"로 꼭 내려받아 두세요', true);
+    renderSavebar('자동 저장 불가 — 상단의 "내보내기"로 꼭 내려받아 두세요', true);
   }
 }
 function renderSavebar(text, warn){
   document.getElementById('savebarText').textContent = text;
-  document.getElementById('savebar').classList.toggle('warn', !!warn);
+  const bar = document.getElementById('savebar');
+  bar.classList.toggle('warn', !!warn);
+  bar.classList.toggle('saving', text==='저장 중…');
+}
+
+/* ════════════════════════════════════════════════════════════
+   GitHub 동기화 (이미 배포에 쓰는 저장소를 데이터 공유에도 활용)
+   ════════════════════════════════════════════════════════════ */
+let GITHUB_CONFIG = { workerUrl:'', syncKey:'' };
+let githubSyncTimer = null;
+let githubSyncing = false;
+
+async function loadGithubConfig(){
+  try{
+    if(hasClaudeStorage()){
+      const res = await window.storage.get('alddot_github_config');
+      if(res && res.value) GITHUB_CONFIG = JSON.parse(res.value);
+    }else{
+      const raw = localStorage.getItem('alddot_github_config');
+      if(raw) GITHUB_CONFIG = JSON.parse(raw);
+    }
+  }catch(err){ /* 저장된 설정 없음 */ }
+}
+async function saveGithubConfig(){
+  try{
+    if(hasClaudeStorage()) await window.storage.set('alddot_github_config', JSON.stringify(GITHUB_CONFIG), false);
+    else localStorage.setItem('alddot_github_config', JSON.stringify(GITHUB_CONFIG));
+  }catch(err){ /* 무시 */ }
+}
+function workerHeaders(extra){
+  const h = {...(extra||{})};
+  if(GITHUB_CONFIG.syncKey) h['X-Sync-Key'] = GITHUB_CONFIG.syncKey;
+  return h;
+}
+async function pushToGithub(){
+  const base = GITHUB_CONFIG.workerUrl.replace(/\/$/,'');
+  const res = await fetch(`${base}/push`, {
+    method: 'POST',
+    headers: workerHeaders({'Content-Type':'application/json'}),
+    body: JSON.stringify(STATE),
+  });
+  if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(err.error || `상태 코드 ${res.status}`); }
+}
+async function pullFromGithub(){
+  const base = GITHUB_CONFIG.workerUrl.replace(/\/$/,'');
+  const res = await fetch(`${base}/pull`, { headers: workerHeaders() });
+  if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(err.error || `상태 코드 ${res.status}`); }
+  return await res.json();
+}
+function scheduleGithubAutoSync(){
+  if(!GITHUB_CONFIG.workerUrl) return;
+  clearTimeout(githubSyncTimer);
+  githubSyncTimer = setTimeout(autoPushToGithub, 8000);
+}
+async function autoPushToGithub(){
+  if(githubSyncing || !GITHUB_CONFIG.workerUrl) return;
+  githubSyncing = true;
+  try{
+    await pushToGithub();
+    renderSavebar('자동 저장됨 · GitHub 동기화 완료', false);
+  }catch(err){ /* 다음 저장 때 재시도 */ }
+  githubSyncing = false;
+}
+function renderGithubActions(){
+  const holder = document.getElementById('githubActionsHolder');
+  if(!holder) return;
+  if(!GITHUB_CONFIG.workerUrl){ holder.innerHTML=''; return; }
+  holder.innerHTML = `
+    <div class="callout ok" style="margin-bottom:10px;">✅ 프록시 서버에 연결됐어요. 입력하시면 잠시 후 자동으로 GitHub에도 동기화돼요. (이 브라우저엔 토큰이 저장되지 않아요)</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="primary sm" id="ghPushBtn">☁️ 지금 GitHub에 저장</button>
+      <button class="sm" id="ghPullBtn">⬇ GitHub에서 불러오기</button>
+    </div>
+  `;
+  document.getElementById('ghPushBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('ghPushBtn');
+    clearError(); setBtnLoading(btn, '저장하는 중...');
+    try{ await pushToGithub(); showToast('GitHub에 저장했어요.'); }
+    catch(err){ showError('GitHub 저장 중 문제가 발생했어요: ' + err.message); }
+    resetBtn(btn);
+  });
+  document.getElementById('ghPullBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('ghPullBtn');
+    clearError(); setBtnLoading(btn, '불러오는 중...');
+    try{
+      const data = await pullFromGithub();
+      resetBtn(btn);
+      showConfirmModal('GitHub에 저장된 내용으로 지금 데이터를 덮어쓸까요?', ()=>{
+        STATE = data; ensureStateShape();
+        activeEventMonthKey = getDefaultActiveEventMonthKey();
+        activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+        scheduleSave(); safeRenderAll();
+        showToast('GitHub에서 불러왔어요.');
+      });
+    }catch(err){ showError('GitHub에서 불러오는 중 문제가 발생했어요: ' + err.message); resetBtn(btn); }
+  });
 }
 
 /* ════════════════════════════════════════════════════════════
    공통 유틸
    ════════════════════════════════════════════════════════════ */
 function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const TRASH_ICON = '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6M5.5 6l.6 9.4A1.5 1.5 0 0 0 7.6 17h4.8a1.5 1.5 0 0 0 1.5-1.6L14.5 6"/><path d="M8.3 9v4.5M11.7 9v4.5"/></svg>';
 function nextMonthOf(key){
   const [y,m] = key.split('-').map(Number);
   let ny=y, nm=m+1; if(nm>12){nm=1; ny+=1;}
@@ -856,12 +888,11 @@ function defaultWeekAnchor(key){
 
 function uid(){ return Math.random().toString(36).slice(2,9); }
 
-function extractEventIdFromUrl(url){
-  if(!url) return '';
-  const matches = String(url).match(/\d+/g);
-  if(!matches || !matches.length) return '';
-  const lastNum = matches[matches.length-1];
-  return lastNum.slice(-4);
+function eventIdToUrl(id){
+  const digits = String(id||'').trim();
+  if(!/^\d{1,10}$/.test(digits)) return '';
+  const padded = digits.padStart(10,'0');
+  return `https://www.uplusmvno.com/benefit/event/detail?mvnopEvetId=EV${padded}`;
 }
 
 function nextCalendarMonthKey(){
@@ -888,33 +919,13 @@ function logActivity(icon, action, detail, tab, monthKey){
   if(STATE.activityLog.length > 200) STATE.activityLog.length = 200;
 }
 
-function renderMonthChipsHtml(months, activeKey, showAll){
-  let html = '';
-  if(!showAll && months.length > RECENT_MONTHS_VISIBLE){
-    html += `<span class="chip chip-more" data-action="show-all">⋯ 이전 달 더보기 (${months.length - RECENT_MONTHS_VISIBLE}개월)</span>`;
-  }
-  const list = showAll ? months : months.slice(-RECENT_MONTHS_VISIBLE);
-  html += list.map(mo => `
-    <span class="chip ${mo.key===activeKey?'active':''}" data-key="${mo.key}">
-      ${escapeHtml(mo.label)}
-      ${months.length>1?`<span class="del" data-delkey="${mo.key}" title="이 달 삭제">🗑️</span>`:''}
-    </span>`).join('');
-  if(showAll && months.length > RECENT_MONTHS_VISIBLE){
-    html += `<span class="chip chip-more" data-action="collapse">▲ 접기</span>`;
-  }
-  return html;
-}
-
 /* ════════════════════════════════════════════════════════════
    활성 탭/월 상태
    ════════════════════════════════════════════════════════════ */
-let activeMainTab = 'home';
+let activeMainTab = 'events';
 let activeEventMonthKey = null;
 let activeBannerMonthKey = null;
 let activeBenefitIndex = 0;
-let showAllEventMonths = false;
-let showAllBannerMonths = false;
-const RECENT_MONTHS_VISIBLE = 6;
 let activeEventStatusFilter = '전체';
 let selectedEventUids = new Set();
 
@@ -996,34 +1007,21 @@ function renderDeadlineBox(){
 /* ════════════════════════════════════════════════════════════
    렌더: 이벤트 관리 탭
    ════════════════════════════════════════════════════════════ */
+let expandedEventMonths = new Set();
+
 function renderEventsTab(){
-  if(!activeEventMonthKey) activeEventMonthKey = getDefaultActiveEventMonthKey();
+  activeEventMonthKey = getDefaultActiveEventMonthKey();
   selectedEventUids = new Set();
   const container = document.getElementById('tab-events');
-
-  const chips = renderMonthChipsHtml(STATE.eventMonths, activeEventMonthKey, showAllEventMonths);
+  const currentMo = getEventMonth(activeEventMonthKey);
+  const otherMonths = STATE.eventMonths.filter(m=>m.key!==activeEventMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
 
   container.innerHTML = `
-    <div class="statusboard" id="statusboardHolder"></div>
     <div class="panel">
-      <h3>이벤트 작업 현황</h3>
-      <p class="sub">완료/진행/대기/연장/비노출 상태로 관리하고, 다음 달로 넘어갈 때는 “연장” 항목만 자동으로 이월됩니다.</p>
-
+      <h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3>
       <div id="deadlineBoxHolder"></div>
-      <div class="month-chips">
-        ${chips}
-        <span class="chip chip-add" id="addEventMonthChip">➕ 새 달 만들기</span>
-      </div>
-      <div style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="primary sm" id="addEventRowBtn">➕ 이벤트 행 추가하기</button>
-        <button class="sm" id="openTemplateBtn">🔖 템플릿에서 추가하기</button>
-        <button class="sm" id="openCalendarBtn">📅 캘린더 보기</button>
-        <button class="sm" id="openReportBtn">📊 요약 리포트 만들기</button>
-        <button class="sm" id="openColumnsBtn">🙈 컬럼 표시 설정</button>
-      </div>
       <div class="status-filter-row" id="eventStatusFilterRow"></div>
       <div id="bulkBarHolder"></div>
-      <p class="sub" style="margin:0 0 8px;">💡 엑셀에서 여러 줄을 복사해서 이벤트명 칸에 붙여넣으면(Ctrl+V) 한 번에 여러 행이 채워져요. 행을 드래그해서 순서도 바꿀 수 있어요.</p>
       <div class="tblwrap">
         <table class="edittable" id="eventsTable">
           <thead><tr id="eventsHeaderRow"></tr></thead>
@@ -1031,53 +1029,165 @@ function renderEventsTab(){
         </table>
       </div>
     </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h3>이력 (${otherMonths.length}건)</h3>
+      <div id="eventHistoryAccordion"></div>
+    </div>
+  `;
+  document.getElementById('maintabsActions').innerHTML = `
+    <button class="sm" id="addEventRowBtn">+ 행 추가하기</button>
+    <button class="primary sm" id="addEventMonthBtn">새 달 만들기</button>
   `;
   renderEventsTableHeader();
   renderStatusboard();
   renderDeadlineBox();
   renderEventStatusFilterRow();
   renderEventsRows();
+  renderEventHistoryAccordion(otherMonths);
 
-  container.querySelectorAll('.chip[data-key]').forEach(el=>{
-    el.addEventListener('click', (e)=>{
-      if(e.target.classList.contains('del')) return;
-      activeEventMonthKey = el.dataset.key; renderEventsTab();
-    });
-  });
-  container.querySelectorAll('.del[data-delkey]').forEach(el=>{
-    el.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const delKey = el.dataset.delkey;
-      const delLabel = el.parentElement.textContent.trim();
-      showConfirmModal(`'${delLabel}' 데이터를 삭제할까요?`, ()=>{
-        const removedMonth = STATE.eventMonths.find(m=>m.key===delKey);
-        const removedIdx = STATE.eventMonths.findIndex(m=>m.key===delKey);
-        STATE.eventMonths = STATE.eventMonths.filter(m=>m.key!==delKey);
-        if(activeEventMonthKey===delKey) activeEventMonthKey = getDefaultActiveEventMonthKey();
-        scheduleSave(); renderEventsTab();
-        showUndoToast(`'${delLabel}' 데이터를 삭제했어요.`, ()=>{
-          STATE.eventMonths.splice(Math.min(removedIdx, STATE.eventMonths.length), 0, removedMonth);
-          scheduleSave(); renderEventsTab();
-        });
-      });
-    });
-  });
-  const showAllChip = container.querySelector('.chip[data-action="show-all"]');
-  if(showAllChip) showAllChip.addEventListener('click', ()=>{ showAllEventMonths = true; renderEventsTab(); });
-  const collapseChip = container.querySelector('.chip[data-action="collapse"]');
-  if(collapseChip) collapseChip.addEventListener('click', ()=>{ showAllEventMonths = false; renderEventsTab(); });
-
-  const addMonthBtn = document.getElementById('addEventMonthChip'); if(addMonthBtn) addMonthBtn.addEventListener('click', addNewEventMonth);
+  const addMonthBtn = document.getElementById('addEventMonthBtn');
+  if(addMonthBtn) addMonthBtn.addEventListener('click', addNewEventMonth);
   const addRowBtn = document.getElementById('addEventRowBtn');
   if(addRowBtn) addRowBtn.addEventListener('click', ()=>{
     const mo = getEventMonth(activeEventMonthKey);
     mo.events.push({_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""});
     scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox();
   });
-  const calBtn = document.getElementById('openCalendarBtn'); if(calBtn) calBtn.addEventListener('click', openCalendarModal);
-  const repBtn = document.getElementById('openReportBtn'); if(repBtn) repBtn.addEventListener('click', openReportModal);
-  const colBtn = document.getElementById('openColumnsBtn'); if(colBtn) colBtn.addEventListener('click', openColumnsModal);
-  const tplBtn = document.getElementById('openTemplateBtn'); if(tplBtn) tplBtn.addEventListener('click', openTemplateModal);
+}
+
+function renderEventHistoryAccordion(otherMonths){
+  const holder = document.getElementById('eventHistoryAccordion');
+  if(!holder) return;
+  if(!otherMonths.length){
+    holder.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="big">🗂️</div>아직 다른 달 이력이 없어요.</div>`;
+    return;
+  }
+  holder.innerHTML = otherMonths.map(mo=>{
+    const isOpen = expandedEventMonths.has(mo.key);
+    return `
+    <div class="benefit-block" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+        <span class="bb-title">
+          <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
+          ${escapeHtml(mo.label)}
+          <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${mo.events.length}건</span>
+        </span>
+        <button class="ghost sm del-event-month-btn" data-key="${mo.key}" title="이 달 삭제">🗑️</button>
+      </div>
+      <div class="event-history-body ${isOpen?'':'hidden'}">
+        <div class="tblwrap">
+          <table class="edittable" id="histTable_${mo.key}">
+            <thead><tr id="histHeader_${mo.key}"></tr></thead>
+            <tbody id="histTbody_${mo.key}"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  holder.querySelectorAll('.accordion-toggle').forEach(head=>{
+    head.addEventListener('click', (e)=>{
+      if(e.target.closest('.del-event-month-btn')) return;
+      const key = head.dataset.key;
+      if(expandedEventMonths.has(key)) expandedEventMonths.delete(key);
+      else expandedEventMonths.add(key);
+      renderEventHistoryAccordion(otherMonths);
+    });
+  });
+  holder.querySelectorAll('.del-event-month-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      const mo = getEventMonth(key);
+      showConfirmModal(`'${mo.label}' 데이터를 삭제할까요?`, ()=>{
+        const idx = STATE.eventMonths.findIndex(m=>m.key===key);
+        const removed = STATE.eventMonths[idx];
+        STATE.eventMonths.splice(idx,1);
+        expandedEventMonths.delete(key);
+        scheduleSave(); renderEventsTab();
+        showUndoToast(`'${removed.label}' 데이터를 삭제했어요.`, ()=>{
+          STATE.eventMonths.splice(Math.min(idx, STATE.eventMonths.length), 0, removed);
+          scheduleSave(); renderEventsTab();
+        });
+      });
+    });
+  });
+
+  otherMonths.forEach(mo=>{ if(expandedEventMonths.has(mo.key)) renderHistoryMonthTable(mo.key); });
+}
+
+function renderHistoryMonthTable(key){
+  const mo = getEventMonth(key);
+  const headerRow = document.getElementById('histHeader_'+key);
+  const tbody = document.getElementById('histTbody_'+key);
+  if(!mo || !headerRow || !tbody) return;
+  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
+  headerRow.innerHTML = `<th style="width:70px;">순서</th>${visibleCols.map(c=>`<th ${c.minWidth?`style="min-width:${c.minWidth}px;"`:''}>${c.label}</th>`).join('')}<th></th>`;
+  if(!mo.events.length){
+    tbody.innerHTML = `<tr><td colspan="${visibleCols.length+2}"><div class="empty-state" style="padding:20px;">등록된 이벤트가 없어요.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = mo.events.map((ev,idx)=>`
+    <tr data-idx="${idx}">
+      <td>
+        <div class="order-cell">
+          <span class="order-badge">${idx+1}</span>
+          <span class="order-arrows">
+            <button class="move-up-btn" title="위로">▲</button>
+            <button class="move-down-btn" title="아래로">▼</button>
+          </span>
+        </div>
+      </td>
+      ${visibleCols.map(c=>renderEventFieldCell(ev, c.key)).join('')}
+      <td><button class="ghost del-row-btn icon-btn" title="행 삭제">${TRASH_ICON}</button></td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    const idx = +tr.dataset.idx;
+    tr.querySelectorAll('.ev-field').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        if(inp.dataset.field==='dueDate' || inp.dataset.field==='reflectStatus'){
+          mo.events[idx][inp.dataset.field] = isoToDot(inp.value);
+        }else{
+          mo.events[idx][inp.dataset.field] = inp.value;
+        }
+        if(inp.dataset.field==='status') inp.className = 'ev-field status-select ' + inp.value;
+        if(inp.dataset.field==='priority') inp.className = 'ev-field priority-select ' + inp.value;
+        if(inp.dataset.field==='name') inp.classList.toggle('empty-required', !inp.value.trim());
+        if(inp.dataset.field==='id'){
+          const linkBtn = tr.querySelector('.id-link-btn');
+          if(linkBtn) linkBtn.disabled = !eventIdToUrl(inp.value);
+        }
+        scheduleSave();
+      });
+      inp.addEventListener('paste', (e)=> handleTablePaste(e, mo, idx, inp.dataset.field));
+    });
+    const linkBtn = tr.querySelector('.id-link-btn');
+    if(linkBtn) linkBtn.addEventListener('click', ()=>{
+      const url = eventIdToUrl(mo.events[idx].id);
+      if(url) window.open(url, '_blank');
+    });
+    tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
+      showConfirmModal('이 행을 삭제할까요?', ()=>{
+        const removed = mo.events[idx];
+        mo.events.splice(idx,1); scheduleSave(); renderHistoryMonthTable(key);
+        showUndoToast(`'${removed.name||'이벤트'}' 행을 삭제했어요.`, ()=>{
+          mo.events.splice(idx,0,removed); scheduleSave(); renderHistoryMonthTable(key);
+        });
+      });
+    });
+    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
+      if(idx<=0) return;
+      [mo.events[idx-1], mo.events[idx]] = [mo.events[idx], mo.events[idx-1]];
+      scheduleSave(); renderHistoryMonthTable(key);
+    });
+    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
+      if(idx>=mo.events.length-1) return;
+      [mo.events[idx+1], mo.events[idx]] = [mo.events[idx], mo.events[idx+1]];
+      scheduleSave(); renderHistoryMonthTable(key);
+    });
+  });
 }
 
 function renderEventsTableHeader(){
@@ -1086,8 +1196,8 @@ function renderEventsTableHeader(){
   const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
   headerRow.innerHTML = `
     <th style="width:32px;"><input type="checkbox" class="header-checkbox" id="eventsHeaderCheckbox" title="전체 선택"/></th>
-    <th style="width:26px;"></th>
-    ${visibleCols.map(c=>`<th ${c.minWidth?`style="min-width:${c.minWidth}px;"`:''}>${c.label}</th>`).join('')}
+    <th style="width:70px;">순서</th>
+    ${visibleCols.map(c=>`<th ${c.minWidth?`style="min-width:${c.minWidth}px;"`:''}>${c.label}${c.key==='name'?' <span class="required-mark" title="필수 입력">*</span>':''}</th>`).join('')}
     <th></th>
   `;
 }
@@ -1113,18 +1223,23 @@ function renderEventStatusFilterRow(){
 function renderEventFieldCell(ev, colKey){
   if(colKey==='priority'){
     const opts = PRIORITY_OPTIONS.map(o=>`<option value="${o}" ${ev.priority===o?'selected':''}>${o}</option>`).join('');
-    return `<td><select class="ev-field" data-field="priority">${opts}</select></td>`;
+    return `<td><select class="ev-field priority-select ${ev.priority}" data-field="priority">${opts}</select></td>`;
   }
   if(colKey==='status'){
     const opts = STATUS_OPTIONS.map(o=>`<option value="${o}" ${ev.status===o?'selected':''}>${o}</option>`).join('');
     return `<td><select class="ev-field status-select ${ev.status}" data-field="status">${opts}</select></td>`;
   }
-  if(colKey==='id'){
-    return `<td><div class="idcell"><input type="text" class="ev-field" data-field="id" value="${escapeHtml(ev.id)}"/>
-      <button class="ghost sm assign-id-btn" title="다음 번호 채번">🔢</button></div></td>`;
+  if(colKey==='dueDate' || colKey==='reflectStatus'){
+    return `<td><input type="date" class="ev-field" data-field="${colKey}" value="${dotToIso(ev[colKey])}"/></td>`;
   }
-  const placeholders = { workType:'HTML 등', category:'파트너사 등', urlType:'신규' };
-  return `<td><input type="text" class="ev-field" data-field="${colKey}" value="${escapeHtml(ev[colKey]||'')}" ${placeholders[colKey]?`placeholder="${placeholders[colKey]}"`:''}/></td>`;
+  if(colKey==='id'){
+    const url = eventIdToUrl(ev.id);
+    return `<td><div class="idcell"><input type="text" class="ev-field" data-field="id" value="${escapeHtml(ev.id)}"/>
+      <button class="ghost sm id-link-btn" title="운영 페이지로 이동" ${url?'':'disabled'}>🔗</button></div></td>`;
+  }
+  const placeholders = { name:'이벤트명을 입력해주세요', workType:'HTML 등', category:'파트너사 등', urlType:'신규' };
+  const emptyRequired = colKey==='name' && !ev.name ? ' empty-required' : '';
+  return `<td><input type="text" class="ev-field${emptyRequired}" data-field="${colKey}" value="${escapeHtml(ev[colKey]||'')}" ${placeholders[colKey]?`placeholder="${placeholders[colKey]}"`:''}/></td>`;
 }
 
 function renderEventsRows(){
@@ -1151,17 +1266,17 @@ function renderEventsRows(){
     return `<tr data-idx="${idx}" data-uid="${ev._uid||''}" draggable="true">
       <td><input type="checkbox" class="row-checkbox" ${checked}/></td>
       <td class="drag-handle" title="드래그해서 순서 변경">
-        <div class="row-move-controls">
-          <button class="move-up-btn" title="위로">▲</button>
-          <span class="drag-dots">⠿</span>
-          <button class="move-down-btn" title="아래로">▼</button>
+        <div class="order-cell">
+          <span class="order-badge">${idx+1}</span>
+          <span class="order-arrows">
+            <button class="move-up-btn" title="위로">▲</button>
+            <button class="move-down-btn" title="아래로">▼</button>
+          </span>
         </div>
       </td>
       ${visibleCols.map(c=>renderEventFieldCell(ev, c.key)).join('')}
       <td style="white-space:nowrap;">
-        <button class="row-link-btn save-template-btn" title="템플릿으로 저장">🔖</button>
-        <button class="row-link-btn duplicate-row-btn" title="다음 달로 복제">🔁</button>
-        <button class="ghost del-row-btn" title="행 삭제">🗑️</button>
+        <button class="ghost del-row-btn icon-btn" title="행 삭제">${TRASH_ICON}</button>
       </td>
     </tr>`;
   }).join('');
@@ -1170,28 +1285,33 @@ function renderEventsRows(){
     const idx = +tr.dataset.idx;
     tr.querySelectorAll('.ev-field').forEach(inp=>{
       inp.addEventListener('input', ()=>{
-        mo.events[idx][inp.dataset.field] = inp.value;
+        if(inp.dataset.field==='dueDate' || inp.dataset.field==='reflectStatus'){
+          mo.events[idx][inp.dataset.field] = isoToDot(inp.value);
+        }else{
+          mo.events[idx][inp.dataset.field] = inp.value;
+        }
         if(inp.dataset.field==='status'){
           inp.className = 'ev-field status-select ' + inp.value;
           renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
         }
-        if(inp.dataset.field==='opUrl'){
-          const extracted = extractEventIdFromUrl(inp.value);
-          if(extracted && !mo.events[idx].id){
-            mo.events[idx].id = extracted;
-            const idInput = tr.querySelector('.ev-field[data-field="id"]');
-            if(idInput) idInput.value = extracted;
-            renderStatusboard();
-          }
+        if(inp.dataset.field==='priority'){
+          inp.className = 'ev-field priority-select ' + inp.value;
+        }
+        if(inp.dataset.field==='name'){
+          inp.classList.toggle('empty-required', !inp.value.trim());
+        }
+        if(inp.dataset.field==='id'){
+          const linkBtn = tr.querySelector('.id-link-btn');
+          if(linkBtn) linkBtn.disabled = !eventIdToUrl(inp.value);
         }
         scheduleSave();
       });
       inp.addEventListener('paste', (e)=> handleTablePaste(e, mo, idx, inp.dataset.field));
     });
-    const assignBtn = tr.querySelector('.assign-id-btn');
-    if(assignBtn) assignBtn.addEventListener('click', ()=>{
-      mo.events[idx].id = String(maxEventId()+1);
-      scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox();
+    const linkBtn = tr.querySelector('.id-link-btn');
+    if(linkBtn) linkBtn.addEventListener('click', ()=>{
+      const url = eventIdToUrl(mo.events[idx].id);
+      if(url) window.open(url, '_blank');
     });
     tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
       showConfirmModal('이 행을 삭제할까요?', ()=>{
@@ -1204,8 +1324,6 @@ function renderEventsRows(){
         });
       });
     });
-    tr.querySelector('.duplicate-row-btn').addEventListener('click', ()=> duplicateEventToNextMonth(mo.events[idx]));
-    tr.querySelector('.save-template-btn').addEventListener('click', ()=> saveEventAsTemplate(mo.events[idx]));
     tr.querySelector('.row-checkbox').addEventListener('change', (e)=>{
       const eventUid = mo.events[idx]._uid;
       if(e.target.checked) selectedEventUids.add(eventUid); else selectedEventUids.delete(eventUid);
@@ -1329,402 +1447,6 @@ function renderBulkBar(){
   });
 }
 
-function duplicateEventToNextMonth(sourceEvent){
-  const {key: nextKey, label: nextLabel} = nextMonthOf(activeEventMonthKey);
-  let targetMonth = getEventMonth(nextKey);
-  const proceed = ()=>{
-    targetMonth.events.push({
-      ...sourceEvent, _uid: uid(), status:'대기', id:'',
-    });
-    logActivity('🔁', `'${sourceEvent.name||'이벤트'}' 이벤트를 '${nextLabel}'로 복제`, '', 'events', nextKey);
-    scheduleSave();
-    if(activeEventMonthKey===nextKey) renderEventsRows();
-    showToast(`'${sourceEvent.name||'이벤트'}'를 '${nextLabel}'에 복제했어요.`);
-  };
-  if(!targetMonth){
-    showConfirmModal(`'${nextLabel}' 시트가 아직 없어요. 새로 만들면서 복제할까요?`, ()=>{
-      STATE.eventMonths.push({key:nextKey, label:nextLabel, events:[]});
-      STATE.eventMonths.sort((a,b)=> a.key<b.key?-1:1);
-      targetMonth = getEventMonth(nextKey);
-      proceed();
-    });
-  }else{
-    proceed();
-  }
-}
-
-function statusColorVar(status){
-  if(status==='완료') return 'var(--pass)';
-  if(status==='진행') return 'var(--minor)';
-  if(status==='연장') return 'var(--major)';
-  if(status==='비노출') return 'var(--hidden-muted)';
-  return 'var(--na)';
-}
-function statusSoftVar(status){
-  if(status==='완료') return 'var(--pass-soft)';
-  if(status==='진행') return 'var(--minor-soft)';
-  if(status==='연장') return 'var(--major-soft)';
-  if(status==='비노출') return 'var(--na-soft)';
-  return 'var(--na-soft)';
-}
-
-/* ════════════════════════════════════════════════════════════
-   캘린더 보기 (반영예정일 기준)
-   ════════════════════════════════════════════════════════════ */
-function openCalendarModal(){
-  const mo = getEventMonth(activeEventMonthKey);
-  const [y, m] = mo.key.split('-').map(Number);
-  document.getElementById('calendarModalTitle').textContent = `📅 ${mo.label} 캘린더`;
-  const body = document.getElementById('calendarModalBody');
-
-  // 어느 '월별 탭'에 있든, 반영예정일이 이 달력 월에 속하면 모두 모은다.
-  // 완료/연장/비노출처럼 작업이 종료된 이벤트는 마감 알림 대상에서 제외한다.
-  const byDay = {};
-  STATE.eventMonths.forEach(monthObj=>{
-    monthObj.events.forEach(ev=>{
-      if(DONE_STATUSES.has(ev.status)) return;
-      const d = parseDueDate(ev.dueDate);
-      if(!d || d.getFullYear()!==y || d.getMonth()+1!==m) return;
-      const day = d.getDate();
-      (byDay[day] = byDay[day]||[]).push(ev);
-    });
-  });
-
-  const firstDow = new Date(y, m-1, 1).getDay();
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const today = new Date();
-  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const isThisMonth = today.getFullYear()===y && (today.getMonth()+1)===m;
-
-  let cells = '';
-  for(let i=0;i<firstDow;i++) cells += `<div class="cal-cell empty"></div>`;
-  for(let day=1; day<=daysInMonth; day++){
-    const evs = byDay[day]||[];
-    const isToday = isThisMonth && today.getDate()===day;
-    const shown = evs.slice(0,3).map(ev=>{
-      const d = parseDueDate(ev.dueDate);
-      const cls = (d && d < todayMidnight) ? 'over' : 'normal';
-      return `<span class="cal-dot ${cls}">${escapeHtml(ev.name||'(제목없음)')}</span>`;
-    }).join('');
-    const more = evs.length>3 ? `<span class="cal-dot normal">+${evs.length-3}건</span>` : '';
-    cells += `<div class="cal-cell ${isToday?'today':''}" data-day="${day}">
-      <div class="cal-daynum">${day}</div>
-      <div class="cal-dot-list">${shown}${more}</div>
-    </div>`;
-  }
-
-  body.innerHTML = `
-    <p class="sub" style="margin:0 0 10px;">완료·연장·비노출 상태는 마감 알림 대상에서 빠져요. 어느 달 탭에 있든 반영예정일 기준으로 모아서 보여줘요.</p>
-    <div class="cal-grid">
-      ${['일','월','화','수','목','금','토'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
-      ${cells}
-    </div>
-    <div class="cal-detail-list" id="calDetailList"><p class="sub" style="margin:0;">날짜를 클릭하면 그날 예정된 이벤트를 볼 수 있어요.</p></div>
-  `;
-  body.querySelectorAll('.cal-cell[data-day]').forEach(cell=>{
-    cell.addEventListener('click', ()=>{
-      const day = +cell.dataset.day;
-      const evs = byDay[day]||[];
-      const detail = document.getElementById('calDetailList');
-      if(!evs.length){ detail.innerHTML = `<p class="sub" style="margin:0;">${m}월 ${day}일에는 마감 예정인 이벤트가 없어요.</p>`; return; }
-      detail.innerHTML = `<div class="home-section-title" style="margin:0 0 8px;">${m}월 ${day}일 (${evs.length}건)</div>` + evs.map(ev=>`
-        <div class="cal-detail-item">
-          <span class="tag" style="background:${statusSoftVar(ev.status)}; color:${statusColorVar(ev.status)};">${escapeHtml(ev.status||'-')}</span>
-          <div style="flex:1;"><div style="font-weight:600;">${escapeHtml(ev.name||'(제목없음)')}</div>
-          <div style="color:var(--muted); font-size:11.5px;">${escapeHtml(ev.category||'')}</div></div>
-        </div>`).join('');
-    });
-  });
-
-  document.getElementById('calendarModalOverlay').classList.remove('hidden');
-}
-document.getElementById('calendarModalCloseBtn').addEventListener('click', ()=> document.getElementById('calendarModalOverlay').classList.add('hidden'));
-document.getElementById('calendarModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='calendarModalOverlay') document.getElementById('calendarModalOverlay').classList.add('hidden'); });
-
-/* ════════════════════════════════════════════════════════════
-   요약 리포트
-   ════════════════════════════════════════════════════════════ */
-function buildReportText(){
-  const mo = getEventMonth(activeEventMonthKey);
-  let done=0, prog=0, wait=0, ext=0, hidden=0;
-  mo.events.forEach(ev=>{
-    if(ev.status==='완료') done++; else if(ev.status==='진행') prog++;
-    else if(ev.status==='대기') wait++; else if(ev.status==='연장') ext++; else if(ev.status==='비노출') hidden++;
-  });
-  const {overdue, dueSoon} = scanDeadlines(mo.events);
-  const total = mo.events.length;
-  const rate = total ? Math.round((done/total)*100) : 0;
-
-  const lines = [];
-  lines.push(`■ ${mo.label} 이벤트 운영 요약`);
-  lines.push(`(작성: ${new Date().toLocaleDateString('ko-KR')})`);
-  lines.push('');
-  lines.push(`전체 ${total}건 중 완료 ${done}건 (완료율 ${rate}%)`);
-  lines.push(`- 완료 ${done} · 진행 ${prog} · 대기 ${wait} · 연장 ${ext} · 비노출 ${hidden}`);
-  lines.push('');
-  if(overdue.length){
-    lines.push(`⏰ 마감 지연 (${overdue.length}건)`);
-    overdue.forEach(ev=> lines.push(`- ${ev.name||'(제목없음)'} (D+${Math.abs(ev.d)}, ${ev.status})`));
-    lines.push('');
-  }
-  if(dueSoon.length){
-    lines.push(`🟡 마감 임박 (${dueSoon.length}건)`);
-    dueSoon.forEach(ev=> lines.push(`- ${ev.name||'(제목없음)'} (${ev.d===0?'오늘':'D-'+ev.d}, ${ev.status})`));
-    lines.push('');
-  }
-  const doneList = mo.events.filter(ev=>ev.status==='완료');
-  if(doneList.length){
-    lines.push(`✅ 이번 달 완료 이벤트 (${doneList.length}건)`);
-    doneList.forEach(ev=> lines.push(`- ${ev.name||'(제목없음)'}${ev.category?` · ${ev.category}`:''}`));
-  }
-  return lines.join('\n');
-}
-function openReportModal(){
-  const text = buildReportText();
-  document.getElementById('reportModalBody').innerHTML = `<div class="report-box">${escapeHtml(text)}</div>`;
-  document.getElementById('reportModalOverlay').classList.remove('hidden');
-}
-document.getElementById('reportModalCloseBtn').addEventListener('click', ()=> document.getElementById('reportModalOverlay').classList.add('hidden'));
-document.getElementById('reportModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='reportModalOverlay') document.getElementById('reportModalOverlay').classList.add('hidden'); });
-document.getElementById('reportModalCopyBtn').addEventListener('click', async ()=>{
-  const text = buildReportText();
-  try{
-    await navigator.clipboard.writeText(text);
-    showToast('리포트를 클립보드에 복사했어요.');
-  }catch(err){
-    showError('복사에 실패했어요. 직접 드래그해서 복사해주세요.');
-  }
-});
-
-/* ════════════════════════════════════════════════════════════
-   컬럼 표시 설정
-   ════════════════════════════════════════════════════════════ */
-function attachDragAutoScroll(scrollEl){
-  if(!scrollEl || scrollEl.__autoScrollBound) return;
-  scrollEl.__autoScrollBound = true;
-  scrollEl.addEventListener('dragover', (e)=>{
-    const rect = scrollEl.getBoundingClientRect();
-    const threshold = 44;
-    if(e.clientY - rect.top < threshold) scrollEl.scrollTop -= 14;
-    else if(rect.bottom - e.clientY < threshold) scrollEl.scrollTop += 14;
-  });
-}
-
-function openColumnsModal(){
-  const body = document.getElementById('columnsModalBody');
-  const customKeys = new Set((STATE.customEventColumns||[]).map(c=>c.key));
-  body.innerHTML = `
-    <div style="display:flex; gap:8px; margin-bottom:10px;">
-      <button class="ghost sm" id="showAllColumnsBtn">모두 표시</button>
-      <button class="primary sm" id="addCustomColumnBtn">➕ 새 컬럼 추가하기</button>
-    </div>
-    <p class="sub" style="margin:0 0 8px;">⠿를 드래그하면 표에 보이는 컬럼 순서를 바꿀 수 있어요.</p>
-    <div class="col-toggle-list">
-      ${getAllEventColumns().map(c=>`
-        <label class="col-toggle-row" data-key="${c.key}" draggable="true">
-          <span class="drag-dots" style="cursor:grab;">⠿</span>
-          <input type="checkbox" class="col-toggle-cb" data-key="${c.key}" ${hiddenEventColumns.has(c.key)?'':'checked'}/>
-          <span>${escapeHtml(c.label)}</span>
-          ${customKeys.has(c.key)?`<button type="button" class="ghost sm del-custom-col-btn" data-key="${c.key}" title="컬럼 삭제">🗑️</button>`:''}
-        </label>
-      `).join('')}
-    </div>`;
-  body.querySelectorAll('.col-toggle-cb').forEach(cb=>{
-    cb.addEventListener('change', ()=>{
-      if(cb.checked) hiddenEventColumns.delete(cb.dataset.key);
-      else hiddenEventColumns.add(cb.dataset.key);
-      STATE.uiPrefs.hiddenEventColumns = [...hiddenEventColumns];
-      scheduleSave();
-      renderEventsTableHeader();
-      renderEventsRows();
-    });
-  });
-  body.querySelectorAll('.del-custom-col-btn').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.preventDefault();
-      const key = btn.dataset.key;
-      const col = (STATE.customEventColumns||[]).find(c=>c.key===key);
-      showConfirmModal(`'${col?col.label:'이'}' 컬럼을 삭제할까요? 해당 컬럼에 입력된 값도 함께 사라져요.`, ()=>{
-        STATE.customEventColumns = STATE.customEventColumns.filter(c=>c.key!==key);
-        hiddenEventColumns.delete(key);
-        STATE.uiPrefs.hiddenEventColumns = [...hiddenEventColumns];
-        STATE.uiPrefs.eventColumnOrder = (STATE.uiPrefs.eventColumnOrder||[]).filter(k=>k!==key);
-        scheduleSave();
-        renderEventsTableHeader(); renderEventsRows();
-        openColumnsModal();
-      });
-    });
-  });
-  body.querySelectorAll('.col-toggle-row').forEach(row=>{
-    row.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', row.dataset.key);
-      row.classList.add('dragging');
-    });
-    row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
-    row.addEventListener('dragover', (e)=>{ e.preventDefault(); row.classList.add('drag-over'); });
-    row.addEventListener('dragleave', ()=> row.classList.remove('drag-over'));
-    row.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      row.classList.remove('drag-over');
-      const fromKey = e.dataTransfer.getData('text/plain');
-      const toKey = row.dataset.key;
-      if(fromKey===toKey || !fromKey) return;
-      const keys = getAllEventColumns().map(c=>c.key);
-      const fromIdx = keys.indexOf(fromKey);
-      const toIdx = keys.indexOf(toKey);
-      if(fromIdx===-1 || toIdx===-1) return;
-      const [moved] = keys.splice(fromIdx,1);
-      keys.splice(toIdx,0,moved);
-      STATE.uiPrefs.eventColumnOrder = keys;
-      scheduleSave();
-      renderEventsTableHeader(); renderEventsRows();
-      openColumnsModal();
-    });
-  });
-  attachDragAutoScroll(body.closest('.modal'));
-  document.getElementById('showAllColumnsBtn').addEventListener('click', ()=>{
-    hiddenEventColumns.clear();
-    STATE.uiPrefs.hiddenEventColumns = [];
-    scheduleSave();
-    renderEventsTableHeader(); renderEventsRows();
-    openColumnsModal();
-  });
-  document.getElementById('addCustomColumnBtn').addEventListener('click', ()=>{
-    showPromptModal('새 컬럼 이름을 입력하세요 (예: 담당자)', '', (name)=>{
-      if(!STATE.customEventColumns) STATE.customEventColumns = [];
-      const key = 'col_' + uid();
-      STATE.customEventColumns.push({key, label: name});
-      scheduleSave();
-      renderEventsTableHeader(); renderEventsRows();
-      openColumnsModal();
-      showToast(`'${name}' 컬럼을 추가했어요.`);
-    });
-  });
-  document.getElementById('columnsModalOverlay').classList.remove('hidden');
-}
-document.getElementById('columnsModalCloseBtn').addEventListener('click', ()=> document.getElementById('columnsModalOverlay').classList.add('hidden'));
-document.getElementById('columnsModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='columnsModalOverlay') document.getElementById('columnsModalOverlay').classList.add('hidden'); });
-
-function openBannerColumnsModal(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  if(!mo.hiddenColumns) mo.hiddenColumns = [];
-  const body = document.getElementById('columnsModalBody');
-  body.innerHTML = `
-    <div style="margin-bottom:10px;"><button class="ghost sm" id="showAllBannerColumnsBtn">모두 표시</button></div>
-    <p class="sub" style="margin:0 0 8px;">⠿를 드래그하면 표에 보이는 구좌 순서를 바꿀 수 있어요.</p>
-    <div class="col-toggle-list">
-      ${mo.columns.map(col=>`
-        <label class="col-toggle-row" data-key="${escapeHtml(col)}" draggable="true">
-          <span class="drag-dots" style="cursor:grab;">⠿</span>
-          <input type="checkbox" class="banner-col-toggle-cb" data-key="${escapeHtml(col)}" ${mo.hiddenColumns.includes(col)?'':'checked'}/>
-          <span>${escapeHtml(col)}</span>
-        </label>
-      `).join('')}
-    </div>`;
-  body.querySelectorAll('.banner-col-toggle-cb').forEach(cb=>{
-    cb.addEventListener('change', ()=>{
-      const key = cb.dataset.key;
-      if(cb.checked) mo.hiddenColumns = mo.hiddenColumns.filter(c=>c!==key);
-      else mo.hiddenColumns.push(key);
-      scheduleSave();
-      renderBannerRows();
-    });
-  });
-  body.querySelectorAll('.col-toggle-row').forEach(row=>{
-    row.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', row.dataset.key);
-      row.classList.add('dragging');
-    });
-    row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
-    row.addEventListener('dragover', (e)=>{ e.preventDefault(); row.classList.add('drag-over'); });
-    row.addEventListener('dragleave', ()=> row.classList.remove('drag-over'));
-    row.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      row.classList.remove('drag-over');
-      const fromKey = e.dataTransfer.getData('text/plain');
-      const toKey = row.dataset.key;
-      if(fromKey===toKey || !fromKey) return;
-      const fromIdx = mo.columns.indexOf(fromKey);
-      const toIdx = mo.columns.indexOf(toKey);
-      if(fromIdx===-1 || toIdx===-1) return;
-      const [moved] = mo.columns.splice(fromIdx,1);
-      mo.columns.splice(toIdx,0,moved);
-      scheduleSave();
-      renderBannerRows(); renderBannerColsEditor();
-      openBannerColumnsModal();
-    });
-  });
-  attachDragAutoScroll(body.closest('.modal'));
-  document.getElementById('showAllBannerColumnsBtn').addEventListener('click', ()=>{
-    mo.hiddenColumns = [];
-    scheduleSave();
-    renderBannerRows();
-    openBannerColumnsModal();
-  });
-  document.getElementById('columnsModalOverlay').classList.remove('hidden');
-}
-
-/* ════════════════════════════════════════════════════════════
-   자주 쓰는 이벤트 템플릿
-   ════════════════════════════════════════════════════════════ */
-function saveEventAsTemplate(ev){
-  showPromptModal('템플릿 이름을 입력하세요 (예: 친구추천 이벤트)', ev.name||'', (name)=>{
-    STATE.eventTemplates.push({
-      _uid: uid(), name,
-      priority: ev.priority, workType: ev.workType, category: ev.category,
-      source: ev.source, urlType: ev.urlType, note: ev.note,
-    });
-    scheduleSave();
-    showToast(`'${name}' 템플릿으로 저장했어요.`);
-  });
-}
-function openTemplateModal(){
-  const body = document.getElementById('templateModalBody');
-  const templates = STATE.eventTemplates||[];
-  if(!templates.length){
-    body.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="big">🔖</div>저장된 템플릿이 없어요. 이벤트 행의 🔖 버튼으로 먼저 저장해보세요.</div>`;
-  }else{
-    body.innerHTML = templates.map(t=>`
-      <div class="template-item" data-uid="${t._uid}">
-        <span class="template-name">${escapeHtml(t.name)}</span>
-        <div style="display:flex; gap:6px;">
-          <button class="primary sm use-template-btn">추가하기</button>
-          <button class="ghost sm del-template-btn">🗑️</button>
-        </div>
-      </div>`).join('');
-  }
-  body.querySelectorAll('.use-template-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const tUid = btn.closest('.template-item').dataset.uid;
-      const t = templates.find(x=>x._uid===tUid);
-      if(!t) return;
-      const mo = getEventMonth(activeEventMonthKey);
-      mo.events.push({
-        _uid:uid(), priority:t.priority||'중', status:'대기', name:t.name, workType:t.workType||'',
-        category:t.category||'', dueDate:'', reflectStatus:'', source:t.source||'', reviewUrl:'',
-        urlType:t.urlType||'', opUrl:'', note:t.note||'', id:'',
-      });
-      scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox();
-      document.getElementById('templateModalOverlay').classList.add('hidden');
-      showToast(`'${t.name}'을(를) 추가했어요.`);
-    });
-  });
-  body.querySelectorAll('.del-template-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const tUid = btn.closest('.template-item').dataset.uid;
-      showConfirmModal('이 템플릿을 삭제할까요?', ()=>{
-        STATE.eventTemplates = STATE.eventTemplates.filter(x=>x._uid!==tUid);
-        scheduleSave(); openTemplateModal();
-      });
-    });
-  });
-  document.getElementById('templateModalOverlay').classList.remove('hidden');
-}
-document.getElementById('templateModalCloseBtn').addEventListener('click', ()=> document.getElementById('templateModalOverlay').classList.add('hidden'));
-document.getElementById('templateModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='templateModalOverlay') document.getElementById('templateModalOverlay').classList.add('hidden'); });
-
 function addNewEventMonth(){
   const last = STATE.eventMonths[STATE.eventMonths.length-1];
   const {key, label} = nextMonthOf(last.key);
@@ -1741,38 +1463,41 @@ function addNewEventMonth(){
 /* ════════════════════════════════════════════════════════════
    렌더: 배너 구좌 관리 탭
    ════════════════════════════════════════════════════════════ */
+let expandedBannerMonths = new Set();
+
 function renderBannerTab(){
-  if(!activeBannerMonthKey) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   const container = document.getElementById('tab-banner');
-  const chips = renderMonthChipsHtml(STATE.bannerMonths, activeBannerMonthKey, showAllBannerMonths);
+  const currentMo = getBannerMonth(activeBannerMonthKey);
+  const otherMonths = STATE.bannerMonths.filter(m=>m.key!==activeBannerMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
 
   container.innerHTML = `
     <div class="panel">
-      <h3>배너 구좌 순위 관리</h3>
-      <p class="sub">구좌별(메인팝업/메인상단/메인하단 등) 순위표를 월 단위로 관리합니다. 구좌(컬럼)는 자유롭게 추가/삭제할 수 있어요.</p>
-      <div style="margin-bottom:14px;">
-        <button id="convertRawBtn" class="primary">🔄 사업팀 원본파일 변환하기</button>
-        <input type="file" id="rawFileInput" accept=".xlsx,.xlsm" />
-      </div>
-      <div class="month-chips">
-        ${chips}
-        <span class="chip chip-add" id="addBannerMonthChip">➕ 새 달 만들기 (이전 달 복사)</span>
+      <div class="panel-head-row">
+        <div><h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3></div>
+        <div class="panel-head-actions">
+          <button id="convertRawBtn">🔄 사업팀 원본파일 변환하기</button>
+          <input type="file" id="rawFileInput" accept=".xlsx,.xlsm" />
+        </div>
       </div>
       <div class="banner-columns-editor" id="bannerColsEditor"></div>
-      <div id="pmManagementHolder"></div>
-      <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <button class="primary sm" id="addBannerRowBtn">➕ 순위 행 추가하기</button>
-        <button class="sm" id="openBannerColumnsBtn">🙈 컬럼 표시 설정</button>
-      </div>
       <div class="tblwrap">
         <table class="edittable" id="bannerTable"></table>
       </div>
     </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h3>이력 (${otherMonths.length}건)</h3>
+      <div id="bannerHistoryAccordion"></div>
+    </div>
+  `;
+  document.getElementById('maintabsActions').innerHTML = `
+    <button class="sm" id="addBannerRowBtn">+ 행 추가하기</button>
+    <button class="primary sm" id="addBannerMonthBtn">새 달 만들기</button>
   `;
   renderBannerColsEditor();
   renderBannerRows();
-  renderPmManagementPanel();
-  const bcolBtn = document.getElementById('openBannerColumnsBtn'); if(bcolBtn) bcolBtn.addEventListener('click', openBannerColumnsModal);
+  renderBannerHistoryAccordion(otherMonths);
 
   const convertBtn = document.getElementById('convertRawBtn');
   const rawInput = document.getElementById('rawFileInput');
@@ -1780,41 +1505,12 @@ function renderBannerTab(){
     convertBtn.addEventListener('click', ()=> rawInput.click());
     rawInput.addEventListener('change', (e)=>{
       const file = e.target.files[0];
-      if(file) handleRawFileImport(file, convertBtn);
+      if(file) handleRawFileImport(file, convertBtn, 'banner');
       e.target.value = '';
     });
   }
 
-  container.querySelectorAll('.chip[data-key]').forEach(el=>{
-    el.addEventListener('click', (e)=>{
-      if(e.target.classList.contains('del')) return;
-      activeBannerMonthKey = el.dataset.key; renderBannerTab();
-    });
-  });
-  container.querySelectorAll('.del[data-delkey]').forEach(el=>{
-    el.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const delKey = el.dataset.delkey;
-      const delLabel = el.parentElement.textContent.trim();
-      showConfirmModal(`'${delLabel}' 배너 구좌 데이터를 삭제할까요?`, ()=>{
-        const removedIdx = STATE.bannerMonths.findIndex(m=>m.key===delKey);
-        const removed = STATE.bannerMonths[removedIdx];
-        STATE.bannerMonths = STATE.bannerMonths.filter(m=>m.key!==delKey);
-        if(activeBannerMonthKey===delKey) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-        scheduleSave(); renderBannerTab();
-        showUndoToast(`'${delLabel}' 배너 구좌 데이터를 삭제했어요.`, ()=>{
-          STATE.bannerMonths.splice(Math.min(removedIdx, STATE.bannerMonths.length), 0, removed);
-          scheduleSave(); renderBannerTab();
-        });
-      });
-    });
-  });
-  const showAllChip = container.querySelector('.chip[data-action="show-all"]');
-  if(showAllChip) showAllChip.addEventListener('click', ()=>{ showAllBannerMonths = true; renderBannerTab(); });
-  const collapseChip = container.querySelector('.chip[data-action="collapse"]');
-  if(collapseChip) collapseChip.addEventListener('click', ()=>{ showAllBannerMonths = false; renderBannerTab(); });
-
-  const addBMonthBtn = document.getElementById('addBannerMonthChip'); if(addBMonthBtn) addBMonthBtn.addEventListener('click', addNewBannerMonth);
+  const addBMonthBtn = document.getElementById('addBannerMonthBtn'); if(addBMonthBtn) addBMonthBtn.addEventListener('click', addNewBannerMonth);
   const addBRowBtn = document.getElementById('addBannerRowBtn');
   if(addBRowBtn) addBRowBtn.addEventListener('click', ()=>{
     const mo = getBannerMonth(activeBannerMonthKey);
@@ -1823,11 +1519,128 @@ function renderBannerTab(){
   });
 }
 
+function renderBannerHistoryAccordion(otherMonths){
+  const holder = document.getElementById('bannerHistoryAccordion');
+  if(!holder) return;
+  if(!otherMonths.length){
+    holder.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="big">🗂️</div>아직 다른 달 이력이 없어요.</div>`;
+    return;
+  }
+  holder.innerHTML = otherMonths.map(mo=>{
+    const isOpen = expandedBannerMonths.has(mo.key);
+    return `
+    <div class="benefit-block" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+        <span class="bb-title">
+          <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
+          ${escapeHtml(mo.label)}
+          <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${mo.ranks.length}건</span>
+        </span>
+        <button class="ghost sm del-banner-month-btn icon-btn" data-key="${mo.key}" title="이 달 삭제">${TRASH_ICON}</button>
+      </div>
+      <div class="event-history-body ${isOpen?'':'hidden'}">
+        <div class="tblwrap">
+          <table class="edittable" id="bHistTable_${mo.key}"></table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  holder.querySelectorAll('.accordion-toggle').forEach(head=>{
+    head.addEventListener('click', (e)=>{
+      if(e.target.closest('.del-banner-month-btn')) return;
+      const key = head.dataset.key;
+      if(expandedBannerMonths.has(key)) expandedBannerMonths.delete(key);
+      else expandedBannerMonths.add(key);
+      renderBannerHistoryAccordion(otherMonths);
+    });
+  });
+  holder.querySelectorAll('.del-banner-month-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      const mo = getBannerMonth(key);
+      showConfirmModal(`'${mo.label}' 배너 구좌 데이터를 삭제할까요?`, ()=>{
+        const idx = STATE.bannerMonths.findIndex(m=>m.key===key);
+        const removed = STATE.bannerMonths[idx];
+        STATE.bannerMonths.splice(idx,1);
+        expandedBannerMonths.delete(key);
+        scheduleSave(); renderBannerTab();
+        showUndoToast(`'${mo.label}' 배너 구좌 데이터를 삭제했어요.`, ()=>{
+          STATE.bannerMonths.splice(Math.min(idx, STATE.bannerMonths.length), 0, removed);
+          scheduleSave(); renderBannerTab();
+        });
+      });
+    });
+  });
+
+  otherMonths.forEach(mo=>{ if(expandedBannerMonths.has(mo.key)) renderBannerHistoryTable(mo.key); });
+}
+
+function renderBannerHistoryTable(key){
+  const mo = getBannerMonth(key);
+  const table = document.getElementById('bHistTable_'+key);
+  if(!mo || !table) return;
+  const hidden = mo.hiddenColumns||[];
+  const visibleCols = mo.columns.filter(c=>!hidden.includes(c));
+  const head = `<thead><tr><th style="width:70px;">순서</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
+  let body;
+  if(!mo.ranks.length){
+    body = `<tbody><tr><td colspan="${visibleCols.length+2}"><div class="empty-state" style="padding:20px;">등록된 순위가 없어요.</div></td></tr></tbody>`;
+  }else{
+    body = '<tbody>' + mo.ranks.map((r,idx)=>`
+      <tr data-idx="${idx}">
+        <td>
+          <div class="order-cell">
+            <span class="order-badge">${idx+1}</span>
+            <span class="order-arrows">
+              <button class="move-up-btn" title="위로">▲</button>
+              <button class="move-down-btn" title="아래로">▼</button>
+            </span>
+          </div>
+        </td>
+        ${visibleCols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
+        <td><button class="ghost del-row-btn icon-btn">${TRASH_ICON}</button></td>
+      </tr>`).join('') + '</tbody>';
+  }
+  table.innerHTML = head + body;
+
+  table.querySelectorAll('tbody tr').forEach(tr=>{
+    const idx = +tr.dataset.idx;
+    tr.querySelectorAll('.bn-field').forEach(inp=>{
+      inp.addEventListener('input', ()=>{ mo.ranks[idx].values[inp.dataset.col] = inp.value; scheduleSave(); });
+      inp.addEventListener('blur', ()=>{
+        const mapped = applyPartnerNameMap(inp.value);
+        if(mapped !== inp.value){ inp.value = mapped; mo.ranks[idx].values[inp.dataset.col] = mapped; scheduleSave(); }
+      });
+    });
+    const delBtn = tr.querySelector('.del-row-btn');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      showConfirmModal('이 순위 행을 삭제할까요?', ()=>{
+        const removed = mo.ranks[idx];
+        mo.ranks.splice(idx,1); scheduleSave(); renderBannerHistoryTable(key);
+        showUndoToast('순위 행을 삭제했어요.', ()=>{
+          mo.ranks.splice(idx,0,removed); scheduleSave(); renderBannerHistoryTable(key);
+        });
+      });
+    });
+    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
+      if(idx<=0) return;
+      [mo.ranks[idx-1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx-1]];
+      scheduleSave(); renderBannerHistoryTable(key);
+    });
+    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
+      if(idx>=mo.ranks.length-1) return;
+      [mo.ranks[idx+1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx+1]];
+      scheduleSave(); renderBannerHistoryTable(key);
+    });
+  });
+}
+
 function renderBannerColsEditor(){
   const mo = getBannerMonth(activeBannerMonthKey);
   const holder = document.getElementById('bannerColsEditor');
-  holder.innerHTML = mo.columns.map(col=>`<span class="col-chip">${escapeHtml(col)}<span class="del" data-col="${escapeHtml(col)}">🗑️</span></span>`).join('')
-    + `<span class="col-chip chip-add" id="addBannerColBtn" style="cursor:pointer;">➕ 구좌 추가하기</span>`;
+  holder.innerHTML = mo.columns.map(col=>`<span class="col-chip">${escapeHtml(col)}<span class="del" data-col="${escapeHtml(col)}">🗑️</span></span>`).join('');
   holder.querySelectorAll('.del[data-col]').forEach(el=>{
     el.addEventListener('click', ()=>{
       const col = el.dataset.col;
@@ -1838,14 +1651,6 @@ function renderBannerColsEditor(){
       });
     });
   });
-  const addBColBtn = document.getElementById('addBannerColBtn');
-  if(addBColBtn) addBColBtn.addEventListener('click', ()=>{
-    showPromptModal('새 구좌 이름을 입력하세요 (예: GNB 검색배너)', '', (name)=>{
-      if(mo.columns.includes(name)){ showError('이미 있는 구좌명이에요.'); return; }
-      mo.columns.push(name);
-      scheduleSave(); renderBannerTab();
-    });
-  });
 }
 
 function renderBannerRows(){
@@ -1853,23 +1658,24 @@ function renderBannerRows(){
   const table = document.getElementById('bannerTable');
   const hidden = mo.hiddenColumns||[];
   const visibleCols = mo.columns.filter(c=>!hidden.includes(c));
-  const head = `<thead><tr><th style="width:26px;"></th><th style="width:50px;">순위</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
+  const head = `<thead><tr><th style="width:70px;">순서</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
   let body;
   if(!mo.ranks.length){
-    body = `<tbody><tr><td colspan="${visibleCols.length+3}"><div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div></td></tr></tbody>`;
+    body = `<tbody><tr><td colspan="${visibleCols.length+2}"><div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div></td></tr></tbody>`;
   }else{
     body = '<tbody>' + mo.ranks.map((r,idx)=>`
       <tr data-idx="${idx}" draggable="true">
         <td class="drag-handle" title="드래그해서 순위 변경">
-          <div class="row-move-controls">
-            <button class="move-up-btn" title="위로">▲</button>
-            <span class="drag-dots">⠿</span>
-            <button class="move-down-btn" title="아래로">▼</button>
+          <div class="order-cell">
+            <span class="order-badge">${idx+1}</span>
+            <span class="order-arrows">
+              <button class="move-up-btn" title="위로">▲</button>
+              <button class="move-down-btn" title="아래로">▼</button>
+            </span>
           </div>
         </td>
-        <td class="mono" style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
         ${visibleCols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
-        <td><button class="ghost del-row-btn">🗑️</button></td>
+        <td><button class="ghost del-row-btn icon-btn">${TRASH_ICON}</button></td>
       </tr>`).join('') + '</tbody>';
   }
   table.innerHTML = head + body;
@@ -1958,28 +1764,6 @@ function computeCurrentWeek(mo){
 /* ════════════════════════════════════════════════════════════
    프리마케팅 배너 수동 관리 (아코디언)
    ════════════════════════════════════════════════════════════ */
-function renderPmManagementPanel(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  const holder = document.getElementById('pmManagementHolder');
-  if(!mo || !holder) return;
-
-  // 아코디언 뼈대는 여기서 딱 한 번만 그린다. 기준일시/배치주기를 바꿔서 다시 그릴 때는
-  // 이 아코디언(details)은 건드리지 않고 안쪽 내용만 갱신해서, 펼쳐둔 상태가 리렌더링에 닫히지 않게 한다.
-  holder.innerHTML = `
-    <details id="pmDetails">
-      <summary class="section-toggle">🎯 프리마케팅 배너 관리 <span class="muted-inline">(수동 편집)</span></summary>
-      <div class="section-toggle-body">
-        <p class="sub" style="margin:0 0 6px;">"프리 주차별 N위" 자리를 채울 파트너를 주차별로 한눈에 보고 바로 수정할 수 있어요. 회사명을 입력하면 통신사명으로 자동 변환돼요.</p>
-        <div id="pmStatusGridHolder"></div>
-        <div id="pmWeekPreviewHolder"></div>
-      </div>
-    </details>
-  `;
-
-  renderPmStatusGrid();
-  renderPmWeekPreview();
-}
-
 function applyPartnerNameMap(name){
   if(!name) return name;
   const trimmed = name.trim();
@@ -1987,9 +1771,9 @@ function applyPartnerNameMap(name){
   return map[trimmed] || name;
 }
 
-function renderPmStatusGrid(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  const holder = document.getElementById('pmStatusGridHolder');
+function renderPmStatusGrid(key){
+  const mo = getBannerMonth(key);
+  const holder = document.getElementById('pmStatusGridHolder_'+key);
   if(!mo || !holder) return;
 
   const cycleWeeks = mo.cycleWeeks || 4;
@@ -2005,11 +1789,11 @@ function renderPmStatusGrid(){
     <div class="pm-status-grid">
       <div class="pm-status-item">
         <label>기준일시</label>
-        <input type="datetime-local" id="pmAnchorInput" value="${anchorInputVal}"/>
+        <input type="datetime-local" id="pmAnchorInput_${key}" value="${anchorInputVal}"/>
       </div>
       <div class="pm-status-item">
         <label>배치 주기</label>
-        <input type="number" id="pmCycleInput" min="1" max="12" value="${cycleWeeks}"/>
+        <input type="number" id="pmCycleInput_${key}" min="1" max="12" value="${cycleWeeks}"/>
       </div>
       <div class="pm-status-item">
         <label>현재 관리 주차</label>
@@ -2026,22 +1810,22 @@ function renderPmStatusGrid(){
     </div>
   `;
 
-  const pmAnchorInp = document.getElementById('pmAnchorInput');
+  const pmAnchorInp = document.getElementById('pmAnchorInput_'+key);
   if(pmAnchorInp) pmAnchorInp.addEventListener('change', (e)=>{
     mo.weekAnchor = e.target.value;
-    scheduleSave(); renderPmStatusGrid(); renderPmWeekPreview();
+    scheduleSave(); renderPmStatusGrid(key); renderPmWeekPreview(key);
   });
-  const pmCycleInp = document.getElementById('pmCycleInput');
+  const pmCycleInp = document.getElementById('pmCycleInput_'+key);
   if(pmCycleInp) pmCycleInp.addEventListener('change', (e)=>{
     const v = Math.max(1, Math.min(12, parseInt(e.target.value)||4));
     mo.cycleWeeks = v;
-    scheduleSave(); renderPmStatusGrid(); renderPmWeekPreview();
+    scheduleSave(); renderPmStatusGrid(key); renderPmWeekPreview(key);
   });
 }
 
-function renderPmWeekPreview(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  const holder = document.getElementById('pmWeekPreviewHolder');
+function renderPmWeekPreview(key){
+  const mo = getBannerMonth(key);
+  const holder = document.getElementById('pmWeekPreviewHolder_'+key);
   if(!mo || !holder) return;
   if(!mo.preMarketingPartners) mo.preMarketingPartners = [];
 
@@ -2050,22 +1834,27 @@ function renderPmWeekPreview(){
   const maxRank = Math.max(6, existingRanks.length ? Math.max(...existingRanks) : 0);
   const currentWeek = computeCurrentWeek(mo);
 
-  let html = '<div class="pm-week-grid">';
-  for(let w=1; w<=cycleWeeks; w++){
-    html += `<div class="pm-week-col ${w===currentWeek?'current':''}">
-      <div class="pm-week-title">${w}주차${w===currentWeek?' · 진행중':''}</div>`;
-    for(let rk=1; rk<=maxRank; rk++){
+  let headCols = '';
+  for(let w=1; w<=cycleWeeks; w++) headCols += `<th>${w}주차${w===currentWeek?' · 진행중':''}</th>`;
+
+  let rows = '';
+  for(let rk=1; rk<=maxRank; rk++){
+    rows += `<tr><td><span class="order-badge">${rk}</span></td>`;
+    for(let w=1; w<=cycleWeeks; w++){
       const entry = mo.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk);
       const name = entry ? (entry.name||'') : '';
-      html += `<div class="pm-week-row">
-        <span class="pm-week-rank">${rk}위</span>
-        <input type="text" class="pm-week-input" data-week="${w}" data-rank="${rk}" value="${escapeHtml(name)}" placeholder="파트너사명"/>
-      </div>`;
+      rows += `<td><input type="text" class="pm-week-input" data-week="${w}" data-rank="${rk}" value="${escapeHtml(name)}" placeholder="파트너사명"/></td>`;
     }
-    html += `</div>`;
+    rows += `</tr>`;
   }
-  html += '</div>';
-  holder.innerHTML = html;
+
+  holder.innerHTML = `
+    <div class="tblwrap">
+      <table class="edittable">
+        <thead><tr><th style="width:60px;">순위</th>${headCols}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 
   holder.querySelectorAll('.pm-week-input').forEach(inp=>{
     inp.addEventListener('input', ()=>{
@@ -2090,6 +1879,88 @@ function renderPmWeekPreview(){
   });
 }
 
+let expandedPmMonths = new Set();
+
+function renderPmTab(){
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  const container = document.getElementById('tab-pm');
+  const currentMo = getBannerMonth(activeBannerMonthKey);
+  const otherMonths = STATE.bannerMonths.filter(m=>m.key!==activeBannerMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
+
+  container.innerHTML = `
+    <div class="panel">
+      <div class="panel-head-row">
+        <div><h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3></div>
+        <div class="panel-head-actions">
+          <button id="convertPmRawBtn">🔄 사업팀 원본파일 변환하기</button>
+          <input type="file" id="pmRawFileInput" accept=".xlsx,.xlsm" />
+        </div>
+      </div>
+      <div id="pmStatusGridHolder_${currentMo.key}"></div>
+      <div id="pmWeekPreviewHolder_${currentMo.key}"></div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h3>이력 (${otherMonths.length}건)</h3>
+      <div id="pmHistoryAccordion"></div>
+    </div>
+  `;
+  document.getElementById('maintabsActions').innerHTML = '';
+  renderPmStatusGrid(currentMo.key);
+  renderPmWeekPreview(currentMo.key);
+  renderPmHistoryAccordion(otherMonths);
+
+  const convertBtn = document.getElementById('convertPmRawBtn');
+  const rawInput = document.getElementById('pmRawFileInput');
+  if(convertBtn && rawInput){
+    convertBtn.addEventListener('click', ()=> rawInput.click());
+    rawInput.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(file) handleRawFileImport(file, convertBtn, 'pm');
+      e.target.value = '';
+    });
+  }
+}
+
+function renderPmHistoryAccordion(otherMonths){
+  const holder = document.getElementById('pmHistoryAccordion');
+  if(!holder) return;
+  if(!otherMonths.length){
+    holder.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="big">🗂️</div>아직 다른 달 이력이 없어요.</div>`;
+    return;
+  }
+  holder.innerHTML = otherMonths.map(mo=>{
+    const isOpen = expandedPmMonths.has(mo.key);
+    const filledCount = (mo.preMarketingPartners||[]).filter(p=>p.name).length;
+    return `
+    <div class="benefit-block" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+        <span class="bb-title">
+          <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
+          ${escapeHtml(mo.label)}
+          <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${filledCount}건</span>
+        </span>
+      </div>
+      <div class="event-history-body ${isOpen?'':'hidden'}">
+        <div id="pmStatusGridHolder_${mo.key}"></div>
+        <div id="pmWeekPreviewHolder_${mo.key}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  holder.querySelectorAll('.accordion-toggle').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const key = head.dataset.key;
+      if(expandedPmMonths.has(key)) expandedPmMonths.delete(key);
+      else expandedPmMonths.add(key);
+      renderPmHistoryAccordion(otherMonths);
+    });
+  });
+  otherMonths.forEach(mo=>{
+    if(expandedPmMonths.has(mo.key)){ renderPmStatusGrid(mo.key); renderPmWeekPreview(mo.key); }
+  });
+}
+
 /* ════════════════════════════════════════════════════════════
    렌더: 혜택 관리 탭 (블록은 배열 index 0 = 최신)
    ════════════════════════════════════════════════════════════ */
@@ -2107,21 +1978,185 @@ function benefitExpiryStyle(expiryDate){
 
 function renderBenefitTab(){
   const container = document.getElementById('tab-benefit');
+  const current = STATE.benefitBlocks[0];
+  const otherBlocks = STATE.benefitBlocks.slice(1);
+
+  const expiringBenefits = current ? current.items.filter(it=> benefitExpiryStyle(it.expiryDate).style) : [];
+  const alertHtml = expiringBenefits.length ? `
+    <div class="home-highlight" style="background:var(--minor-soft); border-color:var(--minor-border); color:var(--minor-text); margin-bottom:16px;">
+      <span>🏷️</span><span>곧 종료되거나 이미 지난 혜택이 <b>${expiringBenefits.length}건</b> 있어요 — 아래에서 확인하세요.</span>
+    </div>` : '';
+
   container.innerHTML = `
     <div class="panel">
-      <h3>혜택 문구 관리 · 이력</h3>
-      <p class="sub">맨 위 블록이 가장 최근(현재 진행 중인) 혜택입니다. 지난 블록은 그대로 이력으로 남아요.</p>
-
-      <div style="margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="primary sm" id="addBenefitMonthBtn">➕ 새 달 만들기 (이전 달 복사)</button>
-        <button class="sm" id="addBenefitBlockBtn">➕ 이름 직접 정해서 만들기</button>
+      <h3>현재 현황${current?` · ${escapeHtml(formatBenefitLabel(current.label))}`:''}</h3>
+      ${alertHtml}
+      <div class="tblwrap">
+        <table class="edittable">
+          <thead><tr><th style="width:70px;">순서</th><th>혜택명</th><th>문구</th><th>작업현황</th><th>종료일</th><th></th></tr></thead>
+          <tbody id="currentBenefitItems"></tbody>
+        </table>
       </div>
-      <div id="benefitBlocks"></div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <div class="panel-head-row">
+        <div><h3>이력 (${otherBlocks.length}건)</h3></div>
+        <div class="panel-head-actions">
+          <button class="sm" id="addBenefitBlockBtn">이름 직접 정해서 만들기</button>
+        </div>
+      </div>
+      <div id="benefitHistoryAccordion"></div>
     </div>
   `;
-  renderBenefitBlocks();
-  const addBenMonthBtn = document.getElementById('addBenefitMonthBtn'); if(addBenMonthBtn) addBenMonthBtn.addEventListener('click', addNewBenefitMonth);
-  const addBenBlockBtn = document.getElementById('addBenefitBlockBtn'); if(addBenBlockBtn) addBenBlockBtn.addEventListener('click', addNewBenefitBlock);
+  document.getElementById('maintabsActions').innerHTML = `
+    <button class="sm" id="addBenefitItemBtn">+ 행 추가하기</button>
+    <button class="primary sm" id="addBenefitMonthBtn">새 달 만들기</button>
+  `;
+  renderCurrentBenefitItems();
+  renderBenefitHistoryAccordion(otherBlocks);
+
+  const addItemBtn = document.getElementById('addBenefitItemBtn');
+  if(addItemBtn) addItemBtn.addEventListener('click', ()=>{
+    if(!current) return;
+    current.items.push({_uid:uid(), name:'', copy:'', status:'', expiryDate:''});
+    scheduleSave(); renderCurrentBenefitItems();
+  });
+  const addMonthBtn = document.getElementById('addBenefitMonthBtn');
+  if(addMonthBtn) addMonthBtn.addEventListener('click', addNewBenefitMonth);
+  const addBlockBtn = document.getElementById('addBenefitBlockBtn');
+  if(addBlockBtn) addBlockBtn.addEventListener('click', addNewBenefitBlock);
+}
+
+function bindBenefitItemRows(container, block, rerenderFn){
+  container.querySelectorAll('tr[data-iidx]').forEach(rowEl=>{
+    const iIdx = +rowEl.dataset.iidx;
+    rowEl.querySelectorAll('.bf-field').forEach(inp=>{
+      inp.addEventListener('input', ()=>{ block.items[iIdx][inp.dataset.field] = inp.value; scheduleSave(); });
+    });
+    rowEl.querySelector('.del-benefit-item-btn').addEventListener('click', ()=>{
+      showConfirmModal('이 혜택 항목을 삭제할까요?', ()=>{
+        const removed = block.items[iIdx];
+        block.items.splice(iIdx,1); scheduleSave(); rerenderFn();
+        showUndoToast(`'${removed.name||'혜택'}' 항목을 삭제했어요.`, ()=>{
+          block.items.splice(iIdx,0,removed);
+          scheduleSave(); rerenderFn();
+        });
+      });
+    });
+    rowEl.querySelector('.move-up-btn').addEventListener('click', ()=>{
+      if(iIdx<=0) return;
+      [block.items[iIdx-1], block.items[iIdx]] = [block.items[iIdx], block.items[iIdx-1]];
+      scheduleSave(); rerenderFn();
+    });
+    rowEl.querySelector('.move-down-btn').addEventListener('click', ()=>{
+      if(iIdx>=block.items.length-1) return;
+      [block.items[iIdx+1], block.items[iIdx]] = [block.items[iIdx], block.items[iIdx+1]];
+      scheduleSave(); rerenderFn();
+    });
+  });
+}
+
+function benefitItemRowHtml(it, iIdx){
+  const expiryStyle = benefitExpiryStyle(it.expiryDate);
+  return `
+    <tr data-iidx="${iIdx}" data-uid="${it._uid||''}">
+      <td>
+        <div class="order-cell">
+          <span class="order-badge">${iIdx+1}</span>
+          <span class="order-arrows">
+            <button class="move-up-btn" title="위로">▲</button>
+            <button class="move-down-btn" title="아래로">▼</button>
+          </span>
+        </div>
+      </td>
+      <td><input type="text" class="bf-field" data-field="name" placeholder="혜택명" value="${escapeHtml(it.name)}"/></td>
+      <td><input type="text" class="bf-field" data-field="copy" placeholder="문구" value="${escapeHtml(it.copy)}"/></td>
+      <td><input type="text" class="bf-field" data-field="status" placeholder="작업현황" value="${escapeHtml(it.status)}"/></td>
+      <td><input type="date" class="bf-field" data-field="expiryDate" value="${escapeHtml(it.expiryDate||'')}" title="${expiryStyle.title}" style="${expiryStyle.style}"/></td>
+      <td><button class="ghost del-benefit-item-btn icon-btn">${TRASH_ICON}</button></td>
+    </tr>`;
+}
+
+function renderCurrentBenefitItems(){
+  const holder = document.getElementById('currentBenefitItems');
+  if(!holder) return;
+  const block = STATE.benefitBlocks[0];
+  if(!block){
+    holder.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="big">🎁</div>혜택 블록이 없어요. "새 달 만들기"로 시작하세요.</div></td></tr>`;
+    return;
+  }
+  holder.innerHTML = block.items.length ? block.items.map((it,iIdx)=> benefitItemRowHtml(it,iIdx)).join('')
+    : `<tr><td colspan="6"><div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div></td></tr>`;
+  bindBenefitItemRows(holder, block, renderCurrentBenefitItems);
+}
+
+function renderBenefitHistoryAccordion(otherBlocks){
+  const holder = document.getElementById('benefitHistoryAccordion');
+  if(!holder) return;
+  if(!otherBlocks.length){
+    holder.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="big">🗂️</div>아직 다른 혜택 이력이 없어요.</div>`;
+    return;
+  }
+  holder.innerHTML = otherBlocks.map(block=>{
+    const isOpen = expandedBenefitBlocks.has(block._blockUid);
+    return `
+    <div class="benefit-block" data-blockuid="${escapeHtml(block._blockUid)}">
+      <div class="bb-head accordion-toggle" data-blockuid="${escapeHtml(block._blockUid)}">
+        <span class="bb-title">
+          <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
+          ${escapeHtml(formatBenefitLabel(block.label))}
+          <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${block.items.length}건</span>
+        </span>
+        <button class="ghost sm del-benefit-block-btn icon-btn" title="블록 삭제">${TRASH_ICON}</button>
+      </div>
+      <div class="event-history-body ${isOpen?'':'hidden'}" data-blockbody="${escapeHtml(block._blockUid)}">
+        <div class="tblwrap">
+          <table class="edittable">
+            <thead><tr><th style="width:70px;">순서</th><th>혜택명</th><th>문구</th><th>작업현황</th><th>종료일</th><th></th></tr></thead>
+            <tbody id="benHistTbody_${escapeHtml(block._blockUid)}"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  holder.querySelectorAll('.accordion-toggle').forEach(headEl=>{
+    headEl.addEventListener('click', (e)=>{
+      if(e.target.closest('.del-benefit-block-btn')) return;
+      const blockUid = headEl.dataset.blockuid;
+      if(expandedBenefitBlocks.has(blockUid)) expandedBenefitBlocks.delete(blockUid);
+      else expandedBenefitBlocks.add(blockUid);
+      renderBenefitHistoryAccordion(otherBlocks);
+    });
+  });
+  holder.querySelectorAll('.del-benefit-block-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const blockUid = btn.closest('.benefit-block').dataset.blockuid;
+      const idx = STATE.benefitBlocks.findIndex(b=>b._blockUid===blockUid);
+      const block = STATE.benefitBlocks[idx];
+      showConfirmModal(`'${formatBenefitLabel(block.label)}' 블록을 삭제할까요?`, ()=>{
+        STATE.benefitBlocks.splice(idx,1);
+        expandedBenefitBlocks.delete(blockUid);
+        scheduleSave(); renderBenefitTab();
+        showUndoToast(`'${formatBenefitLabel(block.label)}' 블록을 삭제했어요.`, ()=>{
+          STATE.benefitBlocks.splice(idx,0,block);
+          scheduleSave(); renderBenefitTab();
+        });
+      });
+    });
+  });
+
+  otherBlocks.forEach(block=>{ if(expandedBenefitBlocks.has(block._blockUid)) renderBenefitHistoryItems(block); });
+}
+
+function renderBenefitHistoryItems(block){
+  const bodyEl = document.getElementById('benHistTbody_'+block._blockUid);
+  if(!bodyEl) return;
+  bodyEl.innerHTML = block.items.length ? block.items.map((it,iIdx)=> benefitItemRowHtml(it,iIdx)).join('')
+    : `<tr><td colspan="6"><div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div></td></tr>`;
+  bindBenefitItemRows(bodyEl, block, ()=> renderBenefitHistoryItems(block));
 }
 
 function addNewBenefitMonth(){
@@ -2137,7 +2172,6 @@ function addNewBenefitMonth(){
   const items = copyFrom ? copyFrom.items.map(it=>({...it, _uid:uid()})) : [];
   const newBlockUid = uid();
   STATE.benefitBlocks.unshift({label: nextLabel, items, _blockUid: newBlockUid});
-  expandedBenefitBlocks = new Set([newBlockUid]);
   logActivity('🎁', `'${nextLabel}' 혜택 블록 생성`, copyFrom ? '이전 블록 항목 복사' : '', 'benefit');
   scheduleSave();
   renderBenefitTab();
@@ -2158,95 +2192,6 @@ function formatBenefitLabel(label){
   return label;
 }
 
-function renderBenefitBlocks(){
-  const holder = document.getElementById('benefitBlocks');
-  if(!STATE.benefitBlocks.length){
-    holder.innerHTML = `<div class="empty-state"><div class="big">🎁</div>혜택 블록이 없어요. 위 버튼으로 만들어보세요.</div>`;
-    return;
-  }
-  if(expandedBenefitBlocks.size===0) expandedBenefitBlocks.add(STATE.benefitBlocks[0]._blockUid);
-
-  holder.innerHTML = STATE.benefitBlocks.map((block, bIdx)=>{
-    const isOpen = expandedBenefitBlocks.has(block._blockUid);
-    return `
-    <div class="benefit-block" data-bidx="${bIdx}">
-      <div class="bb-head accordion-toggle" data-blockuid="${escapeHtml(block._blockUid)}">
-        <span class="bb-title">
-          <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
-          ${escapeHtml(formatBenefitLabel(block.label))} ${bIdx===0?'(현재)':''}
-          <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${block.items.length}건</span>
-        </span>
-        <div style="display:flex; gap:6px;" class="bb-head-actions">
-          <button class="ghost sm add-benefit-item-btn">➕ 항목 추가하기</button>
-          ${STATE.benefitBlocks.length>1?`<button class="ghost sm del-benefit-block-btn" title="블록 삭제">🗑️</button>`:''}
-        </div>
-      </div>
-      <div class="benefit-items ${isOpen?'':'hidden'}">
-        ${block.items.length ? block.items.map((it,iIdx)=>{
-          const expiryStyle = benefitExpiryStyle(it.expiryDate);
-          return `
-          <div class="benefit-row" data-iidx="${iIdx}" data-uid="${it._uid||''}">
-            <input type="text" class="bf-field" data-field="name" placeholder="혜택명" value="${escapeHtml(it.name)}"/>
-            <input type="text" class="bf-field" data-field="copy" placeholder="문구" value="${escapeHtml(it.copy)}"/>
-            <input type="text" class="bf-field" data-field="status" placeholder="작업현황" value="${escapeHtml(it.status)}"/>
-            <input type="date" class="bf-field" data-field="expiryDate" value="${escapeHtml(it.expiryDate||'')}" title="${expiryStyle.title}" style="${expiryStyle.style}"/>
-            <button class="ghost del-benefit-item-btn">🗑️</button>
-          </div>`;
-        }).join('') : `<div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div>`}
-      </div>
-    </div>
-  `;
-  }).join('');
-
-  holder.querySelectorAll('.accordion-toggle').forEach(headEl=>{
-    headEl.addEventListener('click', (e)=>{
-      if(e.target.closest('.bb-head-actions')) return;
-      const blockUid = headEl.dataset.blockuid;
-      if(expandedBenefitBlocks.has(blockUid)) expandedBenefitBlocks.delete(blockUid);
-      else expandedBenefitBlocks.add(blockUid);
-      renderBenefitBlocks();
-    });
-  });
-
-  holder.querySelectorAll('.benefit-block').forEach(blockEl=>{
-    const bIdx = +blockEl.dataset.bidx;
-    const block = STATE.benefitBlocks[bIdx];
-    blockEl.querySelector('.add-benefit-item-btn').addEventListener('click', ()=>{
-      block.items.push({_uid:uid(), name:'', copy:'', status:'', expiryDate:''});
-      expandedBenefitBlocks.add(block._blockUid);
-      scheduleSave(); renderBenefitBlocks();
-    });
-    const delBlockBtn = blockEl.querySelector('.del-benefit-block-btn');
-    if(delBlockBtn) delBlockBtn.addEventListener('click', ()=>{
-      showConfirmModal(`'${block.label}' 블록을 삭제할까요?`, ()=>{
-        expandedBenefitBlocks.delete(block._blockUid);
-        STATE.benefitBlocks.splice(bIdx,1); scheduleSave(); renderBenefitBlocks();
-        showUndoToast(`'${block.label}' 블록을 삭제했어요.`, ()=>{
-          STATE.benefitBlocks.splice(bIdx,0,block);
-          expandedBenefitBlocks.add(block._blockUid);
-          scheduleSave(); renderBenefitBlocks();
-        });
-      });
-    });
-    blockEl.querySelectorAll('.benefit-row').forEach(rowEl=>{
-      const iIdx = +rowEl.dataset.iidx;
-      rowEl.querySelectorAll('.bf-field').forEach(inp=>{
-        inp.addEventListener('input', ()=>{ block.items[iIdx][inp.dataset.field] = inp.value; scheduleSave(); });
-      });
-      rowEl.querySelector('.del-benefit-item-btn').addEventListener('click', ()=>{
-        showConfirmModal('이 혜택 항목을 삭제할까요?', ()=>{
-          const removed = block.items[iIdx];
-          block.items.splice(iIdx,1); scheduleSave(); renderBenefitBlocks();
-          showUndoToast(`'${removed.name||'혜택'}' 항목을 삭제했어요.`, ()=>{
-            block.items.splice(iIdx,0,removed);
-            scheduleSave(); renderBenefitBlocks();
-          });
-        });
-      });
-    });
-  });
-}
-
 function addNewBenefitBlock(){
   showPromptModal('새 블록 이름을 입력하세요 (예: 8월)', '', (label)=>{
     const copyFrom = STATE.benefitBlocks[0];
@@ -2254,7 +2199,6 @@ function addNewBenefitBlock(){
       const items = doCopy ? copyFrom.items.map(it=>({...it, _uid:uid()})) : [];
       const newBlockUid = uid();
       STATE.benefitBlocks.unshift({label, items, _blockUid: newBlockUid});
-      expandedBenefitBlocks = new Set([newBlockUid]);
       logActivity('🎁', `'${label}' 혜택 블록 생성`, doCopy ? '이전 블록 항목 복사' : '', 'benefit');
       scheduleSave(); renderBenefitTab();
     };
@@ -2271,7 +2215,7 @@ function addNewBenefitBlock(){
    ════════════════════════════════════════════════════════════ */
 document.getElementById('globalErrorClose').addEventListener('click', clearError);
 
-const ALL_TABS = ['home','events','banner','benefit','history'];
+const ALL_TABS = ['events','banner','pm','benefit'];
 
 function switchMainTab(tab){
   activeMainTab = tab;
@@ -2283,8 +2227,10 @@ document.getElementById('maintabs').addEventListener('click', (e)=>{
   const btn = e.target.closest('.maintab-btn');
   if(!btn) return;
   switchMainTab(btn.dataset.tab);
-  if(btn.dataset.tab==='home') renderHomeTab();
-  if(btn.dataset.tab==='history') renderHistoryTab();
+  if(btn.dataset.tab==='events') renderEventsTab();
+  if(btn.dataset.tab==='banner') renderBannerTab();
+  if(btn.dataset.tab==='pm') renderPmTab();
+  if(btn.dataset.tab==='benefit') renderBenefitTab();
 });
 
 function flashHighlight(el){
@@ -2296,436 +2242,14 @@ function flashHighlight(el){
   setTimeout(()=> el.classList.remove('flash-highlight'), 1700);
 }
 
-/* ════════════════════════════════════════════════════════════
-   렌더: 홈 대시보드
-   ════════════════════════════════════════════════════════════ */
-/* ════════════════════════════════════════════════════════════
-   이력 관리: 데이터 백업·복원 + GitHub 외부 저장 + 내보내기 이력
-   ════════════════════════════════════════════════════════════ */
-let GITHUB_CONFIG = { token:'', owner:'', repo:'', branch:'main', path:'alddot-history.json' };
-let activeExportFilter = '전체';
 
-async function loadGithubConfig(){
-  try{
-    if(hasClaudeStorage()){
-      const res = await window.storage.get('alddot_github_config');
-      if(res && res.value) GITHUB_CONFIG = JSON.parse(res.value);
-    }else{
-      const raw = localStorage.getItem('alddot_github_config');
-      if(raw) GITHUB_CONFIG = JSON.parse(raw);
-    }
-  }catch(err){ /* 저장된 설정 없음 또는 스토리지 미지원 */ }
-}
-async function saveGithubConfig(){
-  try{
-    if(hasClaudeStorage()) await window.storage.set('alddot_github_config', JSON.stringify(GITHUB_CONFIG), false);
-    else localStorage.setItem('alddot_github_config', JSON.stringify(GITHUB_CONFIG));
-  }catch(err){ /* 무시: 다음 세션엔 다시 연결 필요 */ }
-}
-function parseRepoInput(input){
-  const cleaned = input.trim().replace(/^https?:\/\//,'').replace(/^github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
-  const parts = cleaned.split('/').filter(Boolean);
-  if(parts.length<2) return null;
-  return { owner: parts[0], repo: parts[1] };
-}
-function buildBackupPayload(){
-  return JSON.stringify({
-    eventMonths: STATE.eventMonths, bannerMonths: STATE.bannerMonths,
-    benefitBlocks: STATE.benefitBlocks, eventRequests: STATE.eventRequests||[]
-  }, null, 2);
-}
 function safeRenderAll(){
   try{ renderEventsTab(); }catch(err){ console.error('renderEventsTab 오류:', err); }
   try{ renderBannerTab(); }catch(err){ console.error('renderBannerTab 오류:', err); }
+  try{ renderPmTab(); }catch(err){ console.error('renderPmTab 오류:', err); }
   try{ renderBenefitTab(); }catch(err){ console.error('renderBenefitTab 오류:', err); }
-  try{ renderHomeTab(); }catch(err){ console.error('renderHomeTab 오류:', err); }
 }
 
-function restoreFromPayload(json, onlyDomain){
-  const data = JSON.parse(json);
-  if(!data.eventMonths && !data.bannerMonths && !data.benefitBlocks) throw new Error('올바른 백업 데이터가 아니에요.');
-  if((!onlyDomain || onlyDomain==='이벤트') && data.eventMonths) STATE.eventMonths = data.eventMonths;
-  if((!onlyDomain || onlyDomain==='배너') && data.bannerMonths) STATE.bannerMonths = data.bannerMonths;
-  if((!onlyDomain || onlyDomain==='혜택관리') && data.benefitBlocks) STATE.benefitBlocks = data.benefitBlocks;
-  if(!onlyDomain && data.eventRequests) STATE.eventRequests = data.eventRequests;
-  ensureStateShape();
-  activeEventMonthKey = getDefaultActiveEventMonthKey();
-  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-  scheduleSave();
-  safeRenderAll();
-}
-
-function recordExportSnapshot(channel, label){
-  if(!STATE.exportHistory) STATE.exportHistory = [];
-  const at = new Date().toISOString();
-
-  let total=0, done=0, error=0, unconfirmed=0;
-  STATE.eventMonths.forEach(mo=> mo.events.forEach(ev=>{
-    total++;
-    if(ev.status==='완료') done++;
-    else if(ev.status==='비노출') error++;
-    else unconfirmed++;
-  }));
-  STATE.exportHistory.unshift({
-    id: uid(), at, type:'이벤트', channel, label: `${channel} · ${label}`,
-    counts: { total, done, error, unconfirmed, months: STATE.eventMonths.length },
-    snapshot: JSON.stringify({eventMonths: STATE.eventMonths}),
-  });
-
-  const bannerRankTotal = STATE.bannerMonths.reduce((s,mo)=>s+mo.ranks.length,0);
-  STATE.exportHistory.unshift({
-    id: uid(), at, type:'배너', channel, label: `${channel} · ${label}`,
-    counts: { months: STATE.bannerMonths.length, ranks: bannerRankTotal },
-    snapshot: JSON.stringify({bannerMonths: STATE.bannerMonths}),
-  });
-
-  const benefitItemTotal = STATE.benefitBlocks.reduce((s,b)=>s+b.items.length,0);
-  STATE.exportHistory.unshift({
-    id: uid(), at, type:'혜택관리', channel, label: `${channel} · ${label}`,
-    counts: { blocks: STATE.benefitBlocks.length, items: benefitItemTotal },
-    snapshot: JSON.stringify({benefitBlocks: STATE.benefitBlocks}),
-  });
-
-  if(STATE.exportHistory.length>90) STATE.exportHistory.length=90;
-  scheduleSave();
-}
-
-function renderHistoryTab(){
-  const container = document.getElementById('tab-history');
-  container.innerHTML = `
-    <div class="panel">
-      <h3>데이터 백업 · 복원</h3>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 20px;">
-        <button class="primary" id="historyDownloadBtn" style="height:44px; padding:0 22px;">⬇ 백업 파일 다운로드</button>
-        <button id="historyUploadBtn" style="height:44px; padding:0 22px;">📂 백업 파일 불러오기</button>
-        <input type="file" id="historyJsonFileInput" accept=".json" />
-      </div>
-
-      <details id="githubDetails">
-        <summary class="section-toggle">🔗 GitHub에 외부 저장 <span class="muted-inline">(팀과 공유되는 이력 저장소)</span></summary>
-        <div class="section-toggle-body">
-          <p class="sub" style="margin:0 0 14px;">아래 정보를 채우고 저장소에 연결하면 팀과 이력을 공유할 수 있어요. <b>주의:</b> 토큰은 이 브라우저에만 저장돼서, 팀원마다 각자 자신의 토큰으로 따로 연결해야 해요. 저장소가 비공개라면 팀원을 협업자로 초대해두어야 접속할 수 있어요 (초대 안 된 팀원은 404 오류가 떠요).</p>
-          <div class="gh-step">
-            <span class="gh-step-num">1</span>
-            <input type="password" id="ghTokenInput" placeholder="발급받은 토큰(ghp_...) 붙여넣기" value="${escapeHtml(GITHUB_CONFIG.token||'')}"/>
-            <button class="sm" id="ghTokenLinkBtn">🔑 토큰 발급 ↗</button>
-          </div>
-          <div class="gh-step">
-            <span class="gh-step-num">2</span>
-            <input type="text" id="ghRepoInput" placeholder="저장소 주소 붙여넣기 (예: github.com/my-org/alddot-history)" value="${escapeHtml(GITHUB_CONFIG.owner? `${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`:'')}"/>
-            <button class="sm" id="ghRepoLinkBtn">📁 저장소 만들기 ↗</button>
-          </div>
-          <div class="gh-step">
-            <span class="gh-step-num">3</span>
-            <button class="primary sm" id="ghConnectBtn">연결 테스트 후 저장</button>
-            <span id="ghStatusText" class="muted-inline"></span>
-          </div>
-
-          <details style="margin-top:14px;">
-            <summary class="section-toggle-sub">브랜치 · 파일 경로 직접 지정</summary>
-            <div class="section-toggle-body">
-              <div class="gh-adv-row">
-                <label>브랜치</label><input type="text" id="ghBranchInput" value="${escapeHtml(GITHUB_CONFIG.branch||'main')}" placeholder="main"/>
-              </div>
-              <div class="gh-adv-row">
-                <label>파일 경로</label><input type="text" id="ghPathInput" value="${escapeHtml(GITHUB_CONFIG.path||'alddot-history.json')}" placeholder="alddot-history.json"/>
-              </div>
-            </div>
-          </details>
-
-          <div id="githubActionsHolder" style="margin-top:14px;"></div>
-        </div>
-      </details>
-    </div>
-
-    <div class="panel" style="margin-top:18px;">
-      <h3>내보내기 이력</h3>
-      <p class="sub">엑셀 내보내기·GitHub 저장 시점의 데이터를 스냅샷으로 남겨서, 필요하면 그 시점으로 되돌릴 수 있어요.</p>
-      <div class="status-filter-row" id="exportFilterRow"></div>
-      <div id="exportHistoryList"></div>
-    </div>
-  `;
-
-  renderExportFilterRow();
-  renderExportHistoryList();
-  renderGithubActions();
-
-  document.getElementById('historyDownloadBtn').addEventListener('click', handleJsonExport);
-  document.getElementById('historyUploadBtn').addEventListener('click', ()=> document.getElementById('historyJsonFileInput').click());
-  document.getElementById('historyJsonFileInput').addEventListener('change', (e)=>{
-    const file = e.target.files[0];
-    if(file) handleJsonImportFile(file, document.getElementById('historyUploadBtn'));
-    e.target.value = '';
-  });
-  document.getElementById('ghTokenLinkBtn').addEventListener('click', ()=> window.open('https://github.com/settings/tokens/new?scopes=repo&description=alddot-history', '_blank'));
-  document.getElementById('ghRepoLinkBtn').addEventListener('click', ()=> window.open('https://github.com/new', '_blank'));
-  document.getElementById('ghConnectBtn').addEventListener('click', testAndSaveGithubConnection);
-}
-
-function renderExportFilterRow(){
-  const holder = document.getElementById('exportFilterRow');
-  const log = STATE.exportHistory || [];
-  const filters = ['전체','이벤트','배너','혜택관리'];
-  holder.innerHTML = filters.map(f=>{
-    const count = f==='전체' ? log.length : log.filter(e=>e.type===f).length;
-    return `<span class="chip ${activeExportFilter===f?'active':''}" data-filter="${f}">${f} (${count})</span>`;
-  }).join('');
-  holder.querySelectorAll('.chip').forEach(chip=>{
-    chip.addEventListener('click', ()=>{ activeExportFilter = chip.dataset.filter; renderExportFilterRow(); renderExportHistoryList(); });
-  });
-}
-
-function renderExportHistoryList(){
-  const holder = document.getElementById('exportHistoryList');
-  const log = (STATE.exportHistory||[]).filter(e=> activeExportFilter==='전체' || e.type===activeExportFilter);
-  if(!log.length){
-    holder.innerHTML = `<div class="empty-state"><div class="big">📦</div>아직 내보내기 이력이 없어요. "엑셀로 내보내기"를 하거나 GitHub에 저장하면 여기 쌓여요.</div>`;
-    return;
-  }
-  const badgeClass = {'이벤트':'event','배너':'banner','혜택관리':'benefit'};
-  holder.innerHTML = log.map(entry=>{
-    const dt = new Date(entry.at);
-    const dateLabel = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-    const c = entry.counts||{};
-    let metaText = '', doneRate = null;
-    if(entry.type==='이벤트'){
-      metaText = `${c.months||0}개월 · ${c.total||0}건 · 완료 ${c.done||0}${c.error?`, 비노출 ${c.error}`:''}${c.unconfirmed?`, 확인전 ${c.unconfirmed}`:''}`;
-      doneRate = c.total ? Math.round((c.done/c.total)*100) : 0;
-    }else if(entry.type==='배너'){
-      metaText = `${c.months||0}개월 · 순위 ${c.ranks||0}건`;
-    }else{
-      metaText = `${c.blocks||0}개 블록 · 혜택 ${c.items||0}건`;
-    }
-    return `<div class="export-item" data-id="${entry.id}">
-      <div class="ehi-top">
-        <span class="tag-badge ${badgeClass[entry.type]||''}">${entry.type}</span>
-        <span class="ehi-name">${escapeHtml(entry.label)}</span>
-        <div class="ehi-actions">
-          <button class="sm ehi-restore-btn">불러오기</button>
-          <button class="sm ehi-delete-btn">삭제</button>
-        </div>
-      </div>
-      <div class="ehi-meta">${dateLabel} · ${metaText}</div>
-      ${doneRate!==null ? `<div class="ehi-bar"><div class="ehi-bar-fill" style="width:${doneRate}%;"></div></div>` : ''}
-    </div>`;
-  }).join('');
-
-  holder.querySelectorAll('.export-item').forEach(el=>{
-    const entry = (STATE.exportHistory||[]).find(e=>e.id===el.dataset.id);
-    if(!entry) return;
-    el.querySelector('.ehi-restore-btn').addEventListener('click', ()=>{
-      showConfirmModal(`'${entry.label}' 시점(${new Date(entry.at).toLocaleString('ko-KR')})의 '${entry.type}' 데이터로 되돌릴까요?\n지금의 ${entry.type} 데이터는 이 백업 내용으로 덮어써져요.`, ()=>{
-        try{
-          restoreFromPayload(entry.snapshot, entry.type);
-          showToast(`'${entry.type}' 데이터를 그 시점으로 되돌렸어요.`);
-        }catch(err){ showError('복원 중 문제가 발생했어요: ' + err.message); }
-      });
-    });
-    el.querySelector('.ehi-delete-btn').addEventListener('click', ()=>{
-      showConfirmModal(`'${entry.label}' 이력을 삭제할까요? (실제 데이터는 그대로예요)`, ()=>{
-        STATE.exportHistory = STATE.exportHistory.filter(e=>e.id!==entry.id);
-        scheduleSave(); renderExportFilterRow(); renderExportHistoryList();
-      });
-    });
-  });
-}
-
-function renderGithubActions(){
-  const holder = document.getElementById('githubActionsHolder');
-  if(!GITHUB_CONFIG.owner || !GITHUB_CONFIG.repo){ holder.innerHTML=''; return; }
-  holder.innerHTML = `
-    <div class="callout ok" style="margin-bottom:10px;">✅ <b>${escapeHtml(GITHUB_CONFIG.owner)}/${escapeHtml(GITHUB_CONFIG.repo)}</b> (${escapeHtml(GITHUB_CONFIG.branch)}) 에 연결돼 있어요. 입력하시면 잠시 후 자동으로 GitHub에도 동기화돼요.</div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="primary sm" id="ghPushBtn">☁️ 지금 GitHub에 저장</button>
-      <button class="sm" id="ghPullBtn">⬇ GitHub에서 불러오기</button>
-    </div>
-  `;
-  document.getElementById('ghPushBtn').addEventListener('click', pushToGithub);
-  document.getElementById('ghPullBtn').addEventListener('click', pullFromGithub);
-}
-
-async function testAndSaveGithubConnection(){
-  const token = document.getElementById('ghTokenInput').value.trim();
-  const repoInput = document.getElementById('ghRepoInput').value.trim();
-  const branch = document.getElementById('ghBranchInput').value.trim() || 'main';
-  const path = document.getElementById('ghPathInput').value.trim() || 'alddot-history.json';
-  const statusEl = document.getElementById('ghStatusText');
-  const btn = document.getElementById('ghConnectBtn');
-
-  if(!token || !repoInput){ showError('토큰과 저장소 주소를 모두 입력해주세요.'); return; }
-  const parsed = parseRepoInput(repoInput);
-  if(!parsed){ showError("저장소 주소 형식을 확인해주세요. 예: github.com/my-org/alddot-history"); return; }
-
-  clearError();
-  setBtnLoading(btn, '연결 확인 중...');
-  statusEl.textContent = '';
-  try{
-    const res = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`, {
-      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
-    });
-    if(!res.ok){
-      if(res.status===404) showError('저장소를 찾을 수 없어요. 주소를 확인하거나, 토큰에 이 저장소 권한이 있는지 확인해주세요.');
-      else if(res.status===401) showError('토큰이 올바르지 않아요. 다시 발급받아 붙여넣어주세요.');
-      else showError(`연결에 실패했어요 (상태 코드 ${res.status}).`);
-      resetBtn(btn); return;
-    }
-    GITHUB_CONFIG = { token, owner: parsed.owner, repo: parsed.repo, branch, path };
-    await saveGithubConfig();
-    statusEl.textContent = '✅ 연결됨';
-    showToast('GitHub 저장소에 연결했어요.');
-    renderGithubActions();
-  }catch(err){
-    showError('연결 중 문제가 발생했어요: ' + err.message + ' (네트워크 또는 CORS 문제일 수 있어요)');
-  }
-  resetBtn(btn);
-}
-
-async function pushBackupToGithub(commitMessage){
-  const { owner, repo, branch, path, token } = GITHUB_CONFIG;
-  let sha = null;
-  const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${branch}`, {
-    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
-  });
-  if(getRes.ok){ const getData = await getRes.json(); sha = getData.sha; }
-
-  const payload = buildBackupPayload();
-  const content = btoa(unescape(encodeURIComponent(payload)));
-  const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`, {
-    method: 'PUT',
-    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' },
-    body: JSON.stringify({ message: commitMessage, content, branch, ...(sha?{sha}:{}) })
-  });
-  if(!putRes.ok){ const err = await putRes.json().catch(()=>({})); throw new Error(err.message || `상태 코드 ${putRes.status}`); }
-}
-
-async function pushToGithub(){
-  const btn = document.getElementById('ghPushBtn');
-  clearError();
-  setBtnLoading(btn, '저장하는 중...');
-  try{
-    await pushBackupToGithub(`알닷 관리대장 백업 (${new Date().toLocaleString('ko-KR')})`);
-    const { owner, repo, path } = GITHUB_CONFIG;
-    recordExportSnapshot('GitHub', `${owner}/${repo} · ${path}`);
-    renderExportFilterRow(); renderExportHistoryList();
-    showToast('GitHub 저장소에 저장했어요.');
-  }catch(err){
-    showError('GitHub 저장 중 문제가 발생했어요: ' + err.message);
-  }
-  resetBtn(btn);
-}
-
-/* ════════════════════════════════════════════════════════════
-   GitHub 자동 동기화 (입력 후 잠시 뒤 조용히 백그라운드에서 동기화)
-   ════════════════════════════════════════════════════════════ */
-let githubAutoSaveTimer = null;
-let githubAutoSaving = false;
-function scheduleGithubAutoSave(){
-  if(!GITHUB_CONFIG.owner || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) return;
-  clearTimeout(githubAutoSaveTimer);
-  githubAutoSaveTimer = setTimeout(autoPushToGithub, 8000);
-}
-async function autoPushToGithub(){
-  if(githubAutoSaving || !GITHUB_CONFIG.owner || !GITHUB_CONFIG.repo) return;
-  githubAutoSaving = true;
-  try{
-    await pushBackupToGithub(`자동 동기화 (${new Date().toLocaleString('ko-KR')})`);
-    renderSavebar('자동 저장됨 · GitHub 동기화 완료', false);
-  }catch(err){
-    // 네트워크 문제 등은 조용히 넘어가고 다음 입력 때 다시 시도한다 (매번 에러 토스트가 뜨면 방해가 될 수 있어서)
-  }
-  githubAutoSaving = false;
-}
-
-async function pullFromGithub(){
-  const btn = document.getElementById('ghPullBtn');
-  clearError();
-  setBtnLoading(btn, '불러오는 중...');
-  try{
-    const { owner, repo, branch, path, token } = GITHUB_CONFIG;
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${branch}`, {
-      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
-    });
-    if(!res.ok){ throw new Error(res.status===404 ? '파일을 찾을 수 없어요. 아직 저장된 백업이 없거나, 이 토큰에 저장소 접근 권한이 없을 수 있어요.' : `상태 코드 ${res.status}`); }
-    const data = await res.json();
-    const json = decodeURIComponent(escape(atob(data.content.replace(/\s/g,''))));
-    resetBtn(btn);
-    showConfirmModal('GitHub에 저장된 내용으로 지금 데이터를 덮어쓸까요?', ()=>{
-      try{
-        restoreFromPayload(json);
-        showToast('GitHub에서 불러왔어요.');
-      }catch(err){ showError('불러오기 중 문제가 발생했어요: ' + err.message); }
-    });
-  }catch(err){
-    showError('GitHub에서 불러오는 중 문제가 발생했어요: ' + err.message);
-    resetBtn(btn);
-  }
-}
-
-function renderHomeTab(){
-  const container = document.getElementById('tab-home');
-  const evMonth = getEventMonth(activeEventMonthKey) || STATE.eventMonths[STATE.eventMonths.length-1];
-  let done=0, prog=0, wait=0, ext=0;
-  evMonth.events.forEach(ev=>{
-    if(ev.status==='완료') done++; else if(ev.status==='진행') prog++;
-    else if(ev.status==='대기') wait++; else if(ev.status==='연장') ext++;
-  });
-
-  const {overdue, dueSoon} = scanDeadlines(evMonth.events);
-
-  const bannerMonth = getBannerMonth(activeBannerMonthKey) || STATE.bannerMonths[STATE.bannerMonths.length-1];
-  const benefitBlock = STATE.benefitBlocks[0];
-  const expiringBenefits = benefitBlock ? benefitBlock.items.filter(it=>{
-    const s = benefitExpiryStyle(it.expiryDate);
-    return s.style; // 임박/경과 시에만 style이 채워짐
-  }) : [];
-
-  let highlight = '';
-  if(overdue.length){
-    highlight += `<div class="home-highlight" id="homeHighlightDeadline" style="background:var(--critical-soft); border-color:var(--fatal-border); color:var(--fatal-text);">
-      <span>⏰</span><span>마감이 지연된 이벤트가 <b>${overdue.length}건</b> 있어요 — 눌러서 확인하세요.</span>
-    </div>`;
-  }
-  if(expiringBenefits.length){
-    highlight += `<div class="home-highlight" id="homeHighlightBenefit" style="background:var(--minor-soft); border-color:var(--minor-border); color:var(--minor-text);">
-      <span>🏷️</span><span>곧 종료되거나 이미 지난 혜택이 <b>${expiringBenefits.length}건</b> 있어요 — 눌러서 확인하세요.</span>
-    </div>`;
-  }
-
-  container.innerHTML = `
-    <div class="panel">
-      <h3>홈</h3>
-      <p class="sub">전체 운영 현황을 한눈에 보고, 카드를 눌러 바로 이동하세요.</p>
-      ${highlight}
-      <div class="home-grid">
-        <div class="home-card" id="homeCardEvents">
-          <div class="hc-label">이벤트 관리 · ${escapeHtml(evMonth.label)}</div>
-          <div class="hc-value">${evMonth.events.length}건</div>
-          <div class="hc-sub"><span>완료 ${done}</span><span>진행 ${prog}</span><span>대기 ${wait}</span><span>연장 ${ext}</span>${overdue.length?`<span style="color:var(--fatal-text);">지연 ${overdue.length}</span>`:''}${dueSoon.length?`<span style="color:var(--minor-text);">임박 ${dueSoon.length}</span>`:''}</div>
-        </div>
-        <div class="home-card" id="homeCardBanner">
-          <div class="hc-label">배너 구좌 · ${bannerMonth?escapeHtml(bannerMonth.label):'-'}</div>
-          <div class="hc-value">${bannerMonth?bannerMonth.ranks.length:0}개 구좌</div>
-          <div class="hc-sub"><span>${bannerMonth?bannerMonth.columns.length:0}개 컬럼 운영 중</span></div>
-        </div>
-        <div class="home-card" id="homeCardBenefit">
-          <div class="hc-label">혜택 관리 · ${benefitBlock?escapeHtml(benefitBlock.label):'-'}</div>
-          <div class="hc-value">${benefitBlock?benefitBlock.items.length:0}건</div>
-          <div class="hc-sub"><span>최신 블록 기준</span></div>
-        </div>
-      </div>
-      <div class="home-section-title">💡 이렇게 써보세요</div>
-      <p class="sub" style="margin:0;">이벤트 관리·혜택 관리 탭 안의 검색창으로 지난 이벤트나 혜택을 빠르게 찾을 수 있어요. 엑셀 불러오기/내보내기도 각 탭에서 바로 할 수 있어요.</p>
-    </div>
-  `;
-
-  const hlD = document.getElementById('homeHighlightDeadline');
-  if(hlD) hlD.addEventListener('click', ()=>{ switchMainTab('events'); });
-  const hlB = document.getElementById('homeHighlightBenefit');
-  if(hlB) hlB.addEventListener('click', ()=>{ switchMainTab('benefit'); });
-  const hcEvents = document.getElementById('homeCardEvents'); if(hcEvents) hcEvents.addEventListener('click', ()=> switchMainTab('events'));
-  const hcBanner = document.getElementById('homeCardBanner'); if(hcBanner) hcBanner.addEventListener('click', ()=> switchMainTab('banner'));
-  const hcBenefit = document.getElementById('homeCardBenefit'); if(hcBenefit) hcBenefit.addEventListener('click', ()=> switchMainTab('benefit'));
-}
 
 /* ════════════════════════════════════════════════════════════
    기존 엑셀 불러오기
@@ -2964,15 +2488,22 @@ function buildBannerManagementWorkbook(parsed){
 
 let lastParsedRawPlan = null;
 
-function openConvertModal(parsed){
+let convertMode = 'banner';
+function openConvertModal(parsed, mode){
+  convertMode = mode || 'banner';
   lastParsedRawPlan = parsed;
+  const summary = convertMode==='banner'
+    ? `구좌 ${parsed.criteria.length}개 · 순위 ${parsed.ranks.length}행 · 파트너 ${parsed.partners.length}명`
+    : `프리마케팅 제공순위 ${(parsed.preMarketingPartners||[]).length}명`;
   document.getElementById('convertModalBody').innerHTML = `
     <p class="sub" style="margin:0 0 10px;">
-      <b>${escapeHtml(parsed.monthLabel)}</b> 운영계획을 읽었어요. 구좌 ${parsed.criteria.length}개 · 순위 ${parsed.ranks.length}행 · 파트너 ${parsed.partners.length}명 · 프리마케팅 제공순위 ${(parsed.preMarketingPartners||[]).length}명을 자동으로 정리했어요.
+      <b>${escapeHtml(parsed.monthLabel)}</b> 운영계획을 읽었어요. ${summary}을(를) 자동으로 정리했어요.
     </p>
     <div class="callout">🤖 자동 변환된 초안입니다. 검수가 필요해요.<br/>• 원본에 없던 신규 파트너명은 자동으로 채워지지 않으니 직접 추가해주세요.<br/>• '제공 구좌'는 일단 전체 구성(메인팝업 포함)으로 채워뒀어요 — 보통 하위권 파트너는 메인팝업이 빠지는 경우가 많으니, 하위권부터 확인하며 조정해주세요.</div>
   `;
   document.getElementById('convertModalOverlay').classList.remove('hidden');
+  const applyBtn = document.getElementById('convertModalApplyBtn');
+  if(applyBtn) applyBtn.textContent = convertMode==='banner' ? '📥 배너 구좌 관리에 반영하기' : '📥 프리마케팅 관리에 반영하기';
 }
 function closeConvertModal(){ document.getElementById('convertModalOverlay').classList.add('hidden'); }
 
@@ -2997,34 +2528,43 @@ document.getElementById('convertModalApplyBtn').addEventListener('click', ()=>{
   const mm = p.monthLabel.match(/(\d+)월/)[1];
   const key = `${yy}-${String(mm).padStart(2,'0')}`;
   const label = `${yy.slice(2)}년 ${mm}월`;
-  const columns = p.slotCols.map(s=>s.key);
-  const ranks = p.ranks.map(r=>({ _uid:uid(), values: {...r} }));
-  const partners = p.partners.map(pt=>({ name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
-  const preMarketingPartners = (p.preMarketingPartners||[]).map(pt=>({ _uid: uid(), name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
-  const weekAnchor = defaultWeekAnchor(`${yy}-${String(mm).padStart(2,'0')}`); // 기본 기준일: 해당 월 첫 목요일 오전 10시 (실제 시작일은 다를 수 있어 직접 조정 가능)
 
   const doApply = ()=>{
-    STATE.bannerMonths.push({ key, label, columns, ranks, partners, preMarketingPartners, cycleWeeks: 4, weekAnchor, changeLog: [] });
-    STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
+    let mo = STATE.bannerMonths.find(m=>m.key===key);
+    if(!mo){
+      mo = { key, label, columns: [], ranks: [], partners: [], preMarketingPartners: [], cycleWeeks: 4, weekAnchor: defaultWeekAnchor(key), changeLog: [], hiddenColumns: [] };
+      STATE.bannerMonths.push(mo);
+      STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
+    }
     activeBannerMonthKey = key;
-    logActivity('🔄', `'${label}' 배너 구좌 원본파일 자동 변환 반영`, `구좌 ${ranks.length}개 · 파트너 ${partners.length}명 · 프리마케팅 ${preMarketingPartners.length}명`, 'banner', key);
-    scheduleSave();
-    renderBannerTab();
-    closeConvertModal();
-    showToast(`'${label}' 배너 구좌 관리에 반영했어요. 자동 변환된 내용이니 신규 파트너명은 직접 확인해주세요.`);
+    if(convertMode==='banner'){
+      mo.columns = p.slotCols.map(s=>s.key);
+      mo.ranks = p.ranks.map(r=>({ _uid:uid(), values: {...r} }));
+      mo.partners = p.partners.map(pt=>({ name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
+      logActivity('🔄', `'${label}' 배너 구좌 원본파일 자동 변환 반영`, `구좌 ${mo.ranks.length}개 · 파트너 ${mo.partners.length}명`, 'banner', key);
+      scheduleSave(); renderBannerTab(); closeConvertModal();
+      showToast(`'${label}' 배너 구좌에 반영했어요. 자동 변환된 내용이니 신규 파트너명은 직접 확인해주세요.`);
+    }else{
+      mo.preMarketingPartners = (p.preMarketingPartners||[]).map(pt=>({ _uid: uid(), name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
+      logActivity('🔄', `'${label}' 프리마케팅 원본파일 자동 변환 반영`, `프리마케팅 ${mo.preMarketingPartners.length}명`, 'banner', key);
+      scheduleSave(); renderPmTab(); closeConvertModal();
+      showToast(`'${label}' 프리마케팅 관리에 반영했어요. 자동 변환된 내용이니 신규 파트너명은 직접 확인해주세요.`);
+    }
   };
 
-  if(STATE.bannerMonths.some(m=>m.key===key)){
-    showConfirmModal(`'${label}' 배너 구좌 데이터가 이미 있어요. 덮어쓸까요?`, ()=>{
-      STATE.bannerMonths = STATE.bannerMonths.filter(m=>m.key!==key);
-      doApply();
-    }, ()=> closeConvertModal());
+  const existing = STATE.bannerMonths.find(m=>m.key===key);
+  const hasConflict = existing && (convertMode==='banner' ? existing.ranks.length>0 : (existing.preMarketingPartners||[]).length>0);
+  if(hasConflict){
+    const overwriteMsg = convertMode==='banner'
+      ? `'${label}' 배너 구좌 데이터가 이미 있어요. 순위표를 덮어쓸까요?`
+      : `'${label}' 프리마케팅 데이터가 이미 있어요. 덮어쓸까요?`;
+    showConfirmModal(overwriteMsg, doApply, ()=> closeConvertModal());
   }else{
     doApply();
   }
 });
 
-function handleRawFileImport(file, btn){
+function handleRawFileImport(file, btn, mode){
   clearError();
   setBtnLoading(btn, '변환하는 중...');
   const reader = new FileReader();
@@ -3039,7 +2579,7 @@ function handleRawFileImport(file, btn){
         if(!parsed.criteria.length && !parsed.ranks.length){
           showError('구좌 정보를 찾지 못했어요. 시트 구조가 예상과 달라요.');
         }else{
-          openConvertModal(parsed);
+          openConvertModal(parsed, mode);
         }
       }
     }catch(err){
@@ -3293,8 +2833,8 @@ function handleXlsxExport(btn){
       const wb = XLSX.utils.book_new();
       const customCols = STATE.customEventColumns||[];
       STATE.eventMonths.forEach(mo=>{
-        const rows = [ ["우선순위","작업상태","이벤트명","작업유형","구분","반영예정일","반영상태","소스수급","검수용URL","URL유형","운영URL","이벤트ID","특이사항", ...customCols.map(c=>c.label)] ];
-        mo.events.forEach(ev=> rows.push([ev.priority,ev.status,ev.name,ev.workType,ev.category,ev.dueDate,ev.reflectStatus,ev.source,ev.reviewUrl,ev.urlType,ev.opUrl,ev.id,ev.note, ...customCols.map(c=>ev[c.key]||'')]));
+        const rows = [ ["우선순위","작업상태","이벤트명","작업유형","구분","시작","종료","이벤트ID", ...customCols.map(c=>c.label)] ];
+        mo.events.forEach(ev=> rows.push([ev.priority,ev.status,ev.name,ev.workType,ev.category,ev.dueDate,ev.reflectStatus,ev.id, ...customCols.map(c=>ev[c.key]||'')]));
         const ws = XLSX.utils.aoa_to_sheet(rows);
         XLSX.utils.book_append_sheet(wb, ws, (mo.label + " 이벤트 관리").slice(0,31));
       });
@@ -3320,7 +2860,6 @@ function handleXlsxExport(btn){
       }
       const exportFilename = "알닷_이벤트_운영_" + new Date().toISOString().slice(0,10) + ".xlsx";
       XLSX.writeFile(wb, exportFilename);
-      recordExportSnapshot('엑셀', exportFilename);
       showToast('엑셀 파일로 내보냈어요.');
     }catch(err){
       showError('엑셀로 내보내는 중 문제가 발생했어요: ' + err.message);
@@ -3332,16 +2871,57 @@ function handleXlsxExport(btn){
 /* ════════════════════════════════════════════════════════════
    엑셀 불러오기 / 내보내기 (상단 고정 버튼)
    ════════════════════════════════════════════════════════════ */
-bindXlsxButtons('importXlsxBtn','exportXlsxBtn','xlsxFileInput');
+document.getElementById('exportDataBtn').addEventListener('click', handleJsonExport);
+document.getElementById('importDataBtn').addEventListener('click', ()=> document.getElementById('dataJsonFileInput').click());
+document.getElementById('dataJsonFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(file) handleJsonImportFile(file, document.getElementById('importDataBtn'));
+  e.target.value = '';
+});
+
+document.getElementById('githubSetupBtn').addEventListener('click', ()=>{
+  document.getElementById('ghWorkerUrlInput').value = GITHUB_CONFIG.workerUrl||'';
+  document.getElementById('ghSyncKeyInput').value = GITHUB_CONFIG.syncKey||'';
+  document.getElementById('ghStatusText').textContent = '';
+  renderGithubActions();
+  document.getElementById('githubModalOverlay').classList.remove('hidden');
+});
+document.getElementById('githubModalCloseBtn').addEventListener('click', ()=> document.getElementById('githubModalOverlay').classList.add('hidden'));
+document.getElementById('githubModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='githubModalOverlay') document.getElementById('githubModalOverlay').classList.add('hidden'); });
+document.getElementById('ghConnectBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('ghConnectBtn');
+  const workerUrl = document.getElementById('ghWorkerUrlInput').value.trim();
+  const syncKey = document.getElementById('ghSyncKeyInput').value.trim();
+  const statusEl = document.getElementById('ghStatusText');
+  if(!workerUrl){ statusEl.textContent = '프록시 서버 주소를 입력해주세요.'; return; }
+  setBtnLoading(btn, '확인하는 중...');
+  const prevConfig = {...GITHUB_CONFIG};
+  GITHUB_CONFIG = { workerUrl, syncKey };
+  try{
+    const res = await fetch(`${workerUrl.replace(/\/$/,'')}/ping`, { headers: workerHeaders() });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error || `상태 코드 ${res.status}`);
+    }
+    await saveGithubConfig();
+    statusEl.textContent = '✅ 연결됐어요.';
+    renderGithubActions();
+  }catch(err){
+    GITHUB_CONFIG = prevConfig;
+    statusEl.textContent = '연결 실패: ' + err.message;
+  }
+  resetBtn(btn);
+});
 
 /* ════════════════════════════════════════════════════════════
    JSON 백업 내보내기 / 불러오기
    ════════════════════════════════════════════════════════════ */
 function handleJsonExport(){
+  const filename = "알닷_운영데이터_백업_" + new Date().toISOString().slice(0,10) + ".json";
   const blob = new Blob([JSON.stringify(STATE, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = "알닷_운영데이터_백업_" + new Date().toISOString().slice(0,10) + ".json";
+  a.href = url; a.download = filename;
   a.click(); URL.revokeObjectURL(url);
   showToast('백업 파일로 저장했어요.');
 }
@@ -3372,13 +2952,13 @@ function handleJsonImportFile(file, btn){
 (async function init(){
   await loadState();
   await loadGithubConfig();
-  if(!STORAGE_OK) renderSavebar('자동 저장 불가 — 이력 관리 탭에서 주기적으로 "백업 파일 다운로드"를 눌러 내려받아 두세요', true);
+  if(!STORAGE_OK) renderSavebar('자동 저장 불가 — 상단의 "내보내기"를 주기적으로 눌러 내려받아 두세요', true);
   activeEventMonthKey = getDefaultActiveEventMonthKey();
   activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   renderEventsTab();
   renderBannerTab();
+  renderPmTab();
   renderBenefitTab();
-  renderHomeTab();
 })();
 </script>
 </body>
