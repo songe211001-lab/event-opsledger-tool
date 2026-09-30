@@ -118,7 +118,6 @@
 
   .maintabs-row{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:14px;}
   .maintabs{display:flex; gap:6px;}
-  .maintabs-actions{display:flex; gap:8px; padding-bottom:8px; flex-wrap:wrap;}
   .maintab-btn{background:transparent; color:var(--muted); font-weight:600; padding:10px 16px; border:none; border-bottom:2.5px solid transparent; border-radius:7px 7px 0 0;}
   .maintab-btn.active{color:var(--primary-dark); border-bottom-color:var(--primary);}
 
@@ -216,12 +215,6 @@
   .benefit-block .bb-title{font-weight:700; font-size:13px;}
   .event-history-body{padding:12px 14px;}
   .accordion-chevron{display:inline-block; width:12px; color:var(--muted);}
-
-  .banner-columns-editor{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
-
-  .col-chip{font-size:11.5px; font-weight:600; background:var(--primary-soft); color:var(--primary-dark); padding:5px 10px; border-radius:6px; display:flex; align-items:center; gap:5px;}
-  .col-chip .del{cursor:pointer; opacity:.6;}
-  .col-chip .del:hover{opacity:1; color:var(--fatal);}
 
   .modal-overlay{position:fixed; inset:0; background:rgba(43,37,35,.4); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; overflow-y:auto;}
   #confirmModalOverlay, #promptModalOverlay{z-index:60;}
@@ -340,6 +333,7 @@
   @media (max-width:720px){
     .topbar{align-items:flex-start;}
     .statusboard{flex-direction:column;}
+    .panel-head-actions{flex-shrink:1;}
     .sb-item{border-right:none; border-bottom:1px solid var(--line); padding:8px 4px;}
     .sb-item:last-child{border-bottom:none;}
     .sync-log-row{grid-template-columns:60px 1fr; row-gap:4px;}
@@ -397,7 +391,6 @@
       <button class="maintab-btn" data-tab="pm">프리마케팅 관리</button>
       <button class="maintab-btn" data-tab="benefit">혜택 관리</button>
     </div>
-    <div class="maintabs-actions" id="maintabsActions"></div>
   </div>
 
   <div id="tab-events"></div>
@@ -1759,7 +1752,13 @@ function renderEventsTab(){
   container.innerHTML = `
     <div id="statusboardHolder" class="statusboard"></div>
     <div class="panel">
-      <h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3>
+      <div class="panel-head-row">
+        <div><h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3></div>
+        <div class="panel-head-actions">
+          <button id="addEventRowBtn">+ 행 추가하기</button>
+          <button class="primary" id="addEventMonthBtn">새 달 만들기</button>
+        </div>
+      </div>
       <div id="deadlineBoxHolder"></div>
       <div class="status-filter-row" id="eventStatusFilterRow"></div>
       <div id="bulkBarHolder"></div>
@@ -1775,10 +1774,6 @@ function renderEventsTab(){
       <h3>이력 (${otherMonths.length}건)</h3>
       <div id="eventHistoryAccordion"></div>
     </div>
-  `;
-  document.getElementById('maintabsActions').innerHTML = `
-    <button class="sm" id="addEventRowBtn">+ 행 추가하기</button>
-    <button class="primary sm" id="addEventMonthBtn">새 달 만들기</button>
   `;
   renderEventsTableHeader();
   renderStatusboard();
@@ -2223,11 +2218,12 @@ function renderBannerTab(){
       <div class="panel-head-row">
         <div><h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3></div>
         <div class="panel-head-actions">
+          <button id="addBannerRowBtn">+ 행 추가하기</button>
+          <button class="primary" id="addBannerMonthBtn">새 달 만들기</button>
           <button id="convertRawBtn">🔄 사업팀 원본파일 변환하기</button>
           <input type="file" id="rawFileInput" accept=".xlsx,.xlsm" />
         </div>
       </div>
-      <div class="banner-columns-editor" id="bannerColsEditor"></div>
       <div class="tblwrap">
         <table class="edittable" id="bannerTable"></table>
       </div>
@@ -2238,11 +2234,6 @@ function renderBannerTab(){
       <div id="bannerHistoryAccordion"></div>
     </div>
   `;
-  document.getElementById('maintabsActions').innerHTML = `
-    <button class="sm" id="addBannerRowBtn">+ 행 추가하기</button>
-    <button class="primary sm" id="addBannerMonthBtn">새 달 만들기</button>
-  `;
-  renderBannerColsEditor();
   renderBannerRows();
   renderBannerHistoryAccordion(otherMonths);
 
@@ -2444,22 +2435,6 @@ function renderBannerTable(table, key, mode){
 function renderBannerHistoryTable(key){ renderBannerTable(document.getElementById('bHistTable_'+key), key, 'history'); }
 function renderBannerRows(){ renderBannerTable(document.getElementById('bannerTable'), activeBannerMonthKey, 'current'); }
 
-function renderBannerColsEditor(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  const holder = document.getElementById('bannerColsEditor');
-  holder.innerHTML = mo.columns.map(col=>`<span class="col-chip">${escapeHtml(col)}<span class="del" data-col="${escapeHtml(col)}">🗑️</span></span>`).join('');
-  holder.querySelectorAll('.del[data-col]').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      const col = el.dataset.col;
-      showConfirmModal(`'${col}' 구좌를 삭제할까요? (해당 컬럼 데이터도 함께 사라져요)`, ()=>{
-        mo.columns = mo.columns.filter(c=>c!==col);
-        mo.ranks.forEach(r=>delete r.values[col]);
-        syncChanges(); renderBannerTab();
-      });
-    });
-  });
-}
-
 function addNewBannerMonth(){
   const last = STATE.bannerMonths[STATE.bannerMonths.length-1];
   const {key, label} = nextMonthOf(last.key);
@@ -2629,8 +2604,8 @@ function renderPmTab(){
           <input type="file" id="pmRawFileInput" accept=".xlsx,.xlsm" />
         </div>
       </div>
-      <div id="pmStatusGridHolder_${currentMo.key}"></div>
       <div id="pmWeekPreviewHolder_${currentMo.key}"></div>
+      <div id="pmStatusGridHolder_${currentMo.key}"></div>
     </div>
 
     <div class="panel" style="margin-top:18px;">
@@ -2638,7 +2613,6 @@ function renderPmTab(){
       <div id="pmHistoryAccordion"></div>
     </div>
   `;
-  document.getElementById('maintabsActions').innerHTML = '';
   renderPmStatusGrid(currentMo.key);
   renderPmWeekPreview(currentMo.key);
   renderPmHistoryAccordion(otherMonths);
@@ -2676,8 +2650,8 @@ function renderPmHistoryAccordion(otherMonths){
         ${setCurrentBtnHtml(mo.key)}
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
-        <div id="pmStatusGridHolder_${mo.key}"></div>
         <div id="pmWeekPreviewHolder_${mo.key}"></div>
+        <div id="pmStatusGridHolder_${mo.key}"></div>
       </div>
     </div>`;
   }).join('');
@@ -2727,7 +2701,13 @@ function renderBenefitTab(){
 
   container.innerHTML = `
     <div class="panel">
-      <h3>현재 현황${current?` · ${escapeHtml(formatBenefitLabel(current.label))}`:''}</h3>
+      <div class="panel-head-row">
+        <div><h3>현재 현황${current?` · ${escapeHtml(formatBenefitLabel(current.label))}`:''}</h3></div>
+        <div class="panel-head-actions">
+          <button id="addBenefitItemBtn">+ 행 추가하기</button>
+          <button class="primary" id="addBenefitMonthBtn">새 달 만들기</button>
+        </div>
+      </div>
       ${alertHtml}
       <div class="tblwrap">
         <table class="edittable">
@@ -2746,10 +2726,6 @@ function renderBenefitTab(){
       </div>
       <div id="benefitHistoryAccordion"></div>
     </div>
-  `;
-  document.getElementById('maintabsActions').innerHTML = `
-    <button class="sm" id="addBenefitItemBtn">+ 행 추가하기</button>
-    <button class="primary sm" id="addBenefitMonthBtn">새 달 만들기</button>
   `;
   renderCurrentBenefitItems();
   renderBenefitHistoryAccordion(otherBlocks);
