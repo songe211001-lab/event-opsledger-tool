@@ -6,6 +6,7 @@
 <title>알닷 이벤트 운영 관리대장</title>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     /* 알닷 디자인 시스템 토큰 (design.md 2026-08-26 기준, OKLCH) */
@@ -61,7 +62,7 @@
   .wrap{max-width:1180px; margin:0 auto;}
 
   .topbar{display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
-  .brand .eyebrow{font-size:11px; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; font-weight:600;}
+
   .brand h1{font-weight:800; font-size:30px; letter-spacing:-0.02em; margin:2px 0 0; color:var(--ink); line-height:1.25;}
   .brand .subtitle{font-size:13.5px; color:var(--muted); margin:6px 0 0; line-height:1.6; font-weight:400;}
   .topbar-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
@@ -70,7 +71,7 @@
     background:var(--panel); color:var(--ink-soft); padding:8px 14px; cursor:pointer; transition:all .12s ease;}
   button:hover{border-color:var(--primary); color:var(--primary-dark);}
   button.primary{background:var(--primary); color:#fff; border-color:var(--primary); transition:background .15s var(--ease), border-color .15s var(--ease);}
-  button.primary.copied{background:var(--pass); border-color:var(--pass);}
+
   button.primary:hover{background:var(--primary-dark); border-color:var(--primary-dark); color:#fff;}
   button.ghost{background:transparent; border-color:transparent; color:var(--muted); padding:6px 8px;}
   button.ghost:hover{color:var(--primary-dark); border-color:transparent;}
@@ -107,7 +108,6 @@
   .panel-head-actions{display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0;}
   .panel .sub{color:var(--muted); font-size:12.5px; line-height:1.6; margin:0 0 18px;}
 
-  .month-chips{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:16px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
   .chip{
     font-size:12px; font-weight:600; padding:8px 14px; border-radius:6px; border:1px solid var(--line);
     background:var(--panel); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:6px;
@@ -118,7 +118,6 @@
   .chip.active:hover{color:#fff;}
   .chip .del{opacity:.5; font-size:11px; padding:4px; margin:-4px; display:inline-block;}
   .chip .del:hover{opacity:1; color:var(--fatal);}
-  .chip-add{border-style:dashed; color:var(--primary-dark); background:transparent;}
 
   table.edittable{width:100%; border-collapse:collapse; font-size:12.5px;}
   table.edittable th{
@@ -170,32 +169,6 @@
   .bulk-bar .bulk-actions{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto;}
   .row-checkbox, .header-checkbox{width:17px; height:17px; cursor:pointer; accent-color:var(--primary);}
 
-  /* 이력 관리: 데이터 백업·복원 / GitHub / 내보내기 이력 */
-  .muted-inline{color:var(--muted); font-size:12px; font-weight:400;}
-  .section-toggle{
-    cursor:pointer; font-size:13px; font-weight:700; color:var(--ink); list-style:none; padding:8px 12px;
-    background:var(--panel); border:1px solid var(--line); border-radius:9px; margin-top:6px;
-  }
-  .section-toggle::-webkit-details-marker{display:none;}
-  .section-toggle::before{content:'▸ '; color:var(--muted);}
-  details[open] > .section-toggle::before{content:'▾ ';}
-  .section-toggle-body{padding:14px 0 4px;}
-  .section-toggle-sub{
-    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--muted); list-style:none; padding:6px 0;
-  }
-  .section-toggle-sub::-webkit-details-marker{display:none;}
-  .section-toggle-sub::before{content:'▸ ';}
-  details[open] > .section-toggle-sub::before{content:'▾ ';}
-  .gh-step{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
-  .gh-step-num{
-    flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--ink); color:#fff;
-    font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
-  }
-  .gh-step input{
-    flex:1; height:40px; border:1px solid var(--line); border-radius:7px; padding:0 12px; font-size:13px; font-family:inherit;
-  }
-  .gh-step input:focus{outline:none; border-color:var(--primary); background:var(--primary-soft);}
-
   /* 프리마케팅 배너 수동 관리 */
   .pm-status-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin:14px 0 18px;}
   .pm-status-item label{display:block; font-size:10.5px; color:var(--muted); font-weight:700; margin-bottom:5px; letter-spacing:.02em;}
@@ -207,34 +180,10 @@
   .pm-status-item .pm-readonly.badge-ready{color:var(--minor-text); background:var(--minor-soft);}
   .pm-status-item .pm-readonly.badge-live{color:var(--pass-text); background:var(--pass-soft);}
 
-  .tag-badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; flex-shrink:0;}
-  .tag-badge.event{background:var(--ink); color:#fff;}
-  .tag-badge.banner{background:var(--primary-soft); color:var(--primary-dark);}
-  .tag-badge.benefit{background:var(--pass-soft); color:var(--pass-text);}
-
-  .export-item{border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:10px;}
-
-  .template-item{
-    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
-    border:1px solid var(--line); border-radius:7px; margin-bottom:8px;
-  }
-  .template-name{font-size:13px; font-weight:600; color:var(--ink);}
-
-  .ehi-top{display:flex; align-items:center; gap:10px;}
-  .ehi-name{font-size:13.5px; font-weight:700; color:var(--ink); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .ehi-actions{display:flex; gap:6px; flex-shrink:0;}
-  .ehi-meta{font-size:11.5px; color:var(--muted); margin-top:6px;}
-  .ehi-bar{height:4px; background:var(--line); border-radius:6px; margin-top:8px; overflow:hidden;}
-  .ehi-bar-fill{height:100%; background:var(--pass); border-radius:6px;}
-
-  /* 혜택 만료일 */
-  .benefit-expiry-badge{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:6px; margin-left:6px; white-space:nowrap;}
-  .benefit-expiry-badge.over{background:var(--fatal-soft); color:var(--fatal-text);}
-  .benefit-expiry-badge.soon{background:var(--minor-soft); color:var(--minor-text);}
   .idcell input{width:56px !important; flex:none;}
 
   .callout{background:var(--minor-soft); border:1px solid var(--minor-border); color:var(--minor-text); border-radius:7px; padding:12px 14px; font-size:12.5px; line-height:1.6; margin-bottom:14px;}
-  .callout.ok{background:var(--pass-soft); border-color:var(--pass-border); color:var(--pass-text);}
+
   .empty-state{text-align:center; padding:48px 16px; color:var(--muted); font-size:13px; line-height:1.6;}
   .empty-state .big{font-size:32px; margin-bottom:10px; opacity:.85;}
 
@@ -260,11 +209,15 @@
   .modal h4{margin:0 0 12px; font-size:16px; font-weight:700;}
   .modal input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font-size:13px; margin-bottom:14px; font-family:inherit;}
   .modal .actions{display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;}
-  .modal .review-list{max-height:280px; overflow-y:auto; font-size:12.5px; border:1px solid var(--line); border-radius:4px; padding:10px 12px; margin-top:10px;}
-  .modal .review-list div{padding:3px 0;}
 
   footer{text-align:center; color:var(--muted); font-size:11px; margin-top:30px;}
   .hidden{display:none !important;}
+
+  /* 설정 안내 (연결 정보가 비어 있을 때 · 셀프테스트 결과) */
+  .setup-screen{min-height:80vh; display:flex; align-items:center; justify-content:center;}
+  .setup-card{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:28px; width:440px; max-width:100%; box-shadow:var(--shadow-2);}
+  .setup-card h1{font-size:22px; font-weight:800; margin:0 0 8px; letter-spacing:-0.02em;}
+  #setupMsg{white-space:pre-line; margin:0;}
   input[type=file]{display:none;}
 
   /* 인라인 에러 배너 (alert 대체) */
@@ -333,9 +286,6 @@
     display:flex; align-items:center; gap:10px; font-size:13px; color:var(--minor-text);
   }
 
-  /* 월 칩 더보기/접기 */
-  .chip-more{color:var(--primary-dark); border-style:dashed;}
-
   /* 마감 임박/지연 알림 (컴팩트 요약형) */
   .deadline-box{border-radius:9px; padding:14px 16px; margin-bottom:16px;}
   .deadline-box.has-overdue{background:var(--critical-soft); border:1px solid var(--fatal-border);}
@@ -360,7 +310,7 @@
   .deadline-row .dtag.over{background:var(--fatal); color:#fff;}
   .deadline-row .dtag.soon{background:var(--minor); color:var(--minor-text);}
   .deadline-row .dl-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:var(--ink);}
-  .deadline-row .dl-month{flex-shrink:0; font-size:11px; color:var(--muted);}
+
   .deadline-toggle-btn{
     margin-top:8px; background:transparent; border:none; color:var(--ink-soft); font-size:12px; font-weight:700;
     padding:4px 2px; cursor:pointer; text-decoration:underline;
@@ -377,7 +327,14 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="setup-screen hidden" id="setupScreen">
+  <div class="setup-card">
+    <h1>이벤트 운영 관리대장</h1>
+    <p class="sub" id="setupMsg"></p>
+  </div>
+</div>
+
+<div class="wrap hidden" id="appRoot">
 
   <div class="topbar">
     <div class="brand">
@@ -385,11 +342,15 @@
       <p class="subtitle">이벤트·배너 구좌·혜택 운영 현황을 한 곳에서 관리하고, 매달 반복되는 작업을 자동으로 정리해요.</p>
     </div>
     <div class="topbar-actions">
-      <span class="sync-status" id="savebar"><span class="dot"></span><span id="savebarText">자동 저장됨</span></span>
-      <button class="sm" id="githubSetupBtn">🔗 GitHub 동기화</button>
-      <button id="exportDataBtn">⬇ 내보내기</button>
-      <button id="importDataBtn">⬆ 가져오기</button>
+      <button id="exportDataBtn">⬇ JSON 내보내기</button>
+      <button id="importDataBtn">⬆ JSON 가져오기</button>
+      <button id="xlsxExportBtn">⬇ 엑셀 내보내기</button>
+      <button id="xlsxImportBtn">⬆ 엑셀 불러오기</button>
+      <span class="sync-status" id="savebar"><span class="dot"></span><span id="savebarText">저장됨</span></span>
+      <button class="sm primary hidden" id="migrateBtn">⬆ 기존 데이터 올리기</button>
       <input type="file" id="dataJsonFileInput" accept=".json" />
+      <input type="file" id="xlsxFileInput" accept=".xlsx,.xlsm" />
+      <input type="file" id="migrateFileInput" accept=".json" />
     </div>
   </div>
 
@@ -412,7 +373,7 @@
   <div id="tab-pm" class="hidden"></div>
   <div id="tab-benefit" class="hidden"></div>
 
-  <footer>모든 데이터는 이 브라우저(또는 대화) 안에 저장됩니다 · 상단의 "내보내기"로 주기적으로 백업 파일을 내려받아두시는 걸 권장해요</footer>
+  <footer>데이터는 팀 공용 DB에 실시간 저장돼요</footer>
 </div>
 
 <div id="toastStack"></div>
@@ -433,6 +394,7 @@
     <h4>⚠️ 확인해주세요</h4>
     <p class="sub" id="confirmModalMessage" style="margin:0 0 18px; white-space:pre-line; color:var(--ink-soft);"></p>
     <div class="actions">
+      <button class="hidden" id="confirmModalDismissBtn">취소</button>
       <button id="confirmModalCancelBtn">취소</button>
       <button class="primary" id="confirmModalOkBtn">삭제하기</button>
     </div>
@@ -451,39 +413,22 @@
   </div>
 </div>
 
-<div id="githubModalOverlay" class="modal-overlay hidden">
-  <div class="modal" style="width:480px; max-width:92vw;">
-    <h4>🔗 GitHub 동기화</h4>
-    <p class="sub" style="margin:0 0 14px;">토큰 대신, 관리자가 미리 배포해둔 작은 프록시 서버(Vercel)의 주소만 입력하면 돼요. 토큰은 그 서버에만 보관되고, 이 브라우저에는 전혀 저장되지 않아요.</p>
-    <div class="gh-step">
-      <span class="gh-step-num">1</span>
-      <input type="text" id="ghWorkerUrlInput" placeholder="프록시 서버 주소 (예: https://내프로젝트.vercel.app/api)"/>
-    </div>
-    <div class="gh-step">
-      <span class="gh-step-num">2</span>
-      <input type="password" id="ghSyncKeyInput" placeholder="접근 암구호 (관리자가 설정한 경우에만 입력)"/>
-    </div>
-    <div class="gh-step">
-      <span class="gh-step-num">3</span>
-      <button class="primary sm" id="ghConnectBtn">연결 테스트 후 저장</button>
-      <span id="ghStatusText" class="muted-inline"></span>
-    </div>
-    <p class="sub" style="margin:10px 0 0;">프록시 서버가 아직 없으신가요? 관리자에게 <code>alddot-sync-vercel</code> 폴더를 전달해서 Vercel에 배포해달라고 요청해주세요. (주소 뒤에 <code>/api</code>를 꼭 붙여서 입력해주세요)</p>
-    <div id="githubActionsHolder" style="margin-top:14px;"></div>
-    <div class="actions" style="margin-top:16px;">
-      <button id="githubModalCloseBtn">닫기</button>
-    </div>
-  </div>
-</div>
-
 <script>
 /* ════════════════════════════════════════════════════════════
-   상태 & 저장
+   Supabase 설정 — 한 번 채워서 커밋하면 이 URL을 여는 모든 팀원이 같은 DB에 연결돼요.
+   anon 키는 공개용이라 커밋해도 되지만, service_role 키는 절대 넣지 마세요.
    ════════════════════════════════════════════════════════════ */
-const STORAGE_KEY = 'alddot_history';
+const SUPABASE_URL = 'https://jpeluvatvdzznczmvqrf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZWx1dmF0dmR6em5jem12cXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NDA4NDMsImV4cCI6MjEwNjMxNjg0M30.qZrlzhuNtr7HqYcSEDhp0dt3r0arLIiNK7XReUgipVk';
+
+/* ════════════════════════════════════════════════════════════
+   상태
+   ════════════════════════════════════════════════════════════ */
+const LEGACY_STORAGE_KEY = 'alddot_history'; // 예전 저장 위치 (이관할 때 읽기만 해요)
+const PENDING_KEY = 'alddot_pending';
+const UI_PREFS_KEY = 'alddot_uiPrefs';
+const SELFTEST = new URLSearchParams(location.search).get('selftest') === '1';
 let STATE = null;
-let STORAGE_OK = true;
-let saveTimer = null;
 
 function showToast(msg, type='success'){
   const stack = document.getElementById('toastStack');
@@ -546,11 +491,17 @@ function showPromptModal(title, defaultValue, onSubmit){
   overlay.addEventListener('click', handleOverlayClick);
 }
 
-function showConfirmModal(message, onConfirm, onCancel){
+// ESC·바깥 클릭은 항상 "아무것도 안 함"이에요. onCancel은 취소(또는 cancelLabel) 버튼을 눌렀을 때만 불려요.
+// cancelLabel을 주면 그 버튼은 두 번째 선택지가 되고, 별도의 "취소" 버튼이 함께 보여요.
+function showConfirmModal(message, onConfirm, onCancel, okLabel, cancelLabel){
   const overlay = document.getElementById('confirmModalOverlay');
   const okBtn = document.getElementById('confirmModalOkBtn');
   const cancelBtn = document.getElementById('confirmModalCancelBtn');
+  const dismissBtn = document.getElementById('confirmModalDismissBtn');
   document.getElementById('confirmModalMessage').textContent = message;
+  okBtn.textContent = okLabel || '삭제하기';
+  cancelBtn.textContent = cancelLabel || '취소';
+  dismissBtn.classList.toggle('hidden', !cancelLabel);
   overlay.classList.remove('hidden');
   setTimeout(()=> okBtn.focus(), 30);
 
@@ -558,15 +509,17 @@ function showConfirmModal(message, onConfirm, onCancel){
     overlay.classList.add('hidden');
     okBtn.removeEventListener('click', handleOk);
     cancelBtn.removeEventListener('click', handleCancel);
+    dismissBtn.removeEventListener('click', cleanup);
     document.removeEventListener('keydown', handleKeydown);
     overlay.removeEventListener('click', handleOverlayClick);
   }
   function handleOk(){ cleanup(); onConfirm(); }
   function handleCancel(){ cleanup(); if(onCancel) onCancel(); }
-  function handleKeydown(e){ if(e.key==='Escape') handleCancel(); }
-  function handleOverlayClick(e){ if(e.target===overlay) handleCancel(); }
+  function handleKeydown(e){ if(e.key==='Escape') cleanup(); }
+  function handleOverlayClick(e){ if(e.target===overlay) cleanup(); }
   okBtn.addEventListener('click', handleOk);
   cancelBtn.addEventListener('click', handleCancel);
+  dismissBtn.addEventListener('click', cleanup);
   document.addEventListener('keydown', handleKeydown);
   overlay.addEventListener('click', handleOverlayClick);
 }
@@ -581,9 +534,10 @@ function resetBtn(btn){
 }
 
 const EVENT_FIELDS = ["priority","status","name","workType","category","dueDate","reflectStatus","source","reviewUrl","urlType","opUrl","note"];
+// 화면·엑셀에 보이는 이름만 바꿨어요. 저장 필드 이름(dueDate, reflectStatus)은 그대로예요.
 const EVENT_FIELD_LABELS = {
   priority:"우선순위", status:"작업상태", name:"이벤트명", workType:"작업유형", category:"구분",
-  dueDate:"반영예정일", reflectStatus:"반영상태", source:"소스수급", reviewUrl:"검수용URL",
+  dueDate:"시작일", reflectStatus:"종료일", source:"소스수급", reviewUrl:"검수용URL",
   urlType:"URL유형", opUrl:"운영URL", note:"주요특이사항"
 };
 const STATUS_OPTIONS = ["완료","진행","대기","연장","비노출"];
@@ -609,13 +563,13 @@ const DEFAULT_PARTNER_NAME_MAP = {
 };
 
 const EVENT_TABLE_COLUMNS = [
-  {key:'priority', label:'우선순위'},
+  {key:'priority', label:EVENT_FIELD_LABELS.priority},
   {key:'status', label:'상태'},
-  {key:'name', label:'이벤트명', minWidth:160},
-  {key:'workType', label:'작업유형'},
-  {key:'category', label:'구분'},
-  {key:'dueDate', label:'시작'},
-  {key:'reflectStatus', label:'종료'},
+  {key:'name', label:EVENT_FIELD_LABELS.name, minWidth:160},
+  {key:'workType', label:EVENT_FIELD_LABELS.workType},
+  {key:'category', label:EVENT_FIELD_LABELS.category},
+  {key:'dueDate', label:EVENT_FIELD_LABELS.dueDate},
+  {key:'reflectStatus', label:EVENT_FIELD_LABELS.reflectStatus},
   {key:'id', label:'이벤트ID'},
 ];
 let hiddenEventColumns = new Set();
@@ -638,40 +592,45 @@ function defaultState(){
     eventMonths: [ {key, label, events: []} ],
     bannerMonths: [ {key, label, columns: DEFAULT_BANNER_COLUMNS.slice(), ranks: [], partners: [], preMarketingPartners: [], cycleWeeks: 4, weekAnchor: defaultWeekAnchor(key), changeLog: []} ],
     benefitBlocks: [ {label, items: [], _blockUid: uid()} ],
-    eventRequests: [],
     activityLog: [],
-    eventTemplates: [],
     uiPrefs: { hiddenEventColumns: [], eventColumnOrder: [] },
     customEventColumns: [],
     partnerNameMap: {...DEFAULT_PARTNER_NAME_MAP},
   };
 }
 function ensureStateShape(){
-  if(!STATE.eventRequests) STATE.eventRequests = [];
   if(!STATE.activityLog) STATE.activityLog = [];
-  if(!STATE.exportHistory) STATE.exportHistory = [];
-  if(!STATE.eventTemplates) STATE.eventTemplates = [];
-  if(!STATE.uiPrefs) STATE.uiPrefs = { hiddenEventColumns: [] };
+  if(!STATE.uiPrefs) STATE.uiPrefs = {};
   if(!STATE.customEventColumns) STATE.customEventColumns = [];
-  if(!STATE.partnerNameMap) STATE.partnerNameMap = {};
-  STATE.partnerNameMap = {...DEFAULT_PARTNER_NAME_MAP, ...STATE.partnerNameMap};
+  STATE.partnerNameMap = {...DEFAULT_PARTNER_NAME_MAP, ...(STATE.partnerNameMap||{})};
   if(!STATE.uiPrefs.hiddenEventColumns) STATE.uiPrefs.hiddenEventColumns = [];
   if(!STATE.uiPrefs.eventColumnOrder) STATE.uiPrefs.eventColumnOrder = [];
   hiddenEventColumns = new Set(STATE.uiPrefs.hiddenEventColumns);
-  if(!STATE.eventMonths) STATE.eventMonths = defaultState().eventMonths;
-  if(!STATE.bannerMonths) STATE.bannerMonths = defaultState().bannerMonths;
-  if(!STATE.benefitBlocks) STATE.benefitBlocks = defaultState().benefitBlocks;
+  if(!Array.isArray(STATE.eventMonths) || !STATE.eventMonths.length) STATE.eventMonths = defaultState().eventMonths;
+  if(!Array.isArray(STATE.bannerMonths) || !STATE.bannerMonths.length) STATE.bannerMonths = defaultState().bannerMonths;
+  if(!Array.isArray(STATE.benefitBlocks)) STATE.benefitBlocks = defaultState().benefitBlocks;
+  // _uid는 DB의 기본키라서 비어 있거나 겹치면 새로 발급해요 (예전 버전은 달 복사 때 프리마케팅 _uid가 겹쳤어요)
+  const seen = new Set();
+  const fixUid = o=>{ if(!o._uid || seen.has(o._uid)) o._uid = uid(); seen.add(o._uid); };
+  STATE.eventMonths.forEach(mo=>{
+    if(!mo.events) mo.events = [];
+    mo.events.forEach(fixUid);
+  });
   STATE.bannerMonths.forEach(mo=>{
+    if(!mo.ranks) mo.ranks = [];
+    if(!mo.columns) mo.columns = DEFAULT_BANNER_COLUMNS.slice();
     if(!mo.partners) mo.partners = [];
     if(!mo.preMarketingPartners) mo.preMarketingPartners = [];
     if(!mo.cycleWeeks) mo.cycleWeeks = 4;
     if(!mo.hiddenColumns) mo.hiddenColumns = [];
     mo.preMarketingPartners.forEach(p=>{
-      if(!p._uid) p._uid = uid();
+      fixUid(p);
       if(p.name && STATE.partnerNameMap[p.name.trim()]) p.name = STATE.partnerNameMap[p.name.trim()];
     });
     mo.ranks.forEach(r=>{
-      Object.keys(r.values||{}).forEach(col=>{
+      fixUid(r);
+      if(!r.values) r.values = {};
+      Object.keys(r.values).forEach(col=>{
         const v = r.values[col];
         if(v && STATE.partnerNameMap[String(v).trim()]) r.values[col] = STATE.partnerNameMap[String(v).trim()];
       });
@@ -680,146 +639,806 @@ function ensureStateShape(){
     if(!mo.changeLog) mo.changeLog = [];
   });
   STATE.benefitBlocks.forEach(b=>{
-    if(!b._blockUid) b._blockUid = uid();
-    b.items.forEach(it=>{ if(!it._uid) it._uid = uid(); });
+    if(!b._blockUid || seen.has(b._blockUid)) b._blockUid = uid();
+    seen.add(b._blockUid);
+    if(!b.items) b.items = [];
+    b.items.forEach(fixUid);
   });
-}
-
-function hasClaudeStorage(){
-  return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function';
-}
-
-async function loadState(){
-  try{
-    if(hasClaudeStorage()){
-      const res = await window.storage.get(STORAGE_KEY);
-      if(res && res.value){ STATE = JSON.parse(res.value); ensureStateShape(); return; }
-    }else{
-      // Claude 아티팩트 환경이 아닌 곳(GitHub Pages 등 직접 호스팅)에서는 브라우저 localStorage를 사용한다.
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){ STATE = JSON.parse(raw); ensureStateShape(); return; }
-    }
-  }catch(err){ STORAGE_OK = false; }
-  STATE = defaultState();
-}
-function scheduleSave(){
-  renderSavebar('저장 중…', false);
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(doSave, 400);
-}
-async function doSave(){
-  try{
-    if(hasClaudeStorage()){
-      await window.storage.set(STORAGE_KEY, JSON.stringify(STATE), false);
-    }else{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
-    }
-    STORAGE_OK = true;
-    renderSavebar('자동 저장됨', false);
-    scheduleGithubAutoSync();
-  }catch(err){
-    STORAGE_OK = false;
-    renderSavebar('자동 저장 불가 — 상단의 "내보내기"로 꼭 내려받아 두세요', true);
-  }
-}
-function renderSavebar(text, warn){
-  document.getElementById('savebarText').textContent = text;
-  const bar = document.getElementById('savebar');
-  bar.classList.toggle('warn', !!warn);
-  bar.classList.toggle('saving', text==='저장 중…');
 }
 
 /* ════════════════════════════════════════════════════════════
-   GitHub 동기화 (이미 배포에 쓰는 저장소를 데이터 공유에도 활용)
+   STATE ⇄ DB 행 변환 (순수 함수)
+   containers: 이벤트 월 'event:YYYY-MM' · 배너 월 'banner:YYYY-MM' · 혜택 블록 _blockUid · 'settings'
+   records: 각 행의 _uid
    ════════════════════════════════════════════════════════════ */
-let GITHUB_CONFIG = { workerUrl:'', syncKey:'' };
-let githubSyncTimer = null;
-let githubSyncing = false;
+const SETTINGS_ID = 'settings';
+const SETTINGS_FIELDS = ['partnerNameMap','activityLog','customEventColumns'];
+const CHILD_KEYS = { event_month:['events'], banner_month:['ranks','preMarketingPartners'], benefit_block:['items'] };
+const RECORD_ARRAY = { event:'events', banner_rank:'ranks', pm_partner:'preMarketingPartners', benefit_item:'items' };
+// 혜택 블록 순서는 text sort_key에 담아요. 음수도 문자열 정렬이 맞도록 1e12를 더해 14자리로 채워요.
+const encodeBlockKey = v => String(v + 1e12).padStart(14,'0');
+const decodeBlockKey = s => Number(s) - 1e12;
 
-async function loadGithubConfig(){
-  try{
-    if(hasClaudeStorage()){
-      const res = await window.storage.get('alddot_github_config');
-      if(res && res.value) GITHUB_CONFIG = JSON.parse(res.value);
-    }else{
-      const raw = localStorage.getItem('alddot_github_config');
-      if(raw) GITHUB_CONFIG = JSON.parse(raw);
+function containerIdOf(kind, obj){
+  if(kind==='event_month') return 'event:' + obj.key;
+  if(kind==='banner_month') return 'banner:' + obj.key;
+  if(kind==='benefit_block') return obj._blockUid;
+  return SETTINGS_ID;
+}
+function recordData(kind, obj){
+  if(kind==='banner_rank') return {...(obj.values||{})}; // 칸(구좌)마다 따로 합쳐지도록 values를 펼쳐서 저장
+  const {_uid, ...data} = obj;
+  return data;
+}
+function recordObj(row){
+  return row.kind==='banner_rank' ? {_uid:row.id, values:{...row.data}} : {...row.data, _uid:row.id};
+}
+function containerData(kind, obj){
+  const data = {...obj};
+  CHILD_KEYS[kind].forEach(k=> delete data[k]);
+  return data;
+}
+
+function stateToRows(state, sortOf){
+  const so = sortOf || ((id, i)=> i);
+  const containers = [], records = [];
+  const addRecs = (cid, kind, arr)=> (arr||[]).forEach((o,i)=> records.push({
+    id:o._uid, container_id:cid, kind, sort_order:so(o._uid, i), data:recordData(kind, o),
+  }));
+  (state.eventMonths||[]).forEach(mo=>{
+    const id = containerIdOf('event_month', mo);
+    containers.push({id, kind:'event_month', sort_key:mo.key, data:containerData('event_month', mo)});
+    addRecs(id, 'event', mo.events);
+  });
+  (state.bannerMonths||[]).forEach(mo=>{
+    const id = containerIdOf('banner_month', mo);
+    containers.push({id, kind:'banner_month', sort_key:mo.key, data:containerData('banner_month', mo)});
+    addRecs(id, 'banner_rank', mo.ranks);
+    addRecs(id, 'pm_partner', mo.preMarketingPartners);
+  });
+  (state.benefitBlocks||[]).forEach((b,i)=>{
+    containers.push({id:b._blockUid, kind:'benefit_block', sort_key:encodeBlockKey(so(b._blockUid, i)), data:containerData('benefit_block', b)});
+    addRecs(b._blockUid, 'benefit_item', b.items);
+  });
+  const settings = {};
+  SETTINGS_FIELDS.forEach(k=>{ if(state[k]!==undefined) settings[k] = state[k]; });
+  containers.push({id:SETTINGS_ID, kind:'settings', sort_key:'', data:settings});
+  return {containers, records};
+}
+
+function rowsToState(containers, records){
+  const byContainer = new Map();
+  records.slice()
+    .sort((a,b)=> (a.sort_order - b.sort_order) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+    .forEach(r=>{
+      if(!byContainer.has(r.container_id)) byContainer.set(r.container_id, []);
+      byContainer.get(r.container_id).push(r);
+    });
+  const kids = (cid, kind)=> (byContainer.get(cid)||[]).filter(r=>r.kind===kind).map(recordObj);
+  const state = {eventMonths:[], bannerMonths:[], benefitBlocks:[]};
+  containers.slice()
+    .sort((a,b)=> (a.sort_key||'') < (b.sort_key||'') ? -1 : (a.sort_key||'') > (b.sort_key||'') ? 1 : 0)
+    .forEach(c=>{
+      if(c.kind==='event_month') state.eventMonths.push({...c.data, events:kids(c.id,'event')});
+      else if(c.kind==='banner_month') state.bannerMonths.push({...c.data, ranks:kids(c.id,'banner_rank'), preMarketingPartners:kids(c.id,'pm_partner')});
+      else if(c.kind==='benefit_block') state.benefitBlocks.push({...c.data, items:kids(c.id,'benefit_item')});
+      else if(c.kind==='settings') Object.assign(state, c.data);
+    });
+  return state;
+}
+
+function rowsToMaps(rows){
+  return {
+    containers: new Map(rows.containers.map(r=>[r.id, r])),
+    records: new Map(rows.records.map(r=>[r.id, r])),
+  };
+}
+function cloneMaps(m){ return {containers:new Map(structuredClone([...m.containers])), records:new Map(structuredClone([...m.records]))}; }
+
+// 최상위 키 단위로 바뀐 것만 골라요. 키가 사라졌으면 null(→ 통째로 upsert).
+function shallowPatch(a, b){
+  for(const k in a) if(!(k in b)) return null;
+  const p = {};
+  for(const k in b) if(JSON.stringify(a[k]) !== JSON.stringify(b[k])) p[k] = b[k];
+  return p;
+}
+// 마지막으로 DB와 맞춰둔 행(prev)과 지금 STATE의 행(next)을 비교해서 보낼 쓰기 한 묶음을 만들어요.
+function diffRows(prev, next){
+  const op = {c:[], cso:[], cp:[], r:[], p:[], so:[], dr:[], dc:[]};
+  next.containers.forEach((row, id)=>{
+    const old = prev.containers.get(id);
+    if(!old || old.kind!==row.kind){ op.c.push(row); return; }
+    const patch = shallowPatch(old.data, row.data);
+    if(patch===null){ op.c.push(row); return; }
+    if(Object.keys(patch).length) op.cp.push({id, patch});
+    if(old.sort_key!==row.sort_key) op.cso.push({id, sort_key:row.sort_key});
+  });
+  prev.containers.forEach((row, id)=>{ if(!next.containers.has(id)) op.dc.push(id); });
+  const goneContainers = new Set(op.dc);
+  next.records.forEach((row, id)=>{
+    const old = prev.records.get(id);
+    if(!old || old.kind!==row.kind || old.container_id!==row.container_id){ op.r.push(row); return; }
+    const patch = shallowPatch(old.data, row.data);
+    if(patch===null){ op.r.push(row); return; }
+    if(Object.keys(patch).length) op.p.push({id, patch});
+    if(old.sort_order!==row.sort_order) op.so.push({id, sort_order:row.sort_order});
+  });
+  prev.records.forEach((row, id)=>{ if(!next.records.has(id) && !goneContainers.has(row.container_id)) op.dr.push(id); });
+  Object.keys(op).forEach(k=>{ if(!op[k].length) delete op[k]; });
+  return Object.keys(op).length ? op : null;
+}
+
+// 순서값 채우기: 값이 없는 항목(새 행·옮긴 행)만 이웃 두 값의 중간으로 정해요.
+// 간격이 1e-9보다 작아지면(정수 모드는 1보다 작아지면) 그 목록 전체를 0,1,2…로 다시 매기고 true를 돌려줘요.
+function fillSort(ids, S, integer){
+  const renumber = ()=>{ ids.forEach((id,k)=> S.set(id, k)); return true; };
+  let last = -Infinity;
+  for(const id of ids){
+    const v = S.get(id);
+    if(v==null) continue;
+    if(!(v > last)) return renumber();
+    last = v;
+  }
+  for(let i=0; i<ids.length; i++){
+    if(S.has(ids[i])) continue;
+    let j = i; while(j<ids.length && !S.has(ids[j])) j++;
+    const n = j-i;
+    const lo = i>0 ? S.get(ids[i-1]) : null;
+    const hi = j<ids.length ? S.get(ids[j]) : null;
+    let start, step;
+    if(lo==null && hi==null){ start = 0; step = 1; }
+    else if(lo==null){ start = hi - n; step = 1; }
+    else if(hi==null){ start = lo + 1; step = 1; }
+    else{
+      if(integer){ step = Math.floor((hi-lo)/(n+1)); if(step < 1) return renumber(); }
+      else{ if(hi - lo < 1e-9) return renumber(); step = (hi-lo)/(n+1); }
+      start = lo + step;
     }
-  }catch(err){ /* 저장된 설정 없음 */ }
+    for(let k=0; k<n; k++) S.set(ids[i+k], start + k*step);
+    i = j-1;
+  }
+  return false;
 }
-async function saveGithubConfig(){
-  try{
-    if(hasClaudeStorage()) await window.storage.set('alddot_github_config', JSON.stringify(GITHUB_CONFIG), false);
-    else localStorage.setItem('alddot_github_config', JSON.stringify(GITHUB_CONFIG));
-  }catch(err){ /* 무시 */ }
-}
-function workerHeaders(extra){
-  const h = {...(extra||{})};
-  if(GITHUB_CONFIG.syncKey) h['X-Sync-Key'] = GITHUB_CONFIG.syncKey;
-  return h;
-}
-async function pushToGithub(){
-  const base = GITHUB_CONFIG.workerUrl.replace(/\/$/,'');
-  const res = await fetch(`${base}/push`, {
-    method: 'POST',
-    headers: workerHeaders({'Content-Type':'application/json'}),
-    body: JSON.stringify(STATE),
+
+// 오프라인이던 동안 쌓인 쓰기를 불러온 행에 미리 적용해요 (화면이 내 변경을 잃지 않도록)
+function applyOpToMaps(m, op){
+  (op.c||[]).forEach(r=> m.containers.set(r.id, structuredClone(r)));
+  (op.r||[]).forEach(r=> m.records.set(r.id, structuredClone(r)));
+  (op.cso||[]).forEach(x=>{ const r = m.containers.get(x.id); if(r) r.sort_key = x.sort_key; });
+  (op.cp||[]).forEach(x=>{ const r = m.containers.get(x.id); if(r) r.data = {...r.data, ...structuredClone(x.patch)}; });
+  (op.p||[]).forEach(x=>{ const r = m.records.get(x.id); if(r) r.data = {...r.data, ...structuredClone(x.patch)}; });
+  (op.so||[]).forEach(x=>{ const r = m.records.get(x.id); if(r) r.sort_order = x.sort_order; });
+  (op.dr||[]).forEach(id=> m.records.delete(id));
+  (op.dc||[]).forEach(id=>{
+    m.containers.delete(id);
+    m.records.forEach((r, rid)=>{ if(r.container_id===id) m.records.delete(rid); });
   });
-  if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(err.error || `상태 코드 ${res.status}`); }
 }
-async function pullFromGithub(){
-  const base = GITHUB_CONFIG.workerUrl.replace(/\/$/,'');
-  const res = await fetch(`${base}/pull`, { headers: workerHeaders() });
-  if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(err.error || `상태 코드 ${res.status}`); }
-  return await res.json();
-}
-function scheduleGithubAutoSync(){
-  if(!GITHUB_CONFIG.workerUrl) return;
-  clearTimeout(githubSyncTimer);
-  githubSyncTimer = setTimeout(autoPushToGithub, 8000);
-}
-async function autoPushToGithub(){
-  if(githubSyncing || !GITHUB_CONFIG.workerUrl) return;
-  githubSyncing = true;
+
+/* ════════════════════════════════════════════════════════════
+   동기화: 바뀐 행/필드만 보내고, 실패하면 localStorage 큐에 남겨 다시 보내요
+   ════════════════════════════════════════════════════════════ */
+let sb = null;            // supabase client
+// 탭마다 하나씩 만드는 식별자. 쓰기 때 updated_by 열에 담아서, 되돌아온 내 변경을 알아봐요 (data에는 넣지 않아요)
+const CLIENT_ID = (()=>{
+  const make = ()=> ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=> (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
   try{
-    await pushToGithub();
-    renderSavebar('자동 저장됨 · GitHub 동기화 완료', false);
-  }catch(err){ /* 다음 저장 때 재시도 */ }
-  githubSyncing = false;
+    let v = sessionStorage.getItem('alddot_client_id');
+    if(!v){ v = make(); sessionStorage.setItem('alddot_client_id', v); }
+    return v;
+  }catch(e){ return make(); }
+})();
+let CONNECTED = false;    // 첫 연결을 시작했는지
+let SHADOW = {containers:new Map(), records:new Map()}; // DB에 반영됐거나 큐에 실린 것까지 포함한 "서버 기준" 행
+const SORT = new Map();   // 레코드 id → sort_order, 혜택 블록 id → 정수 순서 (STATE 밖에 둬요)
+const ACK = new Map();    // 't:id' → {ts, fields: Map(field → ts)} 내가 보낸 쓰기의 updated_at
+const MY_DELETES = new Set(); // 내가 지운 id (되돌아온 DELETE 이벤트 무시용)
+const DEBOUNCE = new Map();   // 'id\u0001field' → {timer, id, field, value}
+let QUEUE = [];
+let FLUSHING = false, SEND_FAILED = false, RT_DOWN = false;
+let DB_EMPTY = false, MIGRATED = false;
+
+function loadPendingQueue(){
+  try{ const raw = localStorage.getItem(PENDING_KEY); QUEUE = raw ? JSON.parse(raw) : []; }
+  catch(e){ QUEUE = []; }
+  if(!Array.isArray(QUEUE)) QUEUE = [];
 }
-function renderGithubActions(){
-  const holder = document.getElementById('githubActionsHolder');
-  if(!holder) return;
-  if(!GITHUB_CONFIG.workerUrl){ holder.innerHTML=''; return; }
-  holder.innerHTML = `
-    <div class="callout ok" style="margin-bottom:10px;">✅ 프록시 서버에 연결됐어요. 입력하시면 잠시 후 자동으로 GitHub에도 동기화돼요. (이 브라우저엔 토큰이 저장되지 않아요)</div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="primary sm" id="ghPushBtn">☁️ 지금 GitHub에 저장</button>
-      <button class="sm" id="ghPullBtn">⬇ GitHub에서 불러오기</button>
-    </div>
-  `;
-  document.getElementById('ghPushBtn').addEventListener('click', async ()=>{
-    const btn = document.getElementById('ghPushBtn');
-    clearError(); setBtnLoading(btn, '저장하는 중...');
-    try{ await pushToGithub(); showToast('GitHub에 저장했어요.'); }
-    catch(err){ showError('GitHub 저장 중 문제가 발생했어요: ' + err.message); }
-    resetBtn(btn);
-  });
-  document.getElementById('ghPullBtn').addEventListener('click', async ()=>{
-    const btn = document.getElementById('ghPullBtn');
-    clearError(); setBtnLoading(btn, '불러오는 중...');
-    try{
-      const data = await pullFromGithub();
-      resetBtn(btn);
-      showConfirmModal('GitHub에 저장된 내용으로 지금 데이터를 덮어쓸까요?', ()=>{
-        STATE = data; ensureStateShape();
-        activeEventMonthKey = getDefaultActiveEventMonthKey();
-        activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-        scheduleSave(); safeRenderAll();
-        showToast('GitHub에서 불러왔어요.');
+function persistQueue(){
+  try{
+    if(QUEUE.length) localStorage.setItem(PENDING_KEY, JSON.stringify(QUEUE));
+    else localStorage.removeItem(PENDING_KEY);
+  }catch(e){ /* 저장 공간 부족 — 메모리 큐로 계속 재시도 */ }
+}
+function loadUiPrefs(){
+  try{ return JSON.parse(localStorage.getItem(UI_PREFS_KEY)) || {}; }catch(e){ return {}; }
+}
+
+function sortOf(id, i){ return SORT.has(id) ? SORT.get(id) : i; }
+function fillAllSort(){
+  const ids = arr => (arr||[]).map(o=>o._uid);
+  STATE.eventMonths.forEach(mo=> fillSort(ids(mo.events), SORT));
+  STATE.bannerMonths.forEach(mo=>{ fillSort(ids(mo.ranks), SORT); fillSort(ids(mo.preMarketingPartners), SORT); });
+  STATE.benefitBlocks.forEach(b=> fillSort(ids(b.items), SORT));
+  fillSort(STATE.benefitBlocks.map(b=>b._blockUid), SORT, true);
+}
+function snapshotRows(){ return cloneMaps(rowsToMaps(stateToRows(STATE, sortOf))); }
+
+// 셀 입력 전용: 행+필드별 400ms 디바운스 후 patch_record(id, {field: value})
+function saveField(id, field, value){
+  const sh = SHADOW.records.get(id);
+  if(!sh){ syncChanges(); return; } // 아직 DB에 없는 행이면 통째로 올려요
+  sh.data[field] = structuredClone(value);
+  const k = id + '\u0001' + field;
+  const prev = DEBOUNCE.get(k);
+  if(prev) clearTimeout(prev.timer);
+  const entry = {id, field, value};
+  entry.timer = setTimeout(()=>{ DEBOUNCE.delete(k); enqueue({p:[{id, patch:{[field]: value}}]}); }, 400);
+  DEBOUNCE.set(k, entry);
+  renderSavebar();
+}
+function flushDebounces(){
+  DEBOUNCE.forEach((e,k)=>{ clearTimeout(e.timer); QUEUE.push({p:[{id:e.id, patch:{[e.field]: e.value}}]}); });
+  DEBOUNCE.clear();
+  persistQueue();
+}
+
+// 그 밖의 모든 변경(행 추가·삭제·이동, 새 달, 일괄 처리, 불러오기 등): STATE를 바꾼 뒤 부르면
+// 마지막 서버 기준(SHADOW)과 비교해서 바뀐 것만 한 묶음(op)으로 보내요.
+function syncChanges(){
+  if(!STATE || !sb) return;
+  fillAllSort();
+  const next = snapshotRows();
+  const op = diffRows(SHADOW, next);
+  SHADOW = next;
+  if(op){
+    (op.dr||[]).forEach(id=> MY_DELETES.add('r:'+id));
+    (op.dc||[]).forEach(id=> MY_DELETES.add('c:'+id));
+    enqueue(op);
+  }
+  updateMigrateBtn();
+}
+
+function enqueue(op){
+  QUEUE.push(op);
+  persistQueue();
+  renderSavebar();
+  flushQueue();
+}
+
+class SendError extends Error{ constructor(msg, transient){ super(msg); this.transient = transient; } }
+function check(res){
+  if(!res.error) return res.data;
+  const st = res.status || 0;
+  const transient = st===0 || st===401 || st===408 || st===429 || st>=500 || !res.error.code;
+  throw new SendError(res.error.message || '알 수 없는 오류', transient);
+}
+function chunks(arr, n){ const out = []; for(let i=0; i<(arr||[]).length; i+=n) out.push(arr.slice(i, i+n)); return out; }
+function ackRow(t, id, updatedAt, fields){
+  if(!updatedAt) return;
+  const ts = Date.parse(updatedAt);
+  const k = t + ':' + id;
+  const a = ACK.get(k) || {ts:0, fields:new Map()};
+  a.ts = Math.max(a.ts, ts);
+  fields.forEach(f=> a.fields.set(f, Math.max(a.fields.get(f)||0, ts)));
+  ACK.set(k, a);
+}
+
+async function sendOp(op){
+  if(op.c) for(const part of chunks(op.c, 500)){
+    const data = check(await sb.from('containers').upsert(part.map(r=>({...r, updated_by:CLIENT_ID}))).select('id,updated_at'));
+    data.forEach(d=>{ const row = part.find(r=>r.id===d.id); ackRow('c', d.id, d.updated_at, [...Object.keys(row.data), '__sort']); });
+  }
+  if(op.r) for(const part of chunks(op.r, 500)){
+    const data = check(await sb.from('records').upsert(part.map(r=>({...r, updated_by:CLIENT_ID}))).select('id,updated_at'));
+    data.forEach(d=>{ const row = part.find(r=>r.id===d.id); ackRow('r', d.id, d.updated_at, [...Object.keys(row.data), '__sort', '__container']); });
+  }
+  for(const x of op.cso||[]){
+    const data = check(await sb.from('containers').update({sort_key:x.sort_key, updated_by:CLIENT_ID}).eq('id', x.id).select('id,updated_at'));
+    if(data[0]) ackRow('c', x.id, data[0].updated_at, ['__sort']);
+  }
+  for(const x of op.cp||[]){
+    ackRow('c', x.id, check(await sb.rpc('patch_container', {p_id:x.id, p_patch:x.patch, p_client:CLIENT_ID})), Object.keys(x.patch));
+  }
+  for(const part of chunks(op.p, 20)){
+    await Promise.all(part.map(async x=> ackRow('r', x.id, check(await sb.rpc('patch_record', {p_id:x.id, p_patch:x.patch, p_client:CLIENT_ID})), Object.keys(x.patch))));
+  }
+  for(const part of chunks(op.so, 20)){
+    await Promise.all(part.map(async x=>{
+      const data = check(await sb.from('records').update({sort_order:x.sort_order, updated_by:CLIENT_ID}).eq('id', x.id).select('id,updated_at'));
+      if(data[0]) ackRow('r', x.id, data[0].updated_at, ['__sort']);
+    }));
+  }
+  for(const part of chunks(op.dr, 200)) check(await sb.from('records').delete().in('id', part));
+  if(op.dc && op.dc.length) check(await sb.from('containers').delete().in('id', op.dc));
+}
+
+async function flushQueue(){
+  if(FLUSHING || !sb || !CONNECTED) return;
+  FLUSHING = true; renderSavebar();
+  try{
+    while(QUEUE.length){
+      try{
+        await sendOp(QUEUE[0]);
+      }catch(err){
+        if(err instanceof SendError && !err.transient){
+          // 서버가 거부한 쓰기(권한·형식 오류)는 다시 보내도 같은 결과라 큐에서 빼고 알려요
+          console.error('저장 거부:', err.message, QUEUE[0]);
+          showError('저장이 거부된 변경이 있어요: ' + err.message + ' — 새로고침 후 다시 확인해주세요.');
+        }else{
+          throw err;
+        }
+      }
+      QUEUE.shift(); persistQueue();
+      SEND_FAILED = false;
+    }
+  }catch(err){
+    SEND_FAILED = true;
+    console.warn('전송 실패 — 나중에 다시 보내요:', err.message);
+  }
+  FLUSHING = false; renderSavebar();
+}
+
+function pendingCount(){ return QUEUE.length + DEBOUNCE.size; }
+function renderSavebar(){
+  const bar = document.getElementById('savebar');
+  const textEl = document.getElementById('savebarText');
+  if(!bar || !textEl) return;
+  const n = pendingCount();
+  let text, state;
+  if(SEND_FAILED || RT_DOWN){ text = `연결 끊김 · 미전송 ${n}건`; state = 'warn'; }
+  else if(n || FLUSHING){ text = '저장 중…'; state = 'saving'; }
+  else{ text = '저장됨'; state = ''; }
+  textEl.textContent = text;
+  bar.classList.toggle('warn', state==='warn');
+  bar.classList.toggle('saving', state==='saving');
+}
+
+window.addEventListener('online', flushQueue);
+setInterval(flushQueue, 30000);
+window.addEventListener('beforeunload', (e)=>{
+  if(!pendingCount()) return;
+  flushDebounces(); // 입력 대기 중이던 값도 큐에 넣어두면 다음에 열 때 이어서 보내요
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+async function fetchAll(table){
+  const out = [];
+  for(let from=0; ; from+=1000){
+    const data = check(await sb.from(table).select('*').order('id').range(from, from+999));
+    out.push(...data);
+    if(data.length < 1000) break;
+  }
+  return out;
+}
+async function fetchServerMaps(){
+  const [containers, records] = await Promise.all([fetchAll('containers'), fetchAll('records')]);
+  return rowsToMaps({containers, records});
+}
+
+function loadFromMaps(maps){
+  QUEUE.forEach(op=> applyOpToMaps(maps, op));
+  DB_EMPTY = maps.containers.size===0;
+  SORT.clear();
+  maps.records.forEach(r=> SORT.set(r.id, r.sort_order));
+  maps.containers.forEach(c=>{ if(c.kind==='benefit_block') SORT.set(c.id, decodeBlockKey(c.sort_key)); });
+  SHADOW = cloneMaps(maps);
+  STATE = DB_EMPTY ? defaultState() : rowsToState([...maps.containers.values()], [...maps.records.values()]);
+  STATE.uiPrefs = loadUiPrefs();
+  ensureStateShape();
+  // DB가 비어 있으면 아무것도 올리지 않아요 (기존 데이터 올리기를 먼저 할 수 있게). 첫 수정 때 올라가요.
+  if(!DB_EMPTY) syncChanges(); // ensureStateShape가 채운 기본값·이름 매핑만 올라가요
+  updateMigrateBtn();
+}
+
+/* ════════════════════════════════════════════════════════════
+   Realtime: 다른 사람의 변경을 STATE에 합치고 해당 행만 다시 그려요
+   ════════════════════════════════════════════════════════════ */
+let RT_BUFFER = null;  // 첫 로딩 중에 온 이벤트는 모아뒀다가 로딩 뒤에 적용
+let REMOTE_RENDER = false;
+let TAB_RENDER_DEFERRED = false;
+const ORPHANS = new Map(); // 컨테이너보다 먼저 도착한 레코드
+const ALL_FIELDS = '*';
+
+function pendingFields(t, id){
+  const set = new Set();
+  if(t==='r') DEBOUNCE.forEach(e=>{ if(e.id===id) set.add(e.field); });
+  for(const op of QUEUE){
+    if(t==='r'){
+      if((op.r||[]).some(r=>r.id===id)) return ALL_FIELDS;
+      (op.p||[]).forEach(x=>{ if(x.id===id) Object.keys(x.patch).forEach(f=>set.add(f)); });
+      if((op.so||[]).some(x=>x.id===id)) set.add('__sort');
+    }else{
+      if((op.c||[]).some(r=>r.id===id)) return ALL_FIELDS;
+      (op.cp||[]).forEach(x=>{ if(x.id===id) Object.keys(x.patch).forEach(f=>set.add(f)); });
+      if((op.cso||[]).some(x=>x.id===id)) set.add('__sort');
+    }
+  }
+  return set;
+}
+// true면 그 필드는 로컬 값을 유지 (아직 안 보냈거나, 내가 더 나중에 저장한 값)
+function localWins(t, id, ts){
+  const pend = pendingFields(t, id);
+  const a = ACK.get(t + ':' + id);
+  return f => pend===ALL_FIELDS || pend.has(f) || !!(a && (a.fields.get(f)||0) > ts);
+}
+function isEditing(el){
+  const a = document.activeElement;
+  return !!(el && a && el.contains(a) && a.matches('input:not([type=checkbox]):not([type=file]), select, textarea'));
+}
+
+function findRecord(id){
+  for(const mo of STATE.eventMonths){ const i = mo.events.findIndex(o=>o._uid===id); if(i>=0) return {kind:'event', cid:'event:'+mo.key, arr:mo.events, obj:mo.events[i]}; }
+  for(const mo of STATE.bannerMonths){
+    let i = mo.ranks.findIndex(o=>o._uid===id); if(i>=0) return {kind:'banner_rank', cid:'banner:'+mo.key, arr:mo.ranks, obj:mo.ranks[i]};
+    i = mo.preMarketingPartners.findIndex(o=>o._uid===id); if(i>=0) return {kind:'pm_partner', cid:'banner:'+mo.key, arr:mo.preMarketingPartners, obj:mo.preMarketingPartners[i]};
+  }
+  for(const b of STATE.benefitBlocks){ const i = b.items.findIndex(o=>o._uid===id); if(i>=0) return {kind:'benefit_item', cid:b._blockUid, arr:b.items, obj:b.items[i]}; }
+  return null;
+}
+function containerListOf(kind){
+  return kind==='event_month' ? STATE.eventMonths : kind==='banner_month' ? STATE.bannerMonths : kind==='benefit_block' ? STATE.benefitBlocks : null;
+}
+function findContainer(id){
+  for(const kind of ['event_month','banner_month','benefit_block']){
+    const list = containerListOf(kind);
+    const obj = list.find(c=> containerIdOf(kind, c)===id);
+    if(obj) return {kind, list, obj};
+  }
+  return null;
+}
+function recordArrayFor(cid, kind){
+  const c = findContainer(cid);
+  return c ? c.obj[RECORD_ARRAY[kind]] : null;
+}
+// SORT 값 기준으로 제자리에 끼워 넣어요 (값이 없으면 fallbackIdx)
+function insertBySort(arr, obj, fallbackIdx){
+  const s = SORT.get(obj._uid);
+  let i = s==null ? Math.min(fallbackIdx ?? arr.length, arr.length) : arr.findIndex(o=> (SORT.get(o._uid) ?? Infinity) > s);
+  if(i < 0) i = arr.length;
+  arr.splice(i, 0, obj);
+}
+function setRecordFields(kind, obj, data){
+  if(kind==='banner_rank'){ obj.values = data; return; }
+  Object.keys(obj).forEach(k=>{ if(k!=='_uid') delete obj[k]; });
+  Object.assign(obj, data);
+}
+function refreshShadowRecord(id){
+  const loc = findRecord(id);
+  if(!loc){ SHADOW.records.delete(id); return; }
+  SHADOW.records.set(id, structuredClone({id, container_id:loc.cid, kind:loc.kind, sort_order:SORT.get(id) ?? 0, data:recordData(loc.kind, loc.obj)}));
+}
+function refreshShadowContainer(id){
+  if(id===SETTINGS_ID){
+    const data = {}; SETTINGS_FIELDS.forEach(k=>{ if(STATE[k]!==undefined) data[k] = STATE[k]; });
+    SHADOW.containers.set(id, structuredClone({id, kind:'settings', sort_key:'', data}));
+    return;
+  }
+  const c = findContainer(id);
+  if(!c){ SHADOW.containers.delete(id); return; }
+  const sort_key = c.kind==='benefit_block' ? encodeBlockKey(SORT.get(id) ?? 0) : c.obj.key;
+  SHADOW.containers.set(id, structuredClone({id, kind:c.kind, sort_key, data:containerData(c.kind, c.obj)}));
+}
+
+function onRealtime(table, payload){
+  if(RT_BUFFER){ RT_BUFFER.push([table, payload]); return; }
+  if(!STATE) return;
+  // 빈 DB에서 기본 화면만 보고 있는데 누가 데이터를 올리면, 내 임시 기본값을 버리고 서버 것으로 다시 불러와요
+  if(DB_EMPTY && !MIGRATED && SHADOW.containers.size===0){ resyncFromServer(); return; }
+  const t = table==='containers' ? 'c' : 'r';
+  try{
+    if(payload.eventType==='DELETE'){
+      const id = payload.old && payload.old.id;
+      if(!id) return;
+      if(MY_DELETES.delete(t + ':' + id)) return; // 내가 지운 것이 되돌아온 이벤트
+      t==='r' ? remoteDeleteRecord(id) : remoteDeleteContainer(id);
+      return;
+    }
+    const row = payload.new;
+    const ts = Date.parse(row.updated_at);
+    const a = ACK.get(t + ':' + row.id);
+    if(a && row.updated_by===CLIENT_ID && ts <= a.ts) return; // 이 탭이 보낸 변경이 되돌아온 이벤트
+    t==='r' ? remoteRecord(row, ts) : remoteContainer(row, ts);
+  }catch(err){ console.error('실시간 반영 오류:', err); }
+}
+
+function remoteRecord(row, ts){
+  const targetArr = recordArrayFor(row.container_id, row.kind);
+  if(!targetArr){ ORPHANS.set(row.id, row); return; }
+  const wins = localWins('r', row.id, ts);
+  const loc = findRecord(row.id);
+  let obj;
+  if(loc){
+    const local = recordData(loc.kind, loc.obj);
+    const merged = structuredClone(row.data);
+    Object.keys(local).forEach(f=>{ if(wins(f)) merged[f] = local[f]; });
+    setRecordFields(row.kind, loc.obj, merged);
+    obj = loc.obj;
+  }else{
+    obj = recordObj(row);
+  }
+  const oldSort = SORT.get(row.id);
+  if(!wins('__sort')) SORT.set(row.id, row.sort_order);
+  const moveContainer = !!loc && loc.arr!==targetArr && !wins('__container');
+  const resort = !!loc && SORT.get(row.id)!==oldSort;
+  if(!loc) insertBySort(targetArr, obj);
+  else if(moveContainer || resort){
+    loc.arr.splice(loc.arr.indexOf(obj), 1);
+    insertBySort(moveContainer ? targetArr : loc.arr, obj);
+  }
+  // 새 행·이동은 표 단위로, 값만 바뀐 건 그 행만. 프리마케팅은 주차×순위 격자라 격자 단위로 그려요.
+  const structural = !loc || moveContainer || resort || row.kind==='pm_partner';
+  refreshShadowRecord(row.id);
+  afterRemoteRecord(moveContainer ? loc.cid : row.container_id, row.id, structural);
+  if(moveContainer) afterRemoteRecord(row.container_id, row.id, true);
+}
+
+function remoteDeleteRecord(id){
+  const loc = findRecord(id);
+  if(!loc) return;
+  if(pendingFields('r', id)===ALL_FIELDS) return; // 내가 방금 다시 넣은(되돌리기) 행
+  loc.arr.splice(loc.arr.indexOf(loc.obj), 1);
+  selectedEventUids.delete(id);
+  SHADOW.records.delete(id);
+  afterRemoteRecord(loc.cid, id, true);
+}
+
+function remoteContainer(row, ts){
+  const wins = localWins('c', row.id, ts);
+  if(row.kind==='settings'){
+    SETTINGS_FIELDS.forEach(f=>{ if(row.data[f]!==undefined && !wins(f)) STATE[f] = structuredClone(row.data[f]); });
+    refreshShadowContainer(row.id);
+    return;
+  }
+  const list = containerListOf(row.kind);
+  const loc = findContainer(row.id);
+  if(loc){
+    const local = containerData(row.kind, loc.obj);
+    const merged = structuredClone(row.data);
+    Object.keys(local).forEach(f=>{ if(wins(f)) merged[f] = local[f]; });
+    Object.keys(loc.obj).forEach(k=>{ if(!CHILD_KEYS[row.kind].includes(k)) delete loc.obj[k]; });
+    Object.assign(loc.obj, merged);
+  }else{
+    const obj = structuredClone(row.data);
+    CHILD_KEYS[row.kind].forEach(k=> obj[k] = []);
+    if(row.kind==='benefit_block') SORT.set(row.id, decodeBlockKey(row.sort_key));
+    list.push(obj);
+  }
+  if(row.kind==='benefit_block'){
+    if(!wins('__sort')) SORT.set(row.id, decodeBlockKey(row.sort_key));
+    list.sort((a,b)=> (SORT.get(a._blockUid) ?? 0) - (SORT.get(b._blockUid) ?? 0));
+  }else{
+    list.sort((a,b)=> a.key<b.key ? -1 : a.key>b.key ? 1 : 0);
+  }
+  refreshShadowContainer(row.id);
+  updateMigrateBtn();
+  ORPHANS.forEach((r, rid)=>{ if(r.container_id===row.id){ ORPHANS.delete(rid); remoteRecord(r, Date.parse(r.updated_at)); } });
+  rerenderTabSoon(row.kind);
+}
+
+function remoteDeleteContainer(id){
+  if(pendingFields('c', id)===ALL_FIELDS) return;
+  const loc = findContainer(id);
+  if(!loc) return;
+  loc.list.splice(loc.list.indexOf(loc.obj), 1);
+  SHADOW.containers.delete(id);
+  SHADOW.records.forEach((r, rid)=>{ if(r.container_id===id) SHADOW.records.delete(rid); });
+  ensureStateShape(); // 마지막 달까지 지워졌을 때 화면이 깨지지 않도록
+  rerenderTabSoon(loc.kind);
+}
+
+const TAB_OF_KIND = { event_month:['events'], banner_month:['banner','pm'], benefit_block:['benefit'] };
+function rerenderTabSoon(kind){
+  if(!TAB_OF_KIND[kind].includes(activeMainTab)) return; // 다른 탭은 탭을 열 때 새로 그려요
+  if(isEditing(document.getElementById('tab-'+activeMainTab))){ TAB_RENDER_DEFERRED = true; return; }
+  renderActiveTab();
+}
+
+function afterRemoteRecord(cid, id, structural){
+  REMOTE_RENDER = true;
+  try{
+    if(structural){
+      document.querySelectorAll('[data-container]').forEach(el=>{
+        if(el.dataset.container===cid && el.__rerender) el.__rerender();
       });
-    }catch(err){ showError('GitHub에서 불러오는 중 문제가 발생했어요: ' + err.message); resetBtn(btn); }
+    }else{
+      refreshRow(id);
+    }
+    if(activeMainTab==='events' && cid==='event:'+activeEventMonthKey){
+      renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); renderBulkBar();
+    }
+  }finally{ REMOTE_RENDER = false; }
+}
+
+// tbody 채우기: 원격 변경으로 다시 그릴 때는 지금 입력 중인 행의 DOM은 그대로 두고, 나머지만 바꿔요.
+function fillTbody(tbody, opts){
+  tbody.dataset.container = opts.cid;
+  tbody.__rerender = opts.rerender;
+  tbody.__rowFor = opts.rowFor;
+  tbody.__bind = opts.bind;
+  const bindAll = root=> root.querySelectorAll('tr[data-uid]').forEach(tr=> opts.bind(tr));
+  const keep = REMOTE_RENDER ? [...tbody.children].find(tr=> isEditing(tr)) : null;
+  if(!keep){ tbody.innerHTML = opts.html; bindAll(tbody); return; }
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = opts.html;
+  [...tbody.children].forEach(tr=>{ if(tr!==keep) tr.remove(); });
+  let before = true;
+  [...tmp.children].forEach(tr=>{
+    if(tr.dataset.uid && tr.dataset.uid===keep.dataset.uid){ before = false; return; }
+    tbody.insertBefore(tr, before ? keep : null);
+    if(tr.dataset.uid) opts.bind(tr);
   });
+  keep.dataset.stale = '1'; // 포커스가 빠지면 최신 값으로 다시 그려요
+}
+function refreshRow(id){
+  document.querySelectorAll(`tr[data-uid="${CSS.escape(id)}"]`).forEach(tr=>{
+    const tbody = tr.parentElement;
+    if(!tbody || !tbody.__rowFor) return;
+    if(isEditing(tr)){ tr.dataset.stale = '1'; return; }
+    redrawRow(tr);
+  });
+}
+function redrawRow(tr){
+  const tbody = tr.parentElement;
+  delete tr.dataset.stale;
+  const html = tbody.__rowFor(tr.dataset.uid);
+  if(html==null){ tbody.__rerender(); return; }
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = html;
+  const fresh = tmp.firstElementChild;
+  tr.replaceWith(fresh);
+  tbody.__bind(fresh);
+}
+document.addEventListener('focusout', ()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('tr[data-stale]').forEach(tr=>{ if(!isEditing(tr) && tr.parentElement) redrawRow(tr); });
+    if(TAB_RENDER_DEFERRED && !isEditing(document.getElementById('tab-'+activeMainTab))){
+      TAB_RENDER_DEFERRED = false;
+      renderActiveTab();
+    }
+  }, 0);
+});
+
+function subscribeRealtime(){
+  sb.channel('alddot-db')
+    .on('postgres_changes', {event:'*', schema:'public', table:'containers'}, p=> onRealtime('containers', p))
+    .on('postgres_changes', {event:'*', schema:'public', table:'records'}, p=> onRealtime('records', p))
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED'){
+        const wasDown = RT_DOWN;
+        RT_DOWN = false; renderSavebar();
+        flushQueue().then(()=>{ if(wasDown) resyncFromServer(); });
+      }else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT' || status==='CLOSED'){
+        RT_DOWN = true; renderSavebar();
+      }
+    });
+}
+// 재연결 뒤: 끊겨 있던 동안 놓친 변경을 서버에서 다시 받아요
+async function resyncFromServer(){
+  if(RT_BUFFER) return; // 이미 불러오는 중
+  RT_BUFFER = [];
+  try{
+    flushDebounces();
+    await flushQueue();
+    loadFromMaps(await fetchServerMaps());
+  }catch(err){ console.warn('다시 불러오기 실패:', err.message); }
+  const buffered = RT_BUFFER; RT_BUFFER = null;
+  buffered.forEach(([table, p])=> onRealtime(table, p));
+  if(isEditing(document.getElementById('tab-'+activeMainTab))) TAB_RENDER_DEFERRED = true;
+  else renderActiveTab();
+}
+
+/* ════════════════════════════════════════════════════════════
+   자동 연결: 페이지를 열면 바로 DB에 연결하고 실시간 구독을 시작해요 (로그인 없음)
+   ════════════════════════════════════════════════════════════ */
+const isPlaceholder = v => /^\[.*\]$/.test(v);
+function showSetup(msg){
+  document.getElementById('appRoot').classList.add('hidden');
+  document.getElementById('setupScreen').classList.remove('hidden');
+  document.getElementById('setupMsg').textContent = msg || '';
+}
+
+async function startApp(){
+  if(CONNECTED) return;
+  CONNECTED = true;
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('appRoot').classList.remove('hidden');
+  renderSavebar();
+  RT_BUFFER = [];
+  subscribeRealtime();
+  try{
+    await flushQueue(); // 지난번에 못 보낸 쓰기부터
+    loadFromMaps(await fetchServerMaps());
+  }catch(err){
+    RT_BUFFER = null;
+    showError('데이터를 불러오지 못했어요: ' + err.message + ' — 네트워크를 확인하고 새로고침해주세요.');
+    return;
+  }
+  const buffered = RT_BUFFER; RT_BUFFER = null;
+  buffered.forEach(([table, p])=> onRealtime(table, p));
+  activeEventMonthKey = getDefaultActiveEventMonthKey();
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  renderActiveTab();
+}
+
+function boot(){
+  if(SELFTEST) return; // 셀프테스트는 스크립트 맨 끝에서 따로 돌아요
+  loadPendingQueue();
+  if([SUPABASE_URL, SUPABASE_ANON_KEY].some(isPlaceholder) || !window.supabase){
+    showSetup('설정이 필요해요.\n파일 맨 위 <script>의 SUPABASE_URL · SUPABASE_ANON_KEY 값을 채운 뒤 다시 올려주세요.');
+    return;
+  }
+  // 로그인을 쓰지 않으니 세션 저장·URL 토큰 감지를 끄고, localStorage에도 아무것도 남기지 않아요
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false },
+  });
+  startApp();
+}
+
+/* ════════════════════════════════════════════════════════════
+   기존 데이터 올리기 (DB가 비어 있을 때 1회)
+   ════════════════════════════════════════════════════════════ */
+function updateMigrateBtn(){
+  const btn = document.getElementById('migrateBtn');
+  if(btn) btn.classList.toggle('hidden', !(DB_EMPTY && !MIGRATED && SHADOW.containers.size===0));
+}
+function isValidStateShape(d){
+  return !!d && ['eventMonths','bannerMonths','benefitBlocks'].every(k=> Array.isArray(d[k]));
+}
+document.getElementById('migrateBtn').addEventListener('click', ()=>{
+  if(MIGRATED) return;
+  let raw = null;
+  try{ raw = localStorage.getItem(LEGACY_STORAGE_KEY); }catch(e){ /* 읽기 불가 */ }
+  if(raw){
+    let data = null;
+    try{ data = JSON.parse(raw); }catch(e){ /* 아래에서 안내 */ }
+    if(isValidStateShape(data)){ migrateState(data); return; }
+  }
+  document.getElementById('migrateFileInput').click(); // 이 브라우저에 없으면 JSON 백업 파일로
+});
+document.getElementById('migrateFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let data = null;
+    try{ data = JSON.parse(reader.result); }catch(err){ /* 아래에서 안내 */ }
+    if(!isValidStateShape(data)){ showError('올바른 백업 파일이 아니에요. (eventMonths·bannerMonths·benefitBlocks가 있어야 해요)'); return; }
+    migrateState(data);
+  };
+  reader.readAsText(file);
+});
+async function migrateState(data){
+  if(MIGRATED) return;
+  MIGRATED = true;
+  const btn = document.getElementById('migrateBtn');
+  setBtnLoading(btn, '올리는 중...');
+  clearError();
+  try{
+    if(data.uiPrefs){ try{ localStorage.setItem(UI_PREFS_KEY, JSON.stringify(data.uiPrefs)); }catch(e){ /* 무시 */ } }
+    STATE = {...data, uiPrefs: data.uiPrefs || STATE.uiPrefs};
+    ensureStateShape();
+    SORT.clear();
+    syncChanges();
+    await flushQueue();
+    const expected = stateToRows(STATE);
+    const server = await fetchServerMaps();
+    const okC = server.containers.size===expected.containers.length;
+    const okR = server.records.size===expected.records.length;
+    const report = `컨테이너 ${server.containers.size}/${expected.containers.length}개 · 레코드 ${server.records.size}/${expected.records.length}개`;
+    if(okC && okR) showToast(`기존 데이터를 올렸어요. ${report}`);
+    else showError(`올린 개수가 달라요 (DB/원본): ${report}${QUEUE.length ? ` · 아직 미전송 ${QUEUE.length}건 — 연결되면 자동으로 다시 보내요` : ''}`);
+    logActivity('⬆', '기존 데이터 올리기', report, null);
+    syncChanges();
+  }catch(err){
+    showError('기존 데이터를 올리는 중 문제가 발생했어요: ' + err.message);
+  }
+  resetBtn(btn);
+  updateMigrateBtn();
+  activeEventMonthKey = getDefaultActiveEventMonthKey();
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  renderActiveTab();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -856,7 +1475,7 @@ function scanDeadlines(events, dueSoonDays=7){
   events.forEach(ev=>{
     if(!ev.name) return;
     if(DONE_STATUSES.has(ev.status)) return;
-    const due = parseDueDate(ev.dueDate);
+    const due = parseDueDate(ev.reflectStatus) || parseDueDate(ev.dueDate); // 종료일이 있으면 종료일, 없으면 시작일 기준
     if(!due) return;
     const d = daysBetween(due, today);
     if(d<0) overdue.push({...ev, d});
@@ -1008,15 +1627,17 @@ function renderDeadlineBox(){
    렌더: 이벤트 관리 탭
    ════════════════════════════════════════════════════════════ */
 let expandedEventMonths = new Set();
+let renderedEventMonthKey = null;
 
 function renderEventsTab(){
-  activeEventMonthKey = getDefaultActiveEventMonthKey();
-  selectedEventUids = new Set();
+  if(!activeEventMonthKey || !getEventMonth(activeEventMonthKey)) activeEventMonthKey = getDefaultActiveEventMonthKey();
+  if(renderedEventMonthKey !== activeEventMonthKey){ selectedEventUids = new Set(); renderedEventMonthKey = activeEventMonthKey; }
   const container = document.getElementById('tab-events');
   const currentMo = getEventMonth(activeEventMonthKey);
   const otherMonths = STATE.eventMonths.filter(m=>m.key!==activeEventMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
 
   container.innerHTML = `
+    <div id="statusboardHolder" class="statusboard"></div>
     <div class="panel">
       <h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3>
       <div id="deadlineBoxHolder"></div>
@@ -1051,9 +1672,12 @@ function renderEventsTab(){
   const addRowBtn = document.getElementById('addEventRowBtn');
   if(addRowBtn) addRowBtn.addEventListener('click', ()=>{
     const mo = getEventMonth(activeEventMonthKey);
-    mo.events.push({_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""});
-    scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox();
+    mo.events.push(newEventRow());
+    syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
   });
+}
+function newEventRow(){
+  return {_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""};
 }
 
 function renderEventHistoryAccordion(otherMonths){
@@ -1073,7 +1697,10 @@ function renderEventHistoryAccordion(otherMonths){
           ${escapeHtml(mo.label)}
           <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${mo.events.length}건</span>
         </span>
-        <button class="ghost sm del-event-month-btn" data-key="${mo.key}" title="이 달 삭제">🗑️</button>
+        <span>
+          <button class="ghost sm set-current-btn" data-key="${mo.key}">이 달을 현재로 보기</button>
+          <button class="ghost sm del-event-month-btn" data-key="${mo.key}" title="이 달 삭제">🗑️</button>
+        </span>
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
         <div class="tblwrap">
@@ -1088,11 +1715,18 @@ function renderEventHistoryAccordion(otherMonths){
 
   holder.querySelectorAll('.accordion-toggle').forEach(head=>{
     head.addEventListener('click', (e)=>{
-      if(e.target.closest('.del-event-month-btn')) return;
+      if(e.target.closest('button')) return;
       const key = head.dataset.key;
       if(expandedEventMonths.has(key)) expandedEventMonths.delete(key);
       else expandedEventMonths.add(key);
       renderEventHistoryAccordion(otherMonths);
+    });
+  });
+  holder.querySelectorAll('.set-current-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      activeEventMonthKey = btn.dataset.key;
+      renderEventsTab();
     });
   });
   holder.querySelectorAll('.del-event-month-btn').forEach(btn=>{
@@ -1102,13 +1736,16 @@ function renderEventHistoryAccordion(otherMonths){
       const mo = getEventMonth(key);
       showConfirmModal(`'${mo.label}' 데이터를 삭제할까요?`, ()=>{
         const idx = STATE.eventMonths.findIndex(m=>m.key===key);
+        if(idx<0) return;
         const removed = STATE.eventMonths[idx];
         STATE.eventMonths.splice(idx,1);
         expandedEventMonths.delete(key);
-        scheduleSave(); renderEventsTab();
+        syncChanges(); renderEventsTab();
         showUndoToast(`'${removed.label}' 데이터를 삭제했어요.`, ()=>{
-          STATE.eventMonths.splice(Math.min(idx, STATE.eventMonths.length), 0, removed);
-          scheduleSave(); renderEventsTab();
+          if(getEventMonth(removed.key)) return;
+          STATE.eventMonths.push(removed);
+          STATE.eventMonths.sort((a,b)=> a.key<b.key?-1:1);
+          syncChanges(); renderEventsTab();
         });
       });
     });
@@ -1117,20 +1754,13 @@ function renderEventHistoryAccordion(otherMonths){
   otherMonths.forEach(mo=>{ if(expandedEventMonths.has(mo.key)) renderHistoryMonthTable(mo.key); });
 }
 
-function renderHistoryMonthTable(key){
-  const mo = getEventMonth(key);
-  const headerRow = document.getElementById('histHeader_'+key);
-  const tbody = document.getElementById('histTbody_'+key);
-  if(!mo || !headerRow || !tbody) return;
-  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
-  headerRow.innerHTML = `<th style="width:70px;">순서</th>${visibleCols.map(c=>`<th ${c.minWidth?`style="min-width:${c.minWidth}px;"`:''}>${c.label}</th>`).join('')}<th></th>`;
-  if(!mo.events.length){
-    tbody.innerHTML = `<tr><td colspan="${visibleCols.length+2}"><div class="empty-state" style="padding:20px;">등록된 이벤트가 없어요.</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = mo.events.map((ev,idx)=>`
-    <tr data-idx="${idx}">
-      <td>
+function visibleEventColumns(){ return getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key)); }
+
+function eventRowHtml(ev, idx, cols, mode){
+  const current = mode==='current';
+  return `<tr data-uid="${escapeHtml(ev._uid)}" ${current?'draggable="true"':''}>
+      ${current?`<td><input type="checkbox" class="row-checkbox" ${selectedEventUids.has(ev._uid)?'checked':''}/></td>`:''}
+      <td ${current?'class="drag-handle" title="드래그해서 순서 변경"':''}>
         <div class="order-cell">
           <span class="order-badge">${idx+1}</span>
           <span class="order-arrows">
@@ -1139,61 +1769,134 @@ function renderHistoryMonthTable(key){
           </span>
         </div>
       </td>
-      ${visibleCols.map(c=>renderEventFieldCell(ev, c.key)).join('')}
-      <td><button class="ghost del-row-btn icon-btn" title="행 삭제">${TRASH_ICON}</button></td>
-    </tr>`).join('');
+      ${cols.map(c=>renderEventFieldCell(ev, c.key)).join('')}
+      <td style="white-space:nowrap;">
+        <button class="ghost del-row-btn icon-btn" title="행 삭제">${TRASH_ICON}</button>
+      </td>
+    </tr>`;
+}
 
-  tbody.querySelectorAll('tr').forEach(tr=>{
-    const idx = +tr.dataset.idx;
-    tr.querySelectorAll('.ev-field').forEach(inp=>{
-      inp.addEventListener('input', ()=>{
-        if(inp.dataset.field==='dueDate' || inp.dataset.field==='reflectStatus'){
-          mo.events[idx][inp.dataset.field] = isoToDot(inp.value);
-        }else{
-          mo.events[idx][inp.dataset.field] = inp.value;
-        }
-        if(inp.dataset.field==='status') inp.className = 'ev-field status-select ' + inp.value;
-        if(inp.dataset.field==='priority') inp.className = 'ev-field priority-select ' + inp.value;
-        if(inp.dataset.field==='name') inp.classList.toggle('empty-required', !inp.value.trim());
-        if(inp.dataset.field==='id'){
-          const linkBtn = tr.querySelector('.id-link-btn');
-          if(linkBtn) linkBtn.disabled = !eventIdToUrl(inp.value);
-        }
-        scheduleSave();
+// 상태 필터가 걸려 있으면 보이는 순서와 실제 순서가 달라서, 순서 이동·여러 칸 붙여넣기를 막아요
+function blockedByFilter(mode){
+  if(mode!=='current' || activeEventStatusFilter==='전체') return false;
+  showToast("필터를 '전체'로 바꾼 뒤 이용해주세요", 'error');
+  return true;
+}
+
+// 행 하나에 이벤트를 연결해요. 인덱스 대신 _uid로 매번 찾아서, 다른 사람이 행을 넣거나 지워도 엉뚱한 행을 고치지 않아요.
+function bindEventRow(tr, key, mode){
+  const uidVal = tr.dataset.uid;
+  const getMo = ()=> getEventMonth(key);
+  const getEv = ()=>{ const m = getMo(); return m ? m.events.find(e=>e._uid===uidVal) : null; };
+  const rerender = mode==='current'
+    ? ()=>{ renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+    : ()=> renderHistoryMonthTable(key);
+  const move = (delta)=>{
+    if(blockedByFilter(mode)) return;
+    const m = getMo(); const ev = getEv(); if(!m || !ev) return;
+    const i = m.events.indexOf(ev), j = i + delta;
+    if(j<0 || j>=m.events.length) return;
+    [m.events[i], m.events[j]] = [m.events[j], m.events[i]];
+    SORT.delete(uidVal); // 옮긴 행 하나만 이웃 사이의 중간값으로 다시 정해요
+    syncChanges(); rerender();
+  };
+
+  tr.querySelectorAll('.ev-field').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const ev = getEv(); if(!ev) return;
+      const field = inp.dataset.field;
+      const value = (field==='dueDate' || field==='reflectStatus') ? isoToDot(inp.value) : inp.value;
+      ev[field] = value;
+      if(field==='status'){
+        inp.className = 'ev-field status-select ' + inp.value;
+        if(mode==='current'){ renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+      }
+      if(field==='priority') inp.className = 'ev-field priority-select ' + inp.value;
+      if(field==='name') inp.classList.toggle('empty-required', !inp.value.trim());
+      if(field==='id'){
+        const linkBtn = tr.querySelector('.id-link-btn');
+        if(linkBtn) linkBtn.disabled = !eventIdToUrl(inp.value);
+      }
+      saveField(uidVal, field, value);
+    });
+    inp.addEventListener('paste', (e)=> handleTablePaste(e, key, uidVal, inp.dataset.field, mode));
+  });
+  const linkBtn = tr.querySelector('.id-link-btn');
+  if(linkBtn) linkBtn.addEventListener('click', ()=>{
+    const ev = getEv();
+    const url = ev && eventIdToUrl(ev.id);
+    if(url) window.open(url, '_blank');
+  });
+  tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
+    showConfirmModal('이 행을 삭제할까요?', ()=>{
+      const m = getMo(); const ev = getEv(); if(!m || !ev) return;
+      const idx = m.events.indexOf(ev);
+      m.events.splice(idx,1);
+      selectedEventUids.delete(uidVal);
+      syncChanges(); rerender();
+      showUndoToast(`'${ev.name||'이벤트'}' 행을 삭제했어요.`, ()=>{
+        const m2 = getMo(); if(!m2 || m2.events.includes(ev)) return;
+        insertBySort(m2.events, ev, idx); // 같은 id·같은 순서값으로 다시 넣어요
+        syncChanges(); rerender();
       });
-      inp.addEventListener('paste', (e)=> handleTablePaste(e, mo, idx, inp.dataset.field));
     });
-    const linkBtn = tr.querySelector('.id-link-btn');
-    if(linkBtn) linkBtn.addEventListener('click', ()=>{
-      const url = eventIdToUrl(mo.events[idx].id);
-      if(url) window.open(url, '_blank');
+  });
+  const cb = tr.querySelector('.row-checkbox');
+  if(cb) cb.addEventListener('change', (e)=>{
+    if(e.target.checked) selectedEventUids.add(uidVal); else selectedEventUids.delete(uidVal);
+    renderBulkBar();
+  });
+  tr.querySelector('.move-up-btn').addEventListener('click', ()=> move(-1));
+  tr.querySelector('.move-down-btn').addEventListener('click', ()=> move(1));
+
+  if(mode==='current'){
+    tr.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', uidVal);
+      tr.classList.add('dragging');
     });
-    tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
-      showConfirmModal('이 행을 삭제할까요?', ()=>{
-        const removed = mo.events[idx];
-        mo.events.splice(idx,1); scheduleSave(); renderHistoryMonthTable(key);
-        showUndoToast(`'${removed.name||'이벤트'}' 행을 삭제했어요.`, ()=>{
-          mo.events.splice(idx,0,removed); scheduleSave(); renderHistoryMonthTable(key);
-        });
-      });
+    tr.addEventListener('dragend', ()=> tr.classList.remove('dragging'));
+    tr.addEventListener('dragover', (e)=>{ e.preventDefault(); tr.classList.add('drag-over'); });
+    tr.addEventListener('dragleave', ()=> tr.classList.remove('drag-over'));
+    tr.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      if(blockedByFilter(mode)) return;
+      const fromUid = e.dataTransfer.getData('text/plain');
+      const m = getMo(); if(!m || fromUid===uidVal) return;
+      const fromIdx = m.events.findIndex(x=>x._uid===fromUid);
+      const toIdx = m.events.findIndex(x=>x._uid===uidVal);
+      if(fromIdx<0 || toIdx<0) return;
+      const [moved] = m.events.splice(fromIdx,1);
+      m.events.splice(toIdx,0,moved);
+      SORT.delete(fromUid);
+      syncChanges(); rerender();
     });
-    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
-      if(idx<=0) return;
-      [mo.events[idx-1], mo.events[idx]] = [mo.events[idx], mo.events[idx-1]];
-      scheduleSave(); renderHistoryMonthTable(key);
-    });
-    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
-      if(idx>=mo.events.length-1) return;
-      [mo.events[idx+1], mo.events[idx]] = [mo.events[idx], mo.events[idx+1]];
-      scheduleSave(); renderHistoryMonthTable(key);
-    });
+  }
+}
+
+function renderHistoryMonthTable(key){
+  const mo = getEventMonth(key);
+  const headerRow = document.getElementById('histHeader_'+key);
+  const tbody = document.getElementById('histTbody_'+key);
+  if(!mo || !headerRow || !tbody) return;
+  const visibleCols = visibleEventColumns();
+  headerRow.innerHTML = `<th style="width:70px;">순서</th>${visibleCols.map(c=>`<th ${c.minWidth?`style="min-width:${c.minWidth}px;"`:''}>${c.label}</th>`).join('')}<th></th>`;
+  const html = mo.events.length
+    ? mo.events.map((ev,idx)=> eventRowHtml(ev, idx, visibleCols, 'history')).join('')
+    : `<tr><td colspan="${visibleCols.length+2}"><div class="empty-state" style="padding:20px;">등록된 이벤트가 없어요.</div></td></tr>`;
+  fillTbody(tbody, {
+    cid:'event:'+key, html,
+    rerender: ()=> renderHistoryMonthTable(key),
+    rowFor: uidVal=>{ const m = getEventMonth(key); const i = m ? m.events.findIndex(e=>e._uid===uidVal) : -1; return i<0 ? null : eventRowHtml(m.events[i], i, visibleEventColumns(), 'history'); },
+    bind: tr=> bindEventRow(tr, key, 'history'),
   });
 }
 
 function renderEventsTableHeader(){
   const headerRow = document.getElementById('eventsHeaderRow');
   if(!headerRow) return;
-  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
+  const visibleCols = visibleEventColumns();
   headerRow.innerHTML = `
     <th style="width:32px;"><input type="checkbox" class="header-checkbox" id="eventsHeaderCheckbox" title="전체 선택"/></th>
     <th style="width:70px;">순서</th>
@@ -1205,6 +1908,7 @@ function renderEventsTableHeader(){
 function renderEventStatusFilterRow(){
   const mo = getEventMonth(activeEventMonthKey);
   const holder = document.getElementById('eventStatusFilterRow');
+  if(!mo || !holder) return;
   const filters = ['전체', ...STATUS_OPTIONS];
   holder.innerHTML = filters.map(f=>{
     const count = f==='전체' ? mo.events.length : mo.events.filter(ev=>ev.status===f).length;
@@ -1242,178 +1946,101 @@ function renderEventFieldCell(ev, colKey){
   return `<td><input type="text" class="ev-field${emptyRequired}" data-field="${colKey}" value="${escapeHtml(ev[colKey]||'')}" ${placeholders[colKey]?`placeholder="${placeholders[colKey]}"`:''}/></td>`;
 }
 
+const passesEventFilter = ev => activeEventStatusFilter==='전체' || ev.status===activeEventStatusFilter;
+
 function renderEventsRows(){
   const mo = getEventMonth(activeEventMonthKey);
   const tbody = document.getElementById('eventsTbody');
-  const visibleCols = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key));
+  if(!mo || !tbody) return;
+  const key = mo.key;
+  const visibleCols = visibleEventColumns();
   const colCount = visibleCols.length + 3; // 체크박스 + 드래그핸들 + 액션
-  const visibleIndices = mo.events
-    .map((ev,i)=>i)
-    .filter(i => activeEventStatusFilter==='전체' || mo.events[i].status===activeEventStatusFilter);
+  const visibleEvents = mo.events.filter(passesEventFilter);
 
+  let html;
   if(!mo.events.length){
-    tbody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty-state"><div class="big">🗒️</div>아직 등록된 이벤트가 없어요. 위 “이벤트 행 추가하기”를 눌러 시작하세요.</div></td></tr>`;
-    renderBulkBar(); return;
+    html = `<tr><td colspan="${colCount}"><div class="empty-state"><div class="big">🗒️</div>아직 등록된 이벤트가 없어요. 위 “이벤트 행 추가하기”를 눌러 시작하세요.</div></td></tr>`;
+  }else if(!visibleEvents.length){
+    html = `<tr><td colspan="${colCount}"><div class="empty-state"><div class="big">🔎</div>'${activeEventStatusFilter}' 상태의 이벤트가 없어요.</div></td></tr>`;
+  }else{
+    html = visibleEvents.map(ev=> eventRowHtml(ev, mo.events.indexOf(ev), visibleCols, 'current')).join('');
   }
-  if(!visibleIndices.length){
-    tbody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty-state"><div class="big">🔎</div>'${activeEventStatusFilter}' 상태의 이벤트가 없어요.</div></td></tr>`;
-    renderBulkBar(); return;
-  }
-
-  tbody.innerHTML = visibleIndices.map(idx=>{
-    const ev = mo.events[idx];
-    const checked = selectedEventUids.has(ev._uid) ? 'checked' : '';
-    return `<tr data-idx="${idx}" data-uid="${ev._uid||''}" draggable="true">
-      <td><input type="checkbox" class="row-checkbox" ${checked}/></td>
-      <td class="drag-handle" title="드래그해서 순서 변경">
-        <div class="order-cell">
-          <span class="order-badge">${idx+1}</span>
-          <span class="order-arrows">
-            <button class="move-up-btn" title="위로">▲</button>
-            <button class="move-down-btn" title="아래로">▼</button>
-          </span>
-        </div>
-      </td>
-      ${visibleCols.map(c=>renderEventFieldCell(ev, c.key)).join('')}
-      <td style="white-space:nowrap;">
-        <button class="ghost del-row-btn icon-btn" title="행 삭제">${TRASH_ICON}</button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  tbody.querySelectorAll('tr').forEach(tr=>{
-    const idx = +tr.dataset.idx;
-    tr.querySelectorAll('.ev-field').forEach(inp=>{
-      inp.addEventListener('input', ()=>{
-        if(inp.dataset.field==='dueDate' || inp.dataset.field==='reflectStatus'){
-          mo.events[idx][inp.dataset.field] = isoToDot(inp.value);
-        }else{
-          mo.events[idx][inp.dataset.field] = inp.value;
-        }
-        if(inp.dataset.field==='status'){
-          inp.className = 'ev-field status-select ' + inp.value;
-          renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
-        }
-        if(inp.dataset.field==='priority'){
-          inp.className = 'ev-field priority-select ' + inp.value;
-        }
-        if(inp.dataset.field==='name'){
-          inp.classList.toggle('empty-required', !inp.value.trim());
-        }
-        if(inp.dataset.field==='id'){
-          const linkBtn = tr.querySelector('.id-link-btn');
-          if(linkBtn) linkBtn.disabled = !eventIdToUrl(inp.value);
-        }
-        scheduleSave();
-      });
-      inp.addEventListener('paste', (e)=> handleTablePaste(e, mo, idx, inp.dataset.field));
-    });
-    const linkBtn = tr.querySelector('.id-link-btn');
-    if(linkBtn) linkBtn.addEventListener('click', ()=>{
-      const url = eventIdToUrl(mo.events[idx].id);
-      if(url) window.open(url, '_blank');
-    });
-    tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
-      showConfirmModal('이 행을 삭제할까요?', ()=>{
-        const removed = mo.events[idx];
-        selectedEventUids.delete(removed._uid);
-        mo.events.splice(idx,1); scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
-        showUndoToast(`'${removed.name||'이벤트'}' 행을 삭제했어요.`, ()=>{
-          mo.events.splice(idx,0,removed);
-          scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
-        });
-      });
-    });
-    tr.querySelector('.row-checkbox').addEventListener('change', (e)=>{
-      const eventUid = mo.events[idx]._uid;
-      if(e.target.checked) selectedEventUids.add(eventUid); else selectedEventUids.delete(eventUid);
-      renderBulkBar();
-    });
-    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
-      if(idx<=0) return;
-      [mo.events[idx-1], mo.events[idx]] = [mo.events[idx], mo.events[idx-1]];
-      scheduleSave(); renderEventsRows();
-    });
-    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
-      if(idx>=mo.events.length-1) return;
-      [mo.events[idx+1], mo.events[idx]] = [mo.events[idx], mo.events[idx+1]];
-      scheduleSave(); renderEventsRows();
-    });
-
-    // 드래그로 순서 변경
-    tr.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', String(idx));
-      tr.classList.add('dragging');
-    });
-    tr.addEventListener('dragend', ()=> tr.classList.remove('dragging'));
-    tr.addEventListener('dragover', (e)=>{ e.preventDefault(); tr.classList.add('drag-over'); });
-    tr.addEventListener('dragleave', ()=> tr.classList.remove('drag-over'));
-    tr.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      tr.classList.remove('drag-over');
-      const fromIdx = +e.dataTransfer.getData('text/plain');
-      const toIdx = idx;
-      if(fromIdx===toIdx || isNaN(fromIdx)) return;
-      const [moved] = mo.events.splice(fromIdx,1);
-      mo.events.splice(toIdx,0,moved);
-      scheduleSave(); renderEventsRows();
-    });
+  fillTbody(tbody, {
+    cid:'event:'+key, html,
+    rerender: renderEventsRows,
+    rowFor: uidVal=>{
+      const m = getEventMonth(key); if(!m) return null;
+      const i = m.events.findIndex(e=>e._uid===uidVal);
+      return (i<0 || !passesEventFilter(m.events[i])) ? null : eventRowHtml(m.events[i], i, visibleEventColumns(), 'current');
+    },
+    bind: tr=> bindEventRow(tr, key, 'current'),
   });
 
   const headerCb = document.getElementById('eventsHeaderCheckbox');
   if(headerCb){
-    headerCb.checked = visibleIndices.length>0 && visibleIndices.every(i=>selectedEventUids.has(mo.events[i]._uid));
+    headerCb.checked = visibleEvents.length>0 && visibleEvents.every(ev=>selectedEventUids.has(ev._uid));
     headerCb.onchange = ()=>{
-      if(headerCb.checked) visibleIndices.forEach(i=> selectedEventUids.add(mo.events[i]._uid));
-      else visibleIndices.forEach(i=> selectedEventUids.delete(mo.events[i]._uid));
+      const m = getEventMonth(key); if(!m) return;
+      m.events.filter(passesEventFilter).forEach(ev=> headerCb.checked ? selectedEventUids.add(ev._uid) : selectedEventUids.delete(ev._uid));
       renderEventsRows();
     };
   }
   renderBulkBar();
 }
 
-function handleTablePaste(e, mo, startIdx, startField){
+function handleTablePaste(e, key, startUid, startField, mode){
   const text = (e.clipboardData || window.clipboardData).getData('text');
   if(!text || !/[\t\n]/.test(text)) return; // 단일 셀 값이면 기본 붙여넣기 동작에 맡긴다
   e.preventDefault();
+  if(blockedByFilter(mode)) return;
+  const mo = getEventMonth(key);
+  if(!mo) return;
+  const startIdx = mo.events.findIndex(ev=>ev._uid===startUid);
+  if(startIdx<0) return;
   const rows = text.replace(/\r/g,'').split('\n').filter((r,i,arr)=> !(i===arr.length-1 && r==='')).map(r=>r.split('\t'));
   // 화면에 숨긴 컬럼은 붙여넣기 대상에서도 건너뛴다 (보이는 순서와 실제로 채워지는 순서를 맞추기 위해)
-  const fieldOrder = getAllEventColumns().filter(c=>!hiddenEventColumns.has(c.key)).map(c=>c.key);
+  const fieldOrder = visibleEventColumns().map(c=>c.key);
   const startFieldIdx = fieldOrder.indexOf(startField);
   if(startFieldIdx===-1) return;
+  const rerender = mode==='current'
+    ? ()=>{ renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+    : ()=> renderHistoryMonthTable(key);
 
   const snapshot = []; // 덮어쓰기 전 원래 값 (실행취소용)
   rows.forEach((cols, rOffset)=>{
-    const targetRowIdx = startIdx + rOffset;
-    let targetEv = mo.events[targetRowIdx];
+    let targetEv = mo.events[startIdx + rOffset];
     let isNew = false;
     if(!targetEv){
-      targetEv = {_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""};
+      targetEv = newEventRow();
       mo.events.push(targetEv);
       isNew = true;
     }
-    snapshot.push({ idx: targetRowIdx, isNew, before: isNew ? null : {...targetEv} });
+    snapshot.push({ uid: targetEv._uid, isNew, before: isNew ? null : {...targetEv} });
     cols.forEach((val, cOffset)=>{
       const field = fieldOrder[startFieldIdx + cOffset];
       if(field) targetEv[field] = val.trim();
     });
   });
-  scheduleSave();
-  renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+  syncChanges();
+  rerender();
   showUndoToast(`${rows.length}행을 붙여넣었어요. (자동 반영된 내용이니 한 번 확인해주세요)`, ()=>{
     // 새로 만든 행은 제거하고, 기존 행은 붙여넣기 전 값으로 되돌린다
-    snapshot.slice().reverse().forEach(s=>{
-      if(s.isNew) mo.events.splice(s.idx,1);
-      else mo.events[s.idx] = s.before;
+    const m = getEventMonth(key); if(!m) return;
+    snapshot.forEach(s=>{
+      const i = m.events.findIndex(ev=>ev._uid===s.uid);
+      if(i<0) return;
+      if(s.isNew) m.events.splice(i,1);
+      else Object.assign(m.events[i], s.before);
     });
-    scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+    syncChanges(); rerender();
   });
 }
 
 function renderBulkBar(){
   const holder = document.getElementById('bulkBarHolder');
   if(!holder) return;
+  const mo = getEventMonth(activeEventMonthKey);
+  if(mo){ const live = new Set(mo.events.map(ev=>ev._uid)); selectedEventUids.forEach(u=>{ if(!live.has(u)) selectedEventUids.delete(u); }); }
   if(!selectedEventUids.size){ holder.innerHTML=''; return; }
   const statusBtns = STATUS_OPTIONS.map(s=>`<button class="sm bulk-status-btn" data-status="${s}">${s}로 변경</button>`).join('');
   holder.innerHTML = `
@@ -1431,7 +2058,7 @@ function renderBulkBar(){
       const count = selectedEventUids.size;
       mo.events.forEach(ev=>{ if(selectedEventUids.has(ev._uid)) ev.status = btn.dataset.status; });
       logActivity('☑️', `이벤트 ${count}건 상태를 '${btn.dataset.status}'로 일괄 변경`, mo.label, 'events', mo.key);
-      scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+      syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
       showToast(`${count}건을 '${btn.dataset.status}' 상태로 바꿨어요.`);
     });
   });
@@ -1442,7 +2069,7 @@ function renderBulkBar(){
       mo.events = mo.events.filter(ev=> !selectedEventUids.has(ev._uid));
       selectedEventUids = new Set();
       logActivity('🗑️', `이벤트 ${count}건 일괄 삭제`, mo.label, 'events', mo.key);
-      scheduleSave(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+      syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
     });
   });
 }
@@ -1455,7 +2082,7 @@ function addNewEventMonth(){
   STATE.eventMonths.push({key, label, events: carried});
   activeEventMonthKey = key;
   logActivity('📅', `'${label}' 이벤트 시트 생성`, `연장 항목 ${carried.length}건 자동 이월`, 'events', key);
-  scheduleSave();
+  syncChanges();
   renderEventsTab();
   showToast(`'${label}' 시트를 만들었어요. "연장" 상태였던 ${carried.length}건이 자동으로 이월되었습니다.`);
 }
@@ -1466,7 +2093,7 @@ function addNewEventMonth(){
 let expandedBannerMonths = new Set();
 
 function renderBannerTab(){
-  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  if(!activeBannerMonthKey || !getBannerMonth(activeBannerMonthKey)) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   const container = document.getElementById('tab-banner');
   const currentMo = getBannerMonth(activeBannerMonthKey);
   const otherMonths = STATE.bannerMonths.filter(m=>m.key!==activeBannerMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
@@ -1515,9 +2142,12 @@ function renderBannerTab(){
   if(addBRowBtn) addBRowBtn.addEventListener('click', ()=>{
     const mo = getBannerMonth(activeBannerMonthKey);
     mo.ranks.push({_uid:uid(), values:{}});
-    scheduleSave(); renderBannerRows();
+    syncChanges(); renderBannerRows();
   });
 }
+
+// 배너·프리마케팅 이력 아코디언 헤더의 "이 달을 현재로 보기" 버튼
+function setCurrentBtnHtml(key){ return `<button class="ghost sm set-current-btn" data-key="${key}">이 달을 현재로 보기</button>`; }
 
 function renderBannerHistoryAccordion(otherMonths){
   const holder = document.getElementById('bannerHistoryAccordion');
@@ -1536,7 +2166,10 @@ function renderBannerHistoryAccordion(otherMonths){
           ${escapeHtml(mo.label)}
           <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${mo.ranks.length}건</span>
         </span>
-        <button class="ghost sm del-banner-month-btn icon-btn" data-key="${mo.key}" title="이 달 삭제">${TRASH_ICON}</button>
+        <span>
+          ${setCurrentBtnHtml(mo.key)}
+          <button class="ghost sm del-banner-month-btn icon-btn" data-key="${mo.key}" title="이 달 삭제">${TRASH_ICON}</button>
+        </span>
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
         <div class="tblwrap">
@@ -1548,12 +2181,15 @@ function renderBannerHistoryAccordion(otherMonths){
 
   holder.querySelectorAll('.accordion-toggle').forEach(head=>{
     head.addEventListener('click', (e)=>{
-      if(e.target.closest('.del-banner-month-btn')) return;
+      if(e.target.closest('button')) return;
       const key = head.dataset.key;
       if(expandedBannerMonths.has(key)) expandedBannerMonths.delete(key);
       else expandedBannerMonths.add(key);
       renderBannerHistoryAccordion(otherMonths);
     });
+  });
+  holder.querySelectorAll('.set-current-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); activeBannerMonthKey = btn.dataset.key; renderBannerTab(); });
   });
   holder.querySelectorAll('.del-banner-month-btn').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
@@ -1562,13 +2198,16 @@ function renderBannerHistoryAccordion(otherMonths){
       const mo = getBannerMonth(key);
       showConfirmModal(`'${mo.label}' 배너 구좌 데이터를 삭제할까요?`, ()=>{
         const idx = STATE.bannerMonths.findIndex(m=>m.key===key);
+        if(idx<0) return;
         const removed = STATE.bannerMonths[idx];
         STATE.bannerMonths.splice(idx,1);
         expandedBannerMonths.delete(key);
-        scheduleSave(); renderBannerTab();
+        syncChanges(); renderBannerTab();
         showUndoToast(`'${mo.label}' 배너 구좌 데이터를 삭제했어요.`, ()=>{
-          STATE.bannerMonths.splice(Math.min(idx, STATE.bannerMonths.length), 0, removed);
-          scheduleSave(); renderBannerTab();
+          if(getBannerMonth(removed.key)) return;
+          STATE.bannerMonths.push(removed);
+          STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
+          syncChanges(); renderBannerTab();
         });
       });
     });
@@ -1577,20 +2216,11 @@ function renderBannerHistoryAccordion(otherMonths){
   otherMonths.forEach(mo=>{ if(expandedBannerMonths.has(mo.key)) renderBannerHistoryTable(mo.key); });
 }
 
-function renderBannerHistoryTable(key){
-  const mo = getBannerMonth(key);
-  const table = document.getElementById('bHistTable_'+key);
-  if(!mo || !table) return;
-  const hidden = mo.hiddenColumns||[];
-  const visibleCols = mo.columns.filter(c=>!hidden.includes(c));
-  const head = `<thead><tr><th style="width:70px;">순서</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
-  let body;
-  if(!mo.ranks.length){
-    body = `<tbody><tr><td colspan="${visibleCols.length+2}"><div class="empty-state" style="padding:20px;">등록된 순위가 없어요.</div></td></tr></tbody>`;
-  }else{
-    body = '<tbody>' + mo.ranks.map((r,idx)=>`
-      <tr data-idx="${idx}">
-        <td>
+function bannerRowHtml(r, idx, cols, mode){
+  const current = mode==='current';
+  return `
+      <tr data-uid="${escapeHtml(r._uid)}" ${current?'draggable="true"':''}>
+        <td ${current?'class="drag-handle" title="드래그해서 순위 변경"':''}>
           <div class="order-cell">
             <span class="order-badge">${idx+1}</span>
             <span class="order-arrows">
@@ -1599,43 +2229,100 @@ function renderBannerHistoryTable(key){
             </span>
           </div>
         </td>
-        ${visibleCols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
+        ${cols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
         <td><button class="ghost del-row-btn icon-btn">${TRASH_ICON}</button></td>
-      </tr>`).join('') + '</tbody>';
-  }
-  table.innerHTML = head + body;
+      </tr>`;
+}
+function bannerVisibleCols(mo){ const hidden = mo.hiddenColumns||[]; return mo.columns.filter(c=>!hidden.includes(c)); }
 
-  table.querySelectorAll('tbody tr').forEach(tr=>{
-    const idx = +tr.dataset.idx;
-    tr.querySelectorAll('.bn-field').forEach(inp=>{
-      inp.addEventListener('input', ()=>{ mo.ranks[idx].values[inp.dataset.col] = inp.value; scheduleSave(); });
-      inp.addEventListener('blur', ()=>{
-        const mapped = applyPartnerNameMap(inp.value);
-        if(mapped !== inp.value){ inp.value = mapped; mo.ranks[idx].values[inp.dataset.col] = mapped; scheduleSave(); }
-      });
+function bindBannerRow(tr, key, mode, rerender){
+  const uidVal = tr.dataset.uid;
+  const getMo = ()=> getBannerMonth(key);
+  const getRank = ()=>{ const m = getMo(); return m ? m.ranks.find(r=>r._uid===uidVal) : null; };
+  const move = (delta)=>{
+    const m = getMo(); const r = getRank(); if(!m || !r) return;
+    const i = m.ranks.indexOf(r), j = i + delta;
+    if(j<0 || j>=m.ranks.length) return;
+    [m.ranks[i], m.ranks[j]] = [m.ranks[j], m.ranks[i]];
+    SORT.delete(uidVal);
+    syncChanges(); rerender();
+  };
+  tr.querySelectorAll('.bn-field').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const r = getRank(); if(!r) return;
+      r.values[inp.dataset.col] = inp.value;
+      saveField(uidVal, inp.dataset.col, inp.value);
     });
-    const delBtn = tr.querySelector('.del-row-btn');
-    if(delBtn) delBtn.addEventListener('click', ()=>{
-      showConfirmModal('이 순위 행을 삭제할까요?', ()=>{
-        const removed = mo.ranks[idx];
-        mo.ranks.splice(idx,1); scheduleSave(); renderBannerHistoryTable(key);
-        showUndoToast('순위 행을 삭제했어요.', ()=>{
-          mo.ranks.splice(idx,0,removed); scheduleSave(); renderBannerHistoryTable(key);
-        });
-      });
-    });
-    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
-      if(idx<=0) return;
-      [mo.ranks[idx-1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx-1]];
-      scheduleSave(); renderBannerHistoryTable(key);
-    });
-    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
-      if(idx>=mo.ranks.length-1) return;
-      [mo.ranks[idx+1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx+1]];
-      scheduleSave(); renderBannerHistoryTable(key);
+    inp.addEventListener('blur', ()=>{
+      const mapped = applyPartnerNameMap(inp.value);
+      const r = getRank();
+      if(r && mapped !== inp.value){
+        inp.value = mapped;
+        r.values[inp.dataset.col] = mapped;
+        saveField(uidVal, inp.dataset.col, mapped);
+      }
     });
   });
+  tr.querySelector('.del-row-btn').addEventListener('click', ()=>{
+    showConfirmModal('이 순위 행을 삭제할까요?', ()=>{
+      const m = getMo(); const r = getRank(); if(!m || !r) return;
+      const idx = m.ranks.indexOf(r);
+      m.ranks.splice(idx,1); syncChanges(); rerender();
+      showUndoToast('순위 행을 삭제했어요.', ()=>{
+        const m2 = getMo(); if(!m2 || m2.ranks.includes(r)) return;
+        insertBySort(m2.ranks, r, idx); syncChanges(); rerender();
+      });
+    });
+  });
+  tr.querySelector('.move-up-btn').addEventListener('click', ()=> move(-1));
+  tr.querySelector('.move-down-btn').addEventListener('click', ()=> move(1));
+  if(mode==='current'){
+    tr.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', uidVal);
+      tr.classList.add('dragging');
+    });
+    tr.addEventListener('dragend', ()=> tr.classList.remove('dragging'));
+    tr.addEventListener('dragover', (e)=>{ e.preventDefault(); tr.classList.add('drag-over'); });
+    tr.addEventListener('dragleave', ()=> tr.classList.remove('drag-over'));
+    tr.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      const fromUid = e.dataTransfer.getData('text/plain');
+      const m = getMo(); if(!m || fromUid===uidVal) return;
+      const fromIdx = m.ranks.findIndex(x=>x._uid===fromUid);
+      const toIdx = m.ranks.findIndex(x=>x._uid===uidVal);
+      if(fromIdx<0 || toIdx<0) return;
+      const [moved] = m.ranks.splice(fromIdx,1);
+      m.ranks.splice(toIdx,0,moved);
+      SORT.delete(fromUid);
+      syncChanges(); rerender();
+    });
+  }
 }
+
+// 배너 순위표 (현재 달·이력 공용). thead는 매번 새로 그리고, tbody는 입력 중인 행을 지키며 채워요.
+function renderBannerTable(table, key, mode){
+  const mo = getBannerMonth(key);
+  if(!mo || !table) return;
+  const visibleCols = bannerVisibleCols(mo);
+  if(!table.tHead) table.innerHTML = '<thead></thead><tbody></tbody>';
+  table.tHead.innerHTML = `<tr><th style="width:70px;">순서</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr>`;
+  const emptyMsg = mode==='current'
+    ? `<div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div>`
+    : `<div class="empty-state" style="padding:20px;">등록된 순위가 없어요.</div>`;
+  const html = mo.ranks.length
+    ? mo.ranks.map((r,idx)=> bannerRowHtml(r, idx, visibleCols, mode)).join('')
+    : `<tr><td colspan="${visibleCols.length+2}">${emptyMsg}</td></tr>`;
+  const rerender = ()=> renderBannerTable(table, key, mode);
+  fillTbody(table.tBodies[0], {
+    cid:'banner:'+key, html, rerender,
+    rowFor: uidVal=>{ const m = getBannerMonth(key); const i = m ? m.ranks.findIndex(r=>r._uid===uidVal) : -1; return i<0 ? null : bannerRowHtml(m.ranks[i], i, bannerVisibleCols(m), mode); },
+    bind: tr=> bindBannerRow(tr, key, mode, rerender),
+  });
+}
+function renderBannerHistoryTable(key){ renderBannerTable(document.getElementById('bHistTable_'+key), key, 'history'); }
+function renderBannerRows(){ renderBannerTable(document.getElementById('bannerTable'), activeBannerMonthKey, 'current'); }
 
 function renderBannerColsEditor(){
   const mo = getBannerMonth(activeBannerMonthKey);
@@ -1647,91 +2334,8 @@ function renderBannerColsEditor(){
       showConfirmModal(`'${col}' 구좌를 삭제할까요? (해당 컬럼 데이터도 함께 사라져요)`, ()=>{
         mo.columns = mo.columns.filter(c=>c!==col);
         mo.ranks.forEach(r=>delete r.values[col]);
-        scheduleSave(); renderBannerTab();
+        syncChanges(); renderBannerTab();
       });
-    });
-  });
-}
-
-function renderBannerRows(){
-  const mo = getBannerMonth(activeBannerMonthKey);
-  const table = document.getElementById('bannerTable');
-  const hidden = mo.hiddenColumns||[];
-  const visibleCols = mo.columns.filter(c=>!hidden.includes(c));
-  const head = `<thead><tr><th style="width:70px;">순서</th>${visibleCols.map(c=>`<th>${escapeHtml(c)}</th>`).join('')}<th></th></tr></thead>`;
-  let body;
-  if(!mo.ranks.length){
-    body = `<tbody><tr><td colspan="${visibleCols.length+2}"><div class="empty-state"><div class="big">🎏</div>등록된 순위가 없어요. “순위 행 추가하기”를 눌러 시작하세요.</div></td></tr></tbody>`;
-  }else{
-    body = '<tbody>' + mo.ranks.map((r,idx)=>`
-      <tr data-idx="${idx}" draggable="true">
-        <td class="drag-handle" title="드래그해서 순위 변경">
-          <div class="order-cell">
-            <span class="order-badge">${idx+1}</span>
-            <span class="order-arrows">
-              <button class="move-up-btn" title="위로">▲</button>
-              <button class="move-down-btn" title="아래로">▼</button>
-            </span>
-          </div>
-        </td>
-        ${visibleCols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
-        <td><button class="ghost del-row-btn icon-btn">${TRASH_ICON}</button></td>
-      </tr>`).join('') + '</tbody>';
-  }
-  table.innerHTML = head + body;
-
-  table.querySelectorAll('tbody tr').forEach(tr=>{
-    const idx = +tr.dataset.idx;
-    tr.querySelectorAll('.bn-field').forEach(inp=>{
-      inp.addEventListener('input', ()=>{
-        mo.ranks[idx].values[inp.dataset.col] = inp.value;
-        scheduleSave();
-      });
-      inp.addEventListener('blur', ()=>{
-        const mapped = applyPartnerNameMap(inp.value);
-        if(mapped !== inp.value){
-          inp.value = mapped;
-          mo.ranks[idx].values[inp.dataset.col] = mapped;
-          scheduleSave();
-        }
-      });
-    });
-    const delBtn = tr.querySelector('.del-row-btn');
-    if(delBtn) delBtn.addEventListener('click', ()=>{
-      showConfirmModal('이 순위 행을 삭제할까요?', ()=>{
-        const removed = mo.ranks[idx];
-        mo.ranks.splice(idx,1); scheduleSave(); renderBannerRows();
-        showUndoToast('순위 행을 삭제했어요.', ()=>{
-          mo.ranks.splice(idx,0,removed); scheduleSave(); renderBannerRows();
-        });
-      });
-    });
-    tr.querySelector('.move-up-btn').addEventListener('click', ()=>{
-      if(idx<=0) return;
-      [mo.ranks[idx-1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx-1]];
-      scheduleSave(); renderBannerRows();
-    });
-    tr.querySelector('.move-down-btn').addEventListener('click', ()=>{
-      if(idx>=mo.ranks.length-1) return;
-      [mo.ranks[idx+1], mo.ranks[idx]] = [mo.ranks[idx], mo.ranks[idx+1]];
-      scheduleSave(); renderBannerRows();
-    });
-    tr.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', String(idx));
-      tr.classList.add('dragging');
-    });
-    tr.addEventListener('dragend', ()=> tr.classList.remove('dragging'));
-    tr.addEventListener('dragover', (e)=>{ e.preventDefault(); tr.classList.add('drag-over'); });
-    tr.addEventListener('dragleave', ()=> tr.classList.remove('drag-over'));
-    tr.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      tr.classList.remove('drag-over');
-      const fromIdx = +e.dataTransfer.getData('text/plain');
-      if(fromIdx===idx || isNaN(fromIdx)) return;
-      const [moved] = mo.ranks.splice(fromIdx,1);
-      mo.ranks.splice(idx,0,moved);
-      scheduleSave(); renderBannerRows();
     });
   });
 }
@@ -1742,11 +2346,11 @@ function addNewBannerMonth(){
   if(STATE.bannerMonths.some(m=>m.key===key)){ showError(`'${label}' 은 이미 있어요.`); return; }
   const ranks = last.ranks.map(r=>({_uid:uid(), values:{...r.values}}));
   const partners = (last.partners||[]).map(p=>({...p}));
-  const preMarketingPartners = (last.preMarketingPartners||[]).map(p=>({...p}));
+  const preMarketingPartners = (last.preMarketingPartners||[]).map(p=>({...p, _uid:uid()}));
   STATE.bannerMonths.push({key, label, columns: last.columns.slice(), ranks, partners, preMarketingPartners, cycleWeeks: last.cycleWeeks||4, weekAnchor: defaultWeekAnchor(key), changeLog: []});
   activeBannerMonthKey = key;
   logActivity('🏷️', `'${label}' 배너 구좌 새 달 생성`, '이전 달 구성 복사', 'banner', key);
-  scheduleSave(); renderBannerTab();
+  syncChanges(); renderBannerTab();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1779,10 +2383,12 @@ function renderPmStatusGrid(key){
   const cycleWeeks = mo.cycleWeeks || 4;
   const week = computeCurrentWeek(mo);
   const anchor = new Date((mo.weekAnchor||'').replace(' ','T'));
-  const deadline = !isNaN(anchor.getTime()) ? new Date(anchor.getTime() + (week-1)*7*86400000) : null;
+  // 게재 마감 = 기준일시 + 현재 주차 × 7일
+  const deadline = !isNaN(anchor.getTime()) ? new Date(anchor.getTime() + week*7*86400000) : null;
   const now = new Date();
-  const isLive = deadline && now >= deadline;
+  const isPast = !!deadline && now >= deadline;
   const fmtDT = (d)=> !d || isNaN(d.getTime()) ? '-' : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const statusText = !deadline ? '-' : isPast ? '마감 지남' : `마감 전 D-${daysBetween(deadline, now)}`;
   const anchorInputVal = (mo.weekAnchor||'').slice(0,16);
 
   holder.innerHTML = `
@@ -1805,7 +2411,7 @@ function renderPmStatusGrid(key){
       </div>
       <div class="pm-status-item">
         <label>게재 상태</label>
-        <div class="pm-readonly ${isLive?'badge-live':'badge-ready'}">${isLive?'게재 완료 확인':'게재 전 / 마감 전'}</div>
+        <div class="pm-readonly ${isPast?'badge-live':'badge-ready'}">${statusText}</div>
       </div>
     </div>
   `;
@@ -1813,13 +2419,13 @@ function renderPmStatusGrid(key){
   const pmAnchorInp = document.getElementById('pmAnchorInput_'+key);
   if(pmAnchorInp) pmAnchorInp.addEventListener('change', (e)=>{
     mo.weekAnchor = e.target.value;
-    scheduleSave(); renderPmStatusGrid(key); renderPmWeekPreview(key);
+    syncChanges(); renderPmStatusGrid(key); renderPmWeekPreview(key);
   });
   const pmCycleInp = document.getElementById('pmCycleInput_'+key);
   if(pmCycleInp) pmCycleInp.addEventListener('change', (e)=>{
     const v = Math.max(1, Math.min(12, parseInt(e.target.value)||4));
     mo.cycleWeeks = v;
-    scheduleSave(); renderPmStatusGrid(key); renderPmWeekPreview(key);
+    syncChanges(); renderPmStatusGrid(key); renderPmWeekPreview(key);
   });
 }
 
@@ -1839,7 +2445,7 @@ function renderPmWeekPreview(key){
 
   let rows = '';
   for(let rk=1; rk<=maxRank; rk++){
-    rows += `<tr><td><span class="order-badge">${rk}</span></td>`;
+    rows += `<tr data-uid="pm:${key}:${rk}"><td><span class="order-badge">${rk}</span></td>`;
     for(let w=1; w<=cycleWeeks; w++){
       const entry = mo.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk);
       const name = entry ? (entry.name||'') : '';
@@ -1848,32 +2454,39 @@ function renderPmWeekPreview(key){
     rows += `</tr>`;
   }
 
-  holder.innerHTML = `
-    <div class="tblwrap">
-      <table class="edittable">
-        <thead><tr><th style="width:60px;">순위</th>${headCols}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-
-  holder.querySelectorAll('.pm-week-input').forEach(inp=>{
+  if(!holder.querySelector('table')) holder.innerHTML = `<div class="tblwrap"><table class="edittable"><thead></thead><tbody></tbody></table></div>`;
+  const table = holder.querySelector('table');
+  table.tHead.innerHTML = `<tr><th style="width:60px;">순위</th>${headCols}</tr>`;
+  fillTbody(table.tBodies[0], {
+    cid:'banner:'+key, html: rows,
+    rerender: ()=> renderPmWeekPreview(key),
+    rowFor: ()=> null, // 격자 행은 레코드와 1:1이 아니라서 격자 전체를 다시 그려요
+    bind: tr=> bindPmRow(tr, key),
+  });
+}
+function bindPmRow(tr, key){
+  tr.querySelectorAll('.pm-week-input').forEach(inp=>{
+    const w = +inp.dataset.week, rk = +inp.dataset.rank;
+    const findEntry = ()=>{ const m = getBannerMonth(key); return m ? m.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk) : null; };
     inp.addEventListener('input', ()=>{
-      const w = +inp.dataset.week, rk = +inp.dataset.rank;
-      let entry = mo.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk);
+      const mo = getBannerMonth(key); if(!mo) return;
+      let entry = findEntry();
       if(!entry){
-        entry = {_uid:uid(), name:'', week:w, rankInWeek:rk};
+        entry = {_uid:uid(), name:inp.value, week:w, rankInWeek:rk};
         mo.preMarketingPartners.push(entry);
+        syncChanges(); // 새 칸은 행 추가(insert)
+      }else{
+        entry.name = inp.value;
+        saveField(entry._uid, 'name', entry.name);
       }
-      entry.name = inp.value;
-      scheduleSave();
     });
     inp.addEventListener('blur', ()=>{
       const mapped = applyPartnerNameMap(inp.value);
-      if(mapped !== inp.value){
+      const entry = findEntry();
+      if(entry && mapped !== inp.value){
         inp.value = mapped;
-        const w = +inp.dataset.week, rk = +inp.dataset.rank;
-        const entry = mo.preMarketingPartners.find(p=>p.week===w && p.rankInWeek===rk);
-        if(entry){ entry.name = mapped; scheduleSave(); }
+        entry.name = mapped;
+        saveField(entry._uid, 'name', mapped);
       }
     });
   });
@@ -1882,7 +2495,7 @@ function renderPmWeekPreview(key){
 let expandedPmMonths = new Set();
 
 function renderPmTab(){
-  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  if(!activeBannerMonthKey || !getBannerMonth(activeBannerMonthKey)) activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   const container = document.getElementById('tab-pm');
   const currentMo = getBannerMonth(activeBannerMonthKey);
   const otherMonths = STATE.bannerMonths.filter(m=>m.key!==activeBannerMonthKey).slice().sort((a,b)=> a.key<b.key?1:-1);
@@ -1940,6 +2553,7 @@ function renderPmHistoryAccordion(otherMonths){
           ${escapeHtml(mo.label)}
           <span style="color:var(--muted); font-weight:400; font-size:11.5px;">· ${filledCount}건</span>
         </span>
+        ${setCurrentBtnHtml(mo.key)}
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
         <div id="pmStatusGridHolder_${mo.key}"></div>
@@ -1949,12 +2563,16 @@ function renderPmHistoryAccordion(otherMonths){
   }).join('');
 
   holder.querySelectorAll('.accordion-toggle').forEach(head=>{
-    head.addEventListener('click', ()=>{
+    head.addEventListener('click', (e)=>{
+      if(e.target.closest('button')) return;
       const key = head.dataset.key;
       if(expandedPmMonths.has(key)) expandedPmMonths.delete(key);
       else expandedPmMonths.add(key);
       renderPmHistoryAccordion(otherMonths);
     });
+  });
+  holder.querySelectorAll('.set-current-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); activeBannerMonthKey = btn.dataset.key; renderPmTab(); });
   });
   otherMonths.forEach(mo=>{
     if(expandedPmMonths.has(mo.key)){ renderPmStatusGrid(mo.key); renderPmWeekPreview(mo.key); }
@@ -2018,9 +2636,10 @@ function renderBenefitTab(){
 
   const addItemBtn = document.getElementById('addBenefitItemBtn');
   if(addItemBtn) addItemBtn.addEventListener('click', ()=>{
-    if(!current) return;
-    current.items.push({_uid:uid(), name:'', copy:'', status:'', expiryDate:''});
-    scheduleSave(); renderCurrentBenefitItems();
+    const block = STATE.benefitBlocks[0];
+    if(!block) return;
+    block.items.push({_uid:uid(), name:'', copy:'', status:'', expiryDate:''});
+    syncChanges(); renderCurrentBenefitItems();
   });
   const addMonthBtn = document.getElementById('addBenefitMonthBtn');
   if(addMonthBtn) addMonthBtn.addEventListener('click', addNewBenefitMonth);
@@ -2028,39 +2647,46 @@ function renderBenefitTab(){
   if(addBlockBtn) addBlockBtn.addEventListener('click', addNewBenefitBlock);
 }
 
-function bindBenefitItemRows(container, block, rerenderFn){
-  container.querySelectorAll('tr[data-iidx]').forEach(rowEl=>{
-    const iIdx = +rowEl.dataset.iidx;
-    rowEl.querySelectorAll('.bf-field').forEach(inp=>{
-      inp.addEventListener('input', ()=>{ block.items[iIdx][inp.dataset.field] = inp.value; scheduleSave(); });
-    });
-    rowEl.querySelector('.del-benefit-item-btn').addEventListener('click', ()=>{
-      showConfirmModal('이 혜택 항목을 삭제할까요?', ()=>{
-        const removed = block.items[iIdx];
-        block.items.splice(iIdx,1); scheduleSave(); rerenderFn();
-        showUndoToast(`'${removed.name||'혜택'}' 항목을 삭제했어요.`, ()=>{
-          block.items.splice(iIdx,0,removed);
-          scheduleSave(); rerenderFn();
-        });
-      });
-    });
-    rowEl.querySelector('.move-up-btn').addEventListener('click', ()=>{
-      if(iIdx<=0) return;
-      [block.items[iIdx-1], block.items[iIdx]] = [block.items[iIdx], block.items[iIdx-1]];
-      scheduleSave(); rerenderFn();
-    });
-    rowEl.querySelector('.move-down-btn').addEventListener('click', ()=>{
-      if(iIdx>=block.items.length-1) return;
-      [block.items[iIdx+1], block.items[iIdx]] = [block.items[iIdx], block.items[iIdx+1]];
-      scheduleSave(); rerenderFn();
+function getBenefitBlock(blockUid){ return STATE.benefitBlocks.find(b=>b._blockUid===blockUid); }
+
+function bindBenefitItemRow(tr, blockUid, rerender){
+  const uidVal = tr.dataset.uid;
+  const getItem = ()=>{ const b = getBenefitBlock(blockUid); return b ? b.items.find(it=>it._uid===uidVal) : null; };
+  const move = (delta)=>{
+    const b = getBenefitBlock(blockUid); const it = getItem(); if(!b || !it) return;
+    const i = b.items.indexOf(it), j = i + delta;
+    if(j<0 || j>=b.items.length) return;
+    [b.items[i], b.items[j]] = [b.items[j], b.items[i]];
+    SORT.delete(uidVal);
+    syncChanges(); rerender();
+  };
+  tr.querySelectorAll('.bf-field').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const it = getItem(); if(!it) return;
+      it[inp.dataset.field] = inp.value;
+      saveField(uidVal, inp.dataset.field, inp.value);
     });
   });
+  tr.querySelector('.del-benefit-item-btn').addEventListener('click', ()=>{
+    showConfirmModal('이 혜택 항목을 삭제할까요?', ()=>{
+      const b = getBenefitBlock(blockUid); const it = getItem(); if(!b || !it) return;
+      const idx = b.items.indexOf(it);
+      b.items.splice(idx,1); syncChanges(); rerender();
+      showUndoToast(`'${it.name||'혜택'}' 항목을 삭제했어요.`, ()=>{
+        const b2 = getBenefitBlock(blockUid); if(!b2 || b2.items.includes(it)) return;
+        insertBySort(b2.items, it, idx);
+        syncChanges(); rerender();
+      });
+    });
+  });
+  tr.querySelector('.move-up-btn').addEventListener('click', ()=> move(-1));
+  tr.querySelector('.move-down-btn').addEventListener('click', ()=> move(1));
 }
 
 function benefitItemRowHtml(it, iIdx){
   const expiryStyle = benefitExpiryStyle(it.expiryDate);
   return `
-    <tr data-iidx="${iIdx}" data-uid="${it._uid||''}">
+    <tr data-uid="${escapeHtml(it._uid||'')}">
       <td>
         <div class="order-cell">
           <span class="order-badge">${iIdx+1}</span>
@@ -2078,6 +2704,20 @@ function benefitItemRowHtml(it, iIdx){
     </tr>`;
 }
 
+// 혜택 항목 표 (현재 블록·이력 공용)
+function renderBenefitItemsInto(tbody, blockUid){
+  const block = getBenefitBlock(blockUid);
+  if(!tbody || !block) return;
+  const html = block.items.length ? block.items.map((it,iIdx)=> benefitItemRowHtml(it,iIdx)).join('')
+    : `<tr><td colspan="6"><div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div></td></tr>`;
+  const rerender = ()=> renderBenefitItemsInto(tbody, blockUid);
+  fillTbody(tbody, {
+    cid:blockUid, html, rerender,
+    rowFor: uidVal=>{ const b = getBenefitBlock(blockUid); const i = b ? b.items.findIndex(it=>it._uid===uidVal) : -1; return i<0 ? null : benefitItemRowHtml(b.items[i], i); },
+    bind: tr=> bindBenefitItemRow(tr, blockUid, rerender),
+  });
+}
+
 function renderCurrentBenefitItems(){
   const holder = document.getElementById('currentBenefitItems');
   if(!holder) return;
@@ -2086,9 +2726,7 @@ function renderCurrentBenefitItems(){
     holder.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="big">🎁</div>혜택 블록이 없어요. "새 달 만들기"로 시작하세요.</div></td></tr>`;
     return;
   }
-  holder.innerHTML = block.items.length ? block.items.map((it,iIdx)=> benefitItemRowHtml(it,iIdx)).join('')
-    : `<tr><td colspan="6"><div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div></td></tr>`;
-  bindBenefitItemRows(holder, block, renderCurrentBenefitItems);
+  renderBenefitItemsInto(holder, block._blockUid);
 }
 
 function renderBenefitHistoryAccordion(otherBlocks){
@@ -2134,15 +2772,18 @@ function renderBenefitHistoryAccordion(otherBlocks){
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
       const blockUid = btn.closest('.benefit-block').dataset.blockuid;
-      const idx = STATE.benefitBlocks.findIndex(b=>b._blockUid===blockUid);
-      const block = STATE.benefitBlocks[idx];
+      const block = getBenefitBlock(blockUid);
+      if(!block) return;
       showConfirmModal(`'${formatBenefitLabel(block.label)}' 블록을 삭제할까요?`, ()=>{
+        const idx = STATE.benefitBlocks.indexOf(block);
+        if(idx<0) return;
         STATE.benefitBlocks.splice(idx,1);
         expandedBenefitBlocks.delete(blockUid);
-        scheduleSave(); renderBenefitTab();
+        syncChanges(); renderBenefitTab();
         showUndoToast(`'${formatBenefitLabel(block.label)}' 블록을 삭제했어요.`, ()=>{
-          STATE.benefitBlocks.splice(idx,0,block);
-          scheduleSave(); renderBenefitTab();
+          if(getBenefitBlock(blockUid)) return;
+          STATE.benefitBlocks.splice(Math.min(idx, STATE.benefitBlocks.length),0,block);
+          syncChanges(); renderBenefitTab();
         });
       });
     });
@@ -2152,18 +2793,24 @@ function renderBenefitHistoryAccordion(otherBlocks){
 }
 
 function renderBenefitHistoryItems(block){
-  const bodyEl = document.getElementById('benHistTbody_'+block._blockUid);
-  if(!bodyEl) return;
-  bodyEl.innerHTML = block.items.length ? block.items.map((it,iIdx)=> benefitItemRowHtml(it,iIdx)).join('')
-    : `<tr><td colspan="6"><div class="empty-state" style="padding:16px;">등록된 혜택이 없어요.</div></td></tr>`;
-  bindBenefitItemRows(bodyEl, block, ()=> renderBenefitHistoryItems(block));
+  renderBenefitItemsInto(document.getElementById('benHistTbody_'+block._blockUid), block._blockUid);
+}
+
+// 가장 최근 혜택 블록(benefitBlocks[0])의 이름에서 'YY년 M월' 또는 'M월'을 읽어요. 못 읽으면 null.
+function benefitBlockMonthKey(label){
+  const m = String(label||'').match(/(?:(\d{2,4})년\s*)?(\d{1,2})월/);
+  if(!m) return null;
+  const mm = +m[2];
+  if(mm<1 || mm>12) return null;
+  const y = m[1] ? (m[1].length===2 ? 2000 + +m[1] : +m[1]) : new Date().getFullYear();
+  return `${y}-${String(mm).padStart(2,'0')}`;
 }
 
 function addNewBenefitMonth(){
   const copyFrom = STATE.benefitBlocks[0];
-  const evMonth = getEventMonth(activeEventMonthKey) || STATE.eventMonths[STATE.eventMonths.length-1];
-  const baseKey = evMonth ? evMonth.key : `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
-  const { label: nextLabel } = nextMonthOf(baseKey);
+  const baseKey = (copyFrom && benefitBlockMonthKey(copyFrom.label)) || null;
+  // 기준: 최근 블록의 월 +1. 월을 해석할 수 없으면 오늘 +1개월
+  const { label: nextLabel } = baseKey ? nextMonthOf(baseKey) : nextMonthOf(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`);
 
   if(STATE.benefitBlocks.some(b=>b.label===nextLabel)){
     showError(`'${nextLabel}' 블록은 이미 있어요. 이름을 다르게 하려면 "이름 직접 정해서 만들기"를 이용해주세요.`);
@@ -2173,7 +2820,7 @@ function addNewBenefitMonth(){
   const newBlockUid = uid();
   STATE.benefitBlocks.unshift({label: nextLabel, items, _blockUid: newBlockUid});
   logActivity('🎁', `'${nextLabel}' 혜택 블록 생성`, copyFrom ? '이전 블록 항목 복사' : '', 'benefit');
-  scheduleSave();
+  syncChanges();
   renderBenefitTab();
   showToast(`'${nextLabel}' 혜택 블록을 만들었어요. ${copyFrom ? '이전 블록 항목을 그대로 복사했어요.' : ''}`);
 }
@@ -2200,10 +2847,10 @@ function addNewBenefitBlock(){
       const newBlockUid = uid();
       STATE.benefitBlocks.unshift({label, items, _blockUid: newBlockUid});
       logActivity('🎁', `'${label}' 혜택 블록 생성`, doCopy ? '이전 블록 항목 복사' : '', 'benefit');
-      scheduleSave(); renderBenefitTab();
+      syncChanges(); renderBenefitTab();
     };
     if(copyFrom && copyFrom.items.length){
-      showConfirmModal('직전 블록의 항목을 복사해서 시작할까요?', ()=> finish(true), ()=> finish(false));
+      showConfirmModal('직전 블록의 항목을 복사해서 시작할까요?', ()=> finish(true), ()=> finish(false), '복사해서 만들기', '빈 블록으로 만들기');
     }else{
       finish(false);
     }
@@ -2227,10 +2874,7 @@ document.getElementById('maintabs').addEventListener('click', (e)=>{
   const btn = e.target.closest('.maintab-btn');
   if(!btn) return;
   switchMainTab(btn.dataset.tab);
-  if(btn.dataset.tab==='events') renderEventsTab();
-  if(btn.dataset.tab==='banner') renderBannerTab();
-  if(btn.dataset.tab==='pm') renderPmTab();
-  if(btn.dataset.tab==='benefit') renderBenefitTab();
+  renderActiveTab();
 });
 
 function flashHighlight(el){
@@ -2243,11 +2887,11 @@ function flashHighlight(el){
 }
 
 
-function safeRenderAll(){
-  try{ renderEventsTab(); }catch(err){ console.error('renderEventsTab 오류:', err); }
-  try{ renderBannerTab(); }catch(err){ console.error('renderBannerTab 오류:', err); }
-  try{ renderPmTab(); }catch(err){ console.error('renderPmTab 오류:', err); }
-  try{ renderBenefitTab(); }catch(err){ console.error('renderBenefitTab 오류:', err); }
+// 보이는 탭만 그려요 (다른 탭은 열 때 새로 그려서, 상단 액션 버튼이 엉뚱한 탭 것으로 바뀌지 않아요)
+function renderActiveTab(){
+  if(!STATE) return;
+  const fn = {events:renderEventsTab, banner:renderBannerTab, pm:renderPmTab, benefit:renderBenefitTab}[activeMainTab];
+  try{ fn(); }catch(err){ console.error(activeMainTab + ' 탭 렌더 오류:', err); }
 }
 
 
@@ -2260,11 +2904,11 @@ const EVENT_SHEET_RE = /^(\d{2})년\s*(\d{1,2})월(\s*이벤트\s*관리)?$/;
 const LEGACY_FIELD_MAP = {
   name: ['이벤트명','이벤트및컨텐츠명'],
   priority: ['우선순위'],
-  status: ['상태','퍼블리싱','진행상태'],
+  status: ['작업상태','상태','퍼블리싱','진행상태'],
   workType: ['작업유형','작업'],
   category: ['구분'],
-  dueDate: ['반영예정일','반영일자'],
-  reflectStatus: ['반영상태','개발기반영','stg반영'],
+  dueDate: ['시작일','시작','반영예정일','반영일자'],
+  reflectStatus: ['종료일','종료','반영상태','개발기반영','stg반영'],
   source: ['소스수급','디자인주체','디자인'],
   reviewUrl: ['검수용url'],
   urlType: ['url유형'],
@@ -2283,11 +2927,10 @@ function detectEventSheetLayout(grid){
     row.forEach((cellVal, idx)=>{
       const norm = normHeaderText(cellVal);
       if(!norm || norm.length>20) return;
+      // 한 칸은 한 필드에만 연결해요 ('작업상태'가 '작업'(작업유형)에도 걸리지 않도록)
       for(const [field, variants] of Object.entries(LEGACY_FIELD_MAP)){
         if(fieldCols[field]) continue;
-        for(const variant of variants){
-          if(norm===variant || norm.startsWith(variant)){ fieldCols[field] = idx+1; count++; break; }
-        }
+        if(variants.some(v=> norm===v || norm.startsWith(v))){ fieldCols[field] = idx+1; count++; break; }
       }
     });
     if(count > bestCount){ bestCount = count; bestRow = r; bestFieldCols = fieldCols; }
@@ -2359,6 +3002,9 @@ function findLatestRawSheet(wb){
 function parseRawBannerPlan(wb, sheetInfo){
   const ws = wb.Sheets[sheetInfo.name];
   const grid = sheetToGrid(ws);
+  // 주차 배정은 대상 월의 배치 주기를 따라요 (없으면 4주)
+  const targetMo = getBannerMonth(`${sheetInfo.y}-${String(sheetInfo.mo).padStart(2,'0')}`);
+  const cycle = (targetMo && targetMo.cycleWeeks) || 4;
 
   // 1) 구좌별 컬럼 위치 찾기 (헤더 텍스트 기반, 매달 컬럼 순서가 달라도 안전)
   const slotCols = [];
@@ -2415,8 +3061,8 @@ function parseRawBannerPlan(wb, sheetInfo){
       if(!biz){ r++; continue; }
       blank=0;
       const idx = partners.length; // 0-based 배너순서 산정용
-      const week = (idx % 4) + 1;
-      const rankInWeek = Math.floor(idx / 4) + 1;
+      const week = (idx % cycle) + 1;
+      const rankInWeek = Math.floor(idx / cycle) + 1;
       partners.push({
         bannerOrder: idx+1,
         perfRank: order,
@@ -2448,8 +3094,8 @@ function parseRawBannerPlan(wb, sheetInfo){
       }
       blank=0;
       const idx = preMarketingPartners.length;
-      const week = (idx % 4) + 1;
-      const rankInWeek = Math.floor(idx / 4) + 1;
+      const week = (idx % cycle) + 1;
+      const rankInWeek = Math.floor(idx / cycle) + 1;
       preMarketingPartners.push({ name: (biz && String(biz).trim()) || '', week, rankInWeek, preRank: hasOrder ? order : '-' });
       r++;
     }
@@ -2542,12 +3188,12 @@ document.getElementById('convertModalApplyBtn').addEventListener('click', ()=>{
       mo.ranks = p.ranks.map(r=>({ _uid:uid(), values: {...r} }));
       mo.partners = p.partners.map(pt=>({ name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
       logActivity('🔄', `'${label}' 배너 구좌 원본파일 자동 변환 반영`, `구좌 ${mo.ranks.length}개 · 파트너 ${mo.partners.length}명`, 'banner', key);
-      scheduleSave(); renderBannerTab(); closeConvertModal();
+      syncChanges(); renderBannerTab(); closeConvertModal();
       showToast(`'${label}' 배너 구좌에 반영했어요. 자동 변환된 내용이니 신규 파트너명은 직접 확인해주세요.`);
     }else{
       mo.preMarketingPartners = (p.preMarketingPartners||[]).map(pt=>({ _uid: uid(), name: pt.name, week: pt.week, rankInWeek: pt.rankInWeek }));
       logActivity('🔄', `'${label}' 프리마케팅 원본파일 자동 변환 반영`, `프리마케팅 ${mo.preMarketingPartners.length}명`, 'banner', key);
-      scheduleSave(); renderPmTab(); closeConvertModal();
+      syncChanges(); renderPmTab(); closeConvertModal();
       showToast(`'${label}' 프리마케팅 관리에 반영했어요. 자동 변환된 내용이니 신규 파트너명은 직접 확인해주세요.`);
     }
   };
@@ -2591,9 +3237,22 @@ function handleRawFileImport(file, btn, mode){
   reader.readAsArrayBuffer(file);
 }
 
+const BANNER_SHEET = '알닷 배너 구좌';
+const BANNER_BLOCK_RE = /■\s*알닷\s*배너\s*구좌\s*\(([^)]+)\)/;
+const PM_SHEET = '프리마케팅';
+const PM_BLOCK_RE = /■\s*프리마케팅\s*\(([^)]+)\)/;
+// 'YY년 M월' → {key, label}. 연도가 없으면 null
+function parseYyMonthLabel(s){
+  const m = String(s||'').match(/(\d{2})년\s*(\d{1,2})월/);
+  if(!m) return null;
+  const y = 2000 + +m[1], mm = +m[2];
+  return { key:`${y}-${String(mm).padStart(2,'0')}`, label:`${m[1]}년 ${mm}월` };
+}
+
 function importFromWorkbook(wb){
   const eventMonths = [];
   const skippedSheets = [];
+  const importedBannerMonths = [];
   wb.SheetNames.forEach(name=>{
     const m = name.match(EVENT_SHEET_RE);
     if(!m) return;
@@ -2613,14 +3272,19 @@ function importFromWorkbook(wb){
       if(!nm){ blank++; if(blank>=3) break; r++; continue; }
       blank=0;
       const idVal = get(r,'id');
+      // 종료일(reflectStatus)은 날짜로 정리하고, 날짜가 아닌 옛 '반영상태' 값은 주요특이사항 뒤에 붙여둬요
+      const rsRaw = normalizeDateValue(get(r,'reflectStatus'));
+      const rsIso = dotToIso(rsRaw);
+      let note = get(r,'note') || '';
+      if(rsRaw && !rsIso) note = note ? `${note} / 반영상태: ${rsRaw}` : `반영상태: ${rsRaw}`;
       events.push({
         _uid: uid(),
         priority: get(r,'priority')||'', status: get(r,'status')||'', name: nm,
         workType: get(r,'workType')||'', category: get(r,'category')||'',
-        dueDate: normalizeDateValue(get(r,'dueDate')), reflectStatus: get(r,'reflectStatus')||'',
+        dueDate: normalizeDateValue(get(r,'dueDate')), reflectStatus: rsIso ? isoToDot(rsIso) : '',
         source: get(r,'source')||'', reviewUrl: get(r,'reviewUrl')||'',
         urlType: get(r,'urlType')||'', opUrl: get(r,'opUrl')||'',
-        id: (idVal!==null && idVal!==undefined) ? String(idVal) : '', note: get(r,'note')||''
+        id: (idVal!==null && idVal!==undefined) ? String(idVal) : '', note
       });
       r++;
     }
@@ -2650,20 +3314,18 @@ function importFromWorkbook(wb){
             ranks.push({_uid:uid(), values});
             r++;
           }
-          if(!window.__importedBannerMonths) window.__importedBannerMonths=[];
-          window.__importedBannerMonths.push({key,label,columns,ranks});
+          importedBannerMonths.push({key,label,columns,ranks});
         }
       }catch(err){ /* 배너 구좌 관리 시트 형식이 달라도 이벤트 가져오기는 계속 진행 */ }
     }
   });
 
-  // '알닷 배너 구좌' 마스터 시트: 월별 관리 시트 하나로는 못 잡는 지난 달 이력 블록들을 추가로 가져온다.
-  // (이미 위에서 월별 관리 시트로 가져온 달은 건너뛰고, 구좌명 헤더가 없는 옛 형식 블록은 안전하게 건너뛴다)
-  const BANNER_BLOCK_RE = /■\s*알닷\s*배너\s*구좌\s*\(([^)]+)\)/;
+  // '알닷 배너 구좌' 마스터 시트: '■ 알닷 배너 구좌 (YY년 M월)' 블록 + '노출순위' 헤더
+  // (블록 이름에 연도가 없으면 새달→구달 순서로 보고 연도를 추정해요. 구좌명 헤더가 없는 옛 형식 블록은 건너뛰어요)
   const skippedBannerBlocks = [];
-  if(wb.SheetNames.includes('알닷 배너 구좌')){
+  if(wb.SheetNames.includes(BANNER_SHEET)){
     try{
-      const grid = sheetToGrid(wb.Sheets['알닷 배너 구좌']);
+      const grid = sheetToGrid(wb.Sheets[BANNER_SHEET]);
       let runningYear = eventMonths.length ? +eventMonths[eventMonths.length-1].key.slice(0,4) : new Date().getFullYear();
       let lastMonthNum = null; // 블록이 새달→구달 순으로 내려가다 월이 다시 커지면(예: 2월→12월) 연도가 하나 내려간 것으로 본다
       let r = 1;
@@ -2681,7 +3343,9 @@ function importFromWorkbook(wb){
               r++; continue;
             }
             const mm2 = +monthMatch[1];
-            if(lastMonthNum!==null && mm2>lastMonthNum) runningYear -= 1;
+            const withYear = parseYyMonthLabel(rawLabel);
+            if(withYear) runningYear = +withYear.key.slice(0,4);
+            else if(lastMonthNum!==null && mm2>lastMonthNum) runningYear -= 1;
             lastMonthNum = mm2;
             const key = `${runningYear}-${String(mm2).padStart(2,'0')}`;
             const label = `${String(runningYear).slice(2)}년 ${mm2}월`;
@@ -2706,10 +3370,9 @@ function importFromWorkbook(wb){
               ranks.push({_uid:uid(), values});
               rr++;
             }
-            if(!window.__importedBannerMonths) window.__importedBannerMonths=[];
-            const already = window.__importedBannerMonths.some(x=>x.key===key);
+            const already = importedBannerMonths.some(x=>x.key===key);
             if(!already && columns.length){
-              window.__importedBannerMonths.push({key, label, columns, ranks});
+              importedBannerMonths.push({key, label, columns, ranks});
             }
             r = rr; continue;
           }
@@ -2717,6 +3380,30 @@ function importFromWorkbook(wb){
         r++;
       }
     }catch(err){ /* 마스터 시트 형식이 달라도 나머지 가져오기는 계속 진행 */ }
+  }
+
+  // '프리마케팅' 시트: '■ 프리마케팅 (YY년 M월)' | 배치 주기 | N | 기준일시 | 값 → 주차·순위·파트너사 행
+  if(wb.SheetNames.includes(PM_SHEET)){
+    const grid = sheetToGrid(wb.Sheets[PM_SHEET]);
+    let r = 1;
+    while(r<=grid.length){
+      const v = cellAt(grid,r,1);
+      const bm = typeof v==='string' ? v.match(PM_BLOCK_RE) : null;
+      const parsed = bm && parseYyMonthLabel(bm[1]);
+      if(!parsed){ r++; continue; }
+      const entries = [];
+      let rr = r+2;
+      while(rr<=grid.length && typeof cellAt(grid,rr,1)==='number'){
+        entries.push({_uid:uid(), name: String(cellAt(grid,rr,3) ?? ''), week: cellAt(grid,rr,1), rankInWeek: +cellAt(grid,rr,2)});
+        rr++;
+      }
+      let mo = importedBannerMonths.find(x=>x.key===parsed.key);
+      if(!mo){ mo = {key:parsed.key, label:parsed.label, columns:DEFAULT_BANNER_COLUMNS.slice(), ranks:[]}; importedBannerMonths.push(mo); }
+      mo.preMarketingPartners = entries;
+      const cycle = +cellAt(grid,r,3); if(cycle) mo.cycleWeeks = cycle;
+      const anchor = cellAt(grid,r,5); if(anchor) mo.weekAnchor = String(anchor);
+      r = rr;
+    }
   }
 
   const benefitBlocks = [];
@@ -2735,7 +3422,8 @@ function importFromWorkbook(wb){
             const name = cellAt(grid,rr,2), copy = cellAt(grid,rr,3);
             if(!name && !copy){ blank++; if(blank>=2) break; rr++; continue; }
             blank=0;
-            items.push({_uid:uid(), name:name||'', copy:copy||'', status: cellAt(grid,rr,4)||''});
+            const exp = normalizeDateValue(cellAt(grid,rr,5));
+            items.push({_uid:uid(), name:name||'', copy:copy||'', status: cellAt(grid,rr,4)||'', expiryDate: dotToIso(exp) || exp});
             rr++;
           }
           benefitBlocks.push({label, items});
@@ -2747,7 +3435,8 @@ function importFromWorkbook(wb){
   }
 
   eventMonths.sort((a,b)=> a.key<b.key?-1:1);
-  return { eventMonths, benefitBlocks, bannerMonths: window.__importedBannerMonths || [], skippedSheets, skippedBannerBlocks };
+  importedBannerMonths.sort((a,b)=> a.key<b.key?-1:1);
+  return { eventMonths, benefitBlocks, bannerMonths: importedBannerMonths, skippedSheets, skippedBannerBlocks };
 }
 
 function bindXlsxButtons(importBtnId, exportBtnId, fileInputId){
@@ -2765,54 +3454,88 @@ function bindXlsxButtons(importBtnId, exportBtnId, fileInputId){
   if(exportBtn) exportBtn.addEventListener('click', ()=> handleXlsxExport(exportBtn));
 }
 
+/* ════════════════════════════════════════════════════════════
+   불러오기 공통: 이어붙이기 / 전체 교체 / 취소
+   ════════════════════════════════════════════════════════════ */
+function hasAnyData(){ return STATE.eventMonths.some(m=>m.events.length) || STATE.benefitBlocks.some(b=>b.items.length) || STATE.bannerMonths.some(m=>m.ranks.length); }
+
+function offerImport(imported, sourceLabel, afterDone){
+  if(!isValidStateShape(imported)){
+    showError('가져온 데이터 형식이 올바르지 않아요. (eventMonths·bannerMonths·benefitBlocks가 배열이어야 해요)');
+    afterDone && afterDone(); return;
+  }
+  const summary = `이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 블록 ${imported.benefitBlocks.length}개`;
+  if(!hasAnyData()){ importAppend(imported, sourceLabel, summary); afterDone && afterDone(); return; }
+  showConfirmModal(
+    `${sourceLabel}에서 ${summary}를 찾았어요.\n\n· 이어붙이기: 지금 없는 달·블록만 추가해요.\n· 전체 교체: 모든 사용자의 데이터를 이 파일 내용으로 바꿔요.`,
+    ()=> importAppend(imported, sourceLabel, summary),
+    ()=> confirmReplace(imported, sourceLabel, summary),
+    '이어붙이기', '전체 교체'
+  );
+  // ESC·바깥 클릭·취소는 아무것도 바꾸지 않아요
+  afterDone && afterDone();
+}
+
+// 이어붙이기: 다른 데이터와 id가 겹치지 않도록 새 id를 발급해요
+function reissueIds(imp){
+  imp.eventMonths.forEach(m=> (m.events||[]).forEach(o=> o._uid = uid()));
+  imp.bannerMonths.forEach(m=>{ (m.ranks||[]).forEach(o=> o._uid = uid()); (m.preMarketingPartners||[]).forEach(o=> o._uid = uid()); });
+  imp.benefitBlocks.forEach(b=>{ b._blockUid = uid(); (b.items||[]).forEach(o=> o._uid = uid()); });
+}
+function importAppend(imp, sourceLabel, summary){
+  reissueIds(imp);
+  imp.eventMonths.forEach(m=>{ if(!STATE.eventMonths.some(x=>x.key===m.key)) STATE.eventMonths.push(m); });
+  imp.bannerMonths.forEach(m=>{ if(!STATE.bannerMonths.some(x=>x.key===m.key)) STATE.bannerMonths.push(m); });
+  STATE.benefitBlocks = [...imp.benefitBlocks, ...STATE.benefitBlocks];
+  finishImport(`${sourceLabel} 이어붙이기`, summary);
+}
+function confirmReplace(imp, sourceLabel, summary){
+  showPromptModal("모든 사용자의 데이터가 바뀌어요. 계속하려면 '교체'를 입력해주세요.", '', async (v)=>{
+    if(v!=='교체'){ showToast("'교체'를 정확히 입력해야 진행돼요. 아무것도 바꾸지 않았어요.", 'error'); return; }
+    let server;
+    try{
+      server = await fetchServerMaps(); // 실행 직전 DB 전체를 자동 백업
+      downloadJson(rowsToState([...server.containers.values()], [...server.records.values()]), '알닷_교체전_자동백업_');
+    }catch(err){
+      showError('교체 전 자동 백업을 받지 못해서 교체를 멈췄어요: ' + err.message);
+      return;
+    }
+    const keep = {};
+    SETTINGS_FIELDS.forEach(k=>{ if(imp[k]===undefined) keep[k] = STATE[k]; });
+    SHADOW = cloneMaps(server); // 방금 받은 DB 기준으로 비교해서, 파일에 없는 것은 지우고 있는 것만 올려요
+    SORT.clear();
+    STATE = {...keep, ...imp, uiPrefs: STATE.uiPrefs};
+    finishImport(`${sourceLabel} 전체 교체`, summary);
+  });
+}
+function finishImport(action, summary){
+  STATE.eventMonths.sort((a,b)=> a.key<b.key?-1:1);
+  STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
+  ensureStateShape();
+  activeEventMonthKey = getDefaultActiveEventMonthKey();
+  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
+  logActivity('📄', action, summary, null);
+  syncChanges();
+  renderActiveTab();
+  showToast(`${action} 완료! ${summary} · 자동으로 옮겨온 내용이니 한 번 검수해주세요.`);
+}
+
 function handleXlsxImportFile(file, btn){
   clearError();
   setBtnLoading(btn, '불러오는 중...');
   const reader = new FileReader();
   reader.onload = (ev)=>{
     try{
-      window.__importedBannerMonths = [];
       const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array', cellDates:false});
       const imported = importFromWorkbook(wb);
-      if(!imported.eventMonths.length){
-        const sheetList = wb.SheetNames.join(', ');
-        showError(`'NN년 N월 이벤트 관리' 형식의 시트를 찾지 못했어요. 이 파일의 시트 이름: ${sheetList}`);
+      if(!imported.eventMonths.length && !imported.bannerMonths.length && !imported.benefitBlocks.length){
+        showError(`불러올 시트를 찾지 못했어요 ('NN년 N월 이벤트 관리', '알닷 배너 구좌', '프리마케팅', '알닷 혜택'). 이 파일의 시트 이름: ${wb.SheetNames.join(', ')}`);
         resetBtn(btn); return;
       }
-
-      const finishImport = (mode)=>{
-        if(mode){
-          imported.eventMonths.forEach(m=>{ if(!STATE.eventMonths.some(x=>x.key===m.key)) STATE.eventMonths.push(m); });
-          imported.bannerMonths.forEach(m=>{ if(!STATE.bannerMonths.some(x=>x.key===m.key)) STATE.bannerMonths.push(m); });
-          STATE.benefitBlocks = [...imported.benefitBlocks, ...STATE.benefitBlocks];
-        }else{
-          STATE.eventMonths = imported.eventMonths;
-          STATE.bannerMonths = imported.bannerMonths.length ? imported.bannerMonths : STATE.bannerMonths;
-          STATE.benefitBlocks = imported.benefitBlocks;
-        }
-        STATE.eventMonths.sort((a,b)=> a.key<b.key?-1:1);
-        STATE.bannerMonths.sort((a,b)=> a.key<b.key?-1:1);
-        ensureStateShape();
-        activeEventMonthKey = getDefaultActiveEventMonthKey();
-        activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-        logActivity('📄', '엑셀 불러오기', `이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 ${imported.benefitBlocks.length}개 블록`, null);
-        scheduleSave();
-        safeRenderAll();
-        const skipNote = imported.skippedSheets && imported.skippedSheets.length ? ` (인식 못한 시트 ${imported.skippedSheets.length}개는 건너뜀: ${imported.skippedSheets.join(', ')})` : '';
-        const bannerSkipNote = imported.skippedBannerBlocks && imported.skippedBannerBlocks.length ? ` (구좌명 헤더가 없는 배너 이력 ${imported.skippedBannerBlocks.length}개는 건너뜀)` : '';
-        showToast(`불러오기 완료! 이벤트 ${imported.eventMonths.length}개월 · 배너 ${imported.bannerMonths.length}개월 · 혜택 블록 ${imported.benefitBlocks.length}개 · 자동으로 옮겨온 내용이니 한 번 검수해주세요.${skipNote}${bannerSkipNote}`);
-        resetBtn(btn);
-      };
-
-      if(STATE.eventMonths.some(m=>m.events.length) || STATE.benefitBlocks.some(b=>b.items.length)){
-        showConfirmModal(
-          `이벤트 ${imported.eventMonths.length}개월치, 혜택 블록 ${imported.benefitBlocks.length}개를 찾았어요.\n지금까지 입력한 데이터에 이어붙일까요? ("취소"를 누르면 지금 데이터를 지우고 새로 시작해요)`,
-          ()=> finishImport(true),
-          ()=> finishImport(false)
-        );
-      }else{
-        finishImport(true);
-      }
+      const skipNote = imported.skippedSheets.length ? ` (인식 못한 시트 ${imported.skippedSheets.length}개는 건너뜀: ${imported.skippedSheets.join(', ')})` : '';
+      const bannerSkipNote = imported.skippedBannerBlocks.length ? ` (구좌명 헤더가 없는 배너 이력 ${imported.skippedBannerBlocks.length}개는 건너뜀)` : '';
+      if(skipNote || bannerSkipNote) showToast(`참고: ${skipNote}${bannerSkipNote}`.trim());
+      offerImport(imported, '엑셀', ()=> resetBtn(btn));
     }catch(err){
       showError('엑셀을 읽는 중 문제가 발생했어요: ' + err.message);
       resetBtn(btn);
@@ -2823,43 +3546,57 @@ function handleXlsxImportFile(file, btn){
 }
 
 /* ════════════════════════════════════════════════════════════
-   엑셀로 내보내기
+   엑셀로 내보내기 (importFromWorkbook이 그대로 다시 읽을 수 있는 형식)
    ════════════════════════════════════════════════════════════ */
+function buildExportWorkbook(state){
+  const wb = XLSX.utils.book_new();
+  const customCols = state.customEventColumns||[];
+  const evHeader = [...EVENT_FIELDS.map(f=>EVENT_FIELD_LABELS[f]), '이벤트ID', ...customCols.map(c=>c.label)];
+  state.eventMonths.forEach(mo=>{
+    const rows = [evHeader];
+    mo.events.forEach(ev=> rows.push([...EVENT_FIELDS.map(f=>ev[f] ?? ''), ev.id ?? '', ...customCols.map(c=>ev[c.key] ?? '')]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), (mo.label + " 이벤트 관리").slice(0,31));
+  });
+  const newestFirst = state.bannerMonths.slice().sort((a,b)=> a.key<b.key?1:-1);
+  if(newestFirst.length){
+    const rows = [];
+    newestFirst.forEach(mo=>{
+      rows.push([`■ 알닷 배너 구좌 (${mo.label})`]);
+      rows.push(['노출순위', ...mo.columns]);
+      mo.ranks.forEach((r,i)=> rows.push([i+1, ...mo.columns.map(c=>r.values[c] ?? '')]));
+      rows.push([]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), BANNER_SHEET);
+  }
+  const pmMonths = newestFirst.filter(mo=> (mo.preMarketingPartners||[]).length);
+  if(pmMonths.length){
+    const rows = [];
+    pmMonths.forEach(mo=>{
+      rows.push([`■ 프리마케팅 (${mo.label})`, '배치 주기', mo.cycleWeeks||4, '기준일시', mo.weekAnchor||'']);
+      rows.push(['주차','순위','파트너사']);
+      mo.preMarketingPartners.forEach(p=> rows.push([p.week, p.rankInWeek, p.name ?? '']));
+      rows.push([]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), PM_SHEET);
+  }
+  if(state.benefitBlocks.length){
+    const rows = [];
+    state.benefitBlocks.forEach(b=>{
+      rows.push([`■ 알닷 혜택 (${b.label})`]);
+      rows.push(['No.','혜택명','문구','작업현황','종료일']);
+      b.items.forEach((it,i)=> rows.push([i+1, it.name ?? '', it.copy ?? '', it.status ?? '', it.expiryDate ?? '']));
+      rows.push([]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), BENEFIT_SHEET);
+  }
+  return wb;
+}
 function handleXlsxExport(btn){
   clearError();
   setBtnLoading(btn, '내보내는 중...');
   setTimeout(()=>{
     try{
-      const wb = XLSX.utils.book_new();
-      const customCols = STATE.customEventColumns||[];
-      STATE.eventMonths.forEach(mo=>{
-        const rows = [ ["우선순위","작업상태","이벤트명","작업유형","구분","시작","종료","이벤트ID", ...customCols.map(c=>c.label)] ];
-        mo.events.forEach(ev=> rows.push([ev.priority,ev.status,ev.name,ev.workType,ev.category,ev.dueDate,ev.reflectStatus,ev.id, ...customCols.map(c=>ev[c.key]||'')]));
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, (mo.label + " 이벤트 관리").slice(0,31));
-      });
-      if(STATE.bannerMonths.length){
-        let rows = [];
-        STATE.bannerMonths.forEach(mo=>{
-          rows.push([`■ ${mo.label}`]);
-          rows.push(["순위", ...mo.columns]);
-          mo.ranks.forEach((r,i)=> rows.push([i+1, ...mo.columns.map(c=>r.values[c]||'')]));
-          rows.push([]);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "배너 구좌 이력");
-      }
-      if(STATE.benefitBlocks.length){
-        let rows = [];
-        STATE.benefitBlocks.forEach(b=>{
-          rows.push([`■ 알닷 혜택 (${b.label})`]);
-          rows.push(["혜택명","문구","작업현황"]);
-          b.items.forEach(it=> rows.push([it.name,it.copy,it.status]));
-          rows.push([]);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "혜택 이력");
-      }
-      const exportFilename = "알닷_이벤트_운영_" + new Date().toISOString().slice(0,10) + ".xlsx";
-      XLSX.writeFile(wb, exportFilename);
+      XLSX.writeFile(buildExportWorkbook(STATE), "알닷_이벤트_운영_" + new Date().toISOString().slice(0,10) + ".xlsx");
       showToast('엑셀 파일로 내보냈어요.');
     }catch(err){
       showError('엑셀로 내보내는 중 문제가 발생했어요: ' + err.message);
@@ -2869,7 +3606,7 @@ function handleXlsxExport(btn){
 }
 
 /* ════════════════════════════════════════════════════════════
-   엑셀 불러오기 / 내보내기 (상단 고정 버튼)
+   상단 버튼: JSON 백업 / 엑셀
    ════════════════════════════════════════════════════════════ */
 document.getElementById('exportDataBtn').addEventListener('click', handleJsonExport);
 document.getElementById('importDataBtn').addEventListener('click', ()=> document.getElementById('dataJsonFileInput').click());
@@ -2878,51 +3615,21 @@ document.getElementById('dataJsonFileInput').addEventListener('change', (e)=>{
   if(file) handleJsonImportFile(file, document.getElementById('importDataBtn'));
   e.target.value = '';
 });
-
-document.getElementById('githubSetupBtn').addEventListener('click', ()=>{
-  document.getElementById('ghWorkerUrlInput').value = GITHUB_CONFIG.workerUrl||'';
-  document.getElementById('ghSyncKeyInput').value = GITHUB_CONFIG.syncKey||'';
-  document.getElementById('ghStatusText').textContent = '';
-  renderGithubActions();
-  document.getElementById('githubModalOverlay').classList.remove('hidden');
-});
-document.getElementById('githubModalCloseBtn').addEventListener('click', ()=> document.getElementById('githubModalOverlay').classList.add('hidden'));
-document.getElementById('githubModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='githubModalOverlay') document.getElementById('githubModalOverlay').classList.add('hidden'); });
-document.getElementById('ghConnectBtn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('ghConnectBtn');
-  const workerUrl = document.getElementById('ghWorkerUrlInput').value.trim();
-  const syncKey = document.getElementById('ghSyncKeyInput').value.trim();
-  const statusEl = document.getElementById('ghStatusText');
-  if(!workerUrl){ statusEl.textContent = '프록시 서버 주소를 입력해주세요.'; return; }
-  setBtnLoading(btn, '확인하는 중...');
-  const prevConfig = {...GITHUB_CONFIG};
-  GITHUB_CONFIG = { workerUrl, syncKey };
-  try{
-    const res = await fetch(`${workerUrl.replace(/\/$/,'')}/ping`, { headers: workerHeaders() });
-    if(!res.ok){
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.error || `상태 코드 ${res.status}`);
-    }
-    await saveGithubConfig();
-    statusEl.textContent = '✅ 연결됐어요.';
-    renderGithubActions();
-  }catch(err){
-    GITHUB_CONFIG = prevConfig;
-    statusEl.textContent = '연결 실패: ' + err.message;
-  }
-  resetBtn(btn);
-});
+bindXlsxButtons('xlsxImportBtn', 'xlsxExportBtn', 'xlsxFileInput');
 
 /* ════════════════════════════════════════════════════════════
    JSON 백업 내보내기 / 불러오기
    ════════════════════════════════════════════════════════════ */
-function handleJsonExport(){
-  const filename = "알닷_운영데이터_백업_" + new Date().toISOString().slice(0,10) + ".json";
-  const blob = new Blob([JSON.stringify(STATE, null, 2)], {type:'application/json'});
+function downloadJson(data, prefix){
+  const filename = prefix + new Date().toISOString().slice(0,10) + ".json";
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   a.click(); URL.revokeObjectURL(url);
+}
+function handleJsonExport(){
+  downloadJson(STATE, "알닷_운영데이터_백업_");
   showToast('백업 파일로 저장했어요.');
 }
 function handleJsonImportFile(file, btn){
@@ -2930,35 +3637,107 @@ function handleJsonImportFile(file, btn){
   setBtnLoading(btn, '불러오는 중...');
   const reader = new FileReader();
   reader.onload = (ev)=>{
-    try{
-      const data = JSON.parse(ev.target.result);
-      if(!data.eventMonths) throw new Error('올바른 백업 파일이 아니에요.');
-      STATE = data;
-      ensureStateShape();
-      activeEventMonthKey = getDefaultActiveEventMonthKey();
-      activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-      scheduleSave();
-      safeRenderAll();
-      showToast('백업 데이터를 불러왔어요.');
-    }catch(err){ showError('백업 파일을 읽는 중 문제가 발생했어요: ' + err.message); }
-    resetBtn(btn);
+    let data = null;
+    try{ data = JSON.parse(ev.target.result); }
+    catch(err){ showError('백업 파일을 읽는 중 문제가 발생했어요: ' + err.message); resetBtn(btn); return; }
+    offerImport(data, 'JSON 백업', ()=> resetBtn(btn));
   };
+  reader.onerror = ()=>{ showError('파일을 읽지 못했어요. 다시 시도해주세요.'); resetBtn(btn); };
   reader.readAsText(file);
 }
 
 /* ════════════════════════════════════════════════════════════
    초기화
    ════════════════════════════════════════════════════════════ */
-(async function init(){
-  await loadState();
-  await loadGithubConfig();
-  if(!STORAGE_OK) renderSavebar('자동 저장 불가 — 상단의 "내보내기"를 주기적으로 눌러 내려받아 두세요', true);
-  activeEventMonthKey = getDefaultActiveEventMonthKey();
-  activeBannerMonthKey = getDefaultActiveBannerMonthKey();
-  renderEventsTab();
-  renderBannerTab();
-  renderPmTab();
-  renderBenefitTab();
+boot();
+
+/* ════════════════════════════════════════════════════════════
+   셀프테스트: ?selftest=1 일 때만 실행 (DB 연결 없이 순수 함수만 검사)
+   ════════════════════════════════════════════════════════════ */
+if(SELFTEST) (function runSelfTest(){
+  const results = [];
+  const assert = (cond, msg)=>{ if(!cond) throw new Error('ASSERT 실패: ' + msg); results.push('✔ ' + msg); };
+  const canon = v => JSON.stringify(v, (k,x)=> x && typeof x==='object' && !Array.isArray(x) ? Object.keys(x).sort().reduce((o,kk)=>(o[kk]=x[kk],o),{}) : x);
+  const deepEq = (a,b)=> canon(a)===canon(b);
+  const iso = d => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  const addDays = n => { const d = new Date(); d.setDate(d.getDate()+n); return d; };
+  const ev = (u, name, extra)=> ({_uid:u, priority:'중', status:'진행', name, workType:'HTML', category:'파트너', dueDate:'2026.09.01', reflectStatus:'2026.09.15', source:'자체', reviewUrl:'https://review/'+u, urlType:'신규', opUrl:'https://op/'+u, note:'메모 '+u, id:String(100+u.length), ...extra});
+  const sample = {
+    eventMonths: [
+      {key:'2026-08', label:'26년 8월', events:[ev('e1','여름 이벤트'), ev('e2','8월 쿠폰', {status:'완료', priority:'상'})]},
+      {key:'2026-09', label:'26년 9월', events:[ev('e3','가을 이벤트'), ev('e4','추석 특가', {reflectStatus:''}), ev('e5','9월 룰렛')]},
+    ],
+    bannerMonths: [
+      {key:'2026-08', label:'26년 8월', columns:['메인 팝업','메인 상단'], hiddenColumns:[], cycleWeeks:4, weekAnchor:'2026-08-06T10:00', partners:[{name:'A모바일', week:1, rankInWeek:1}], changeLog:[],
+        ranks:[{_uid:'r1', values:{'메인 팝업':'A모바일','메인 상단':'토스모바일'}}, {_uid:'r2', values:{'메인 팝업':'프리티','메인 상단':'티플러스'}}],
+        preMarketingPartners:[{_uid:'p1', name:'모나', week:1, rankInWeek:1}, {_uid:'p2', name:'슈가모바일', week:2, rankInWeek:1}]},
+      {key:'2026-09', label:'26년 9월', columns:['메인 팝업','메인 상단','메인 하단'], hiddenColumns:['메인 하단'], cycleWeeks:3, weekAnchor:'2026-09-03T10:00', partners:[], changeLog:[],
+        ranks:[{_uid:'r3', values:{'메인 팝업':'헬로모바일','메인 상단':'유모바일','메인 하단':'찬스모바일'}}],
+        preMarketingPartners:[{_uid:'p3', name:'아이즈모바일', week:3, rankInWeek:2}]},
+    ],
+    benefitBlocks: [
+      {_blockUid:'b2', label:'26년 9월', items:[{_uid:'i1', name:'데이터 쿠폰', copy:'1GB 더', status:'진행', expiryDate:'2026-09-30'}, {_uid:'i2', name:'요금 할인', copy:'첫달 무료', status:'완료', expiryDate:''}]},
+      {_blockUid:'b1', label:'26년 8월', items:[{_uid:'i3', name:'여름 혜택', copy:'시원하게', status:'종료', expiryDate:'2026-08-31'}]},
+    ],
+    partnerNameMap: {...DEFAULT_PARTNER_NAME_MAP},
+    activityLog: [{id:'a1', at:'2026-09-01T00:00:00.000Z', icon:'📅', action:'테스트', detail:'', tab:null, monthKey:null}],
+    customEventColumns: [],
+  };
+
+  try{
+    // (a) STATE → rows → STATE 왕복 (행 순서 포함). 행 배열을 뒤섞어서 순서가 sort 값에서 온다는 것도 확인
+    const rows = stateToRows(sample);
+    const ids = rows.containers.map(c=>c.id);
+    assert(new Set(ids).size===ids.length, '(a) 컨테이너 id가 겹치지 않음 (event:·banner: 접두어)');
+    assert(new Set(rows.records.map(r=>r.id)).size===rows.records.length, '(a) 레코드 id가 겹치지 않음');
+    const back = rowsToState(rows.containers.slice().reverse(), rows.records.slice().reverse());
+    assert(deepEq(back, sample), '(a) stateToRows → rowsToState 결과가 원래 STATE와 깊은 비교로 같음');
+    const maps = rowsToMaps(rows);
+    assert(diffRows(maps, cloneMaps(maps))===null, '(a) 바뀐 게 없으면 보낼 쓰기도 없음');
+    const edited = structuredClone(sample); edited.eventMonths[1].events[0].name = '바뀐 이름';
+    const op = diffRows(maps, rowsToMaps(stateToRows(edited)));
+    assert(op && op.p && op.p.length===1 && deepEq(op.p[0], {id:'e3', patch:{name:'바뀐 이름'}}) && Object.keys(op).length===1, '(a) 셀 하나 수정 → patch_record 한 건(바뀐 필드만)');
+
+    // (b) sort_order 중간값과 다시 매기기
+    const S = new Map([['x',0],['y',1],['z',2]]);
+    let order = ['x','z','y']; S.delete('z');
+    assert(fillSort(order, S)===false && S.get('z')===0.5 && S.get('x')===0 && S.get('y')===1, '(b) 옮긴 행 하나만 이웃의 중간값(0.5)으로 바뀜');
+    let renumbered = false, n = 0;
+    while(!renumbered && n < 100){ order = ['x','m'+n, ...order.slice(1)]; renumbered = fillSort(order, S); n++; }
+    assert(renumbered, `(b) 간격이 1e-9보다 작아지면 다시 매김 (${n}번째 삽입에서)`);
+    assert(order.every((id,k)=> S.get(id)===k), '(b) 다시 매긴 뒤 순서값이 0,1,2… 정수');
+    const B = new Map([['b1',0]]);
+    fillSort(['new','b1'], B, true);
+    assert(B.get('new')===-1 && encodeBlockKey(-1) < encodeBlockKey(0), '(b) 혜택 블록을 맨 앞에 추가하면 sort_key가 더 작음');
+
+    // (c) 엑셀 내보내기 → 불러오기 왕복
+    const wb = XLSX.read(new Uint8Array(XLSX.write(buildExportWorkbook(sample), {type:'array', bookType:'xlsx'})), {type:'array'});
+    const imp = importFromWorkbook(wb);
+    const strip = arr => arr.map(({_uid, ...rest})=> rest);
+    const evFields = e => Object.fromEntries([...EVENT_FIELDS, 'id'].map(f=>[f, String(e[f] ?? '')]));
+    assert(deepEq(imp.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)})), sample.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)}))), '(c) 이벤트 월·모든 EVENT_FIELDS가 같음');
+    const rankView = mo => ({key:mo.key, columns:mo.columns, ranks:mo.ranks.map(r=> mo.columns.map(c=> r.values[c] ?? ''))});
+    assert(deepEq(imp.bannerMonths.map(rankView), sample.bannerMonths.map(rankView)), '(c) 배너 구좌 순위가 같음');
+    assert(deepEq(imp.benefitBlocks.map(b=>({label:b.label, items:strip(b.items)})), sample.benefitBlocks.map(b=>({label:b.label, items:strip(b.items)}))), '(c) 혜택 항목과 expiryDate가 같음');
+    const pmView = mo => ({key:mo.key, cycleWeeks:mo.cycleWeeks, weekAnchor:mo.weekAnchor, entries:strip(mo.preMarketingPartners||[])});
+    assert(deepEq(imp.bannerMonths.map(pmView), sample.bannerMonths.map(pmView)), '(c) 프리마케팅(주차·순위·파트너, 배치 주기, 기준일시)이 같음');
+
+    // (d) 마감 알림은 reflectStatus(종료일)를 먼저 봄
+    const dl = scanDeadlines([
+      {_uid:'d1', name:'종료일 지남', status:'진행', dueDate:iso(addDays(10)), reflectStatus:iso(addDays(-3))},
+      {_uid:'d2', name:'종료일 없음', status:'진행', dueDate:iso(addDays(2)), reflectStatus:''},
+      {_uid:'d3', name:'종료일 여유', status:'진행', dueDate:iso(addDays(-5)), reflectStatus:iso(addDays(30))},
+    ]);
+    assert(dl.overdue.length===1 && dl.overdue[0]._uid==='d1', '(d) 시작일이 미래여도 종료일이 지났으면 지연');
+    assert(dl.dueSoon.length===1 && dl.dueSoon[0]._uid==='d2', '(d) 종료일이 없으면 시작일 기준으로 임박');
+    assert(!dl.overdue.concat(dl.dueSoon).some(x=>x._uid==='d3'), '(d) 시작일이 지나도 종료일이 30일 남았으면 알림 없음');
+
+    console.log('SELFTEST PASS\n' + results.join('\n'));
+    showSetup('✅ 셀프테스트 통과 (' + results.length + '개)\n' + results.join('\n'));
+  }catch(err){
+    console.error('SELFTEST FAIL', err);
+    showSetup('❌ 셀프테스트 실패: ' + err.message + '\n' + results.join('\n'));
+  }
 })();
 </script>
 </body>
