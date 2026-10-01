@@ -117,12 +117,6 @@
   .act-go[disabled]{opacity:1; cursor:default; color:var(--ink);}
   .act-detail{display:block; font-size:11.5px; color:var(--ink-soft);}
 
-  /* 안내 띠 (월 준비·백업) */
-  .notice{display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:10px 14px; margin-bottom:12px; font-size:12.5px; color:var(--ink);}
-  .notice .notice-close{margin-left:auto;}
-  .check-item{font-weight:600;}
-  .check-item.ok{color:var(--pass-text);}
-  .check-item.miss{color:var(--fatal-text);}
 
   /* 접속자 · 다른 사람이 편집 중인 행 */
   button.presence-chip{font-size:11.5px; padding:6px 10px; border-radius:999px; color:var(--ink-soft);}
@@ -158,7 +152,6 @@
   .statusboard button.sb-item:hover .sb-label{color:var(--primary-dark);}
   .statusboard button.sb-item[aria-pressed="true"]{background:var(--fatal-soft);}
   table.edittable input.dup-id{border:1.5px solid var(--fatal-border); background:var(--fatal-soft);}
-  .status-filter-row select{height:34px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:12px; font-weight:600; padding:0 8px; background:var(--panel); color:var(--ink-soft);}
   .pm-rank-actions{display:flex; gap:8px; margin-top:8px;}
   .deadline-row .dl-month{flex-shrink:0; font-size:11px; color:var(--ink-soft);}
   @media (prefers-reduced-motion: reduce){ .sync-status.saving .dot{animation:none;} }
@@ -445,7 +438,6 @@
   <div class="inline-error hidden" id="globalError">
     <span>⚠️</span><span id="globalErrorText"></span><span class="close" id="globalErrorClose">✕</span>
   </div>
-  <div id="noticeHolder"></div>
 
   <div class="maintabs-row">
     <div class="maintabs" id="maintabs">
@@ -633,12 +625,12 @@ function resetBtn(btn){
   if(btn.dataset.originalLabel) btn.innerHTML = btn.dataset.originalLabel;
 }
 
-const EVENT_FIELDS = ["priority","status","name","workType","category","dueDate","reflectStatus","source","reviewUrl","urlType","opUrl","note","owner"];
+const EVENT_FIELDS = ["priority","status","name","workType","category","dueDate","reflectStatus","source","reviewUrl","urlType","opUrl","note"];
 // 화면·엑셀에 보이는 이름만 바꿨어요. 저장 필드 이름(dueDate, reflectStatus)은 그대로예요.
 const EVENT_FIELD_LABELS = {
   priority:"우선순위", status:"작업상태", name:"이벤트명", workType:"작업유형", category:"구분",
   dueDate:"시작일", reflectStatus:"종료일", source:"소스수급", reviewUrl:"검수용URL",
-  urlType:"URL유형", opUrl:"운영URL", note:"주요특이사항", owner:"담당자"
+  urlType:"URL유형", opUrl:"운영URL", note:"주요특이사항"
 };
 const STATUS_OPTIONS = ["완료","진행","대기","연장","비노출"];
 const PRIORITY_OPTIONS = ["상","중","하"];
@@ -663,7 +655,6 @@ const DEFAULT_PARTNER_NAME_MAP = {
 };
 
 const EVENT_TABLE_COLUMNS = [
-  {key:'priority', label:EVENT_FIELD_LABELS.priority},
   {key:'status', label:'상태'},
   {key:'name', label:EVENT_FIELD_LABELS.name, minWidth:160},
   {key:'workType', label:EVENT_FIELD_LABELS.workType},
@@ -671,7 +662,6 @@ const EVENT_TABLE_COLUMNS = [
   {key:'dueDate', label:EVENT_FIELD_LABELS.dueDate},
   {key:'reflectStatus', label:EVENT_FIELD_LABELS.reflectStatus},
   {key:'id', label:'이벤트ID'},
-  {key:'owner', label:EVENT_FIELD_LABELS.owner},
 ];
 // 미입력 표시 대상 (팀 기준에 맞게 바꿔 쓰세요)
 const REQUIRED_EVENT_FIELDS = ['name', 'dueDate', 'reflectStatus', 'id'];
@@ -1019,7 +1009,6 @@ function syncChanges(){
     splitAuxOp(op, prev, next).forEach(part=>{ if(part) enqueue(part); });
   }
   updateMigrateBtn();
-  renderNotices();
 }
 function splitAuxOp(op, prev, next){
   const kindOf = id => (next.records.get(id) || prev.records.get(id) || {}).kind;
@@ -1767,65 +1756,6 @@ function refreshCounts(){
 }
 
 /* ════════════════════════════════════════════════════════════
-   안내 띠: 다음 달 준비 체크 · 백업 알림
-   ════════════════════════════════════════════════════════════ */
-const NOTICE_HIDDEN = new Set();
-function nextMonthStatus(){
-  const target = nextCalendarMonthKey();
-  return { target,
-    event: STATE.eventMonths.some(m=>m.key===target),
-    banner: STATE.bannerMonths.some(m=>m.key===target),
-    benefit: STATE.benefitBlocks.some(b=> benefitBlockMonthKey(b.label)===target) };
-}
-function renderNotices(){
-  const holder = document.getElementById('noticeHolder');
-  if(!holder || !STATE || !CONNECTED) return;
-  const parts = [];
-  const st = nextMonthStatus();
-  if(!NOTICE_HIDDEN.has('month') && !(st.event && st.banner && st.benefit)){
-    const item = (ok, label)=> `<span class="check-item ${ok ? 'ok' : 'miss'}">${label} ${ok ? '준비됨' : '없음'}</span>`;
-    parts.push(`<div class="notice"><b>${monthLabelOfKey(st.target)} 준비</b>${item(st.event,'이벤트')}${item(st.banner,'배너')}${item(st.benefit,'혜택')}
-      <button type="button" class="primary sm" id="prepareMonthBtn">없는 것 한 번에 만들기</button>
-      <button type="button" class="ghost sm notice-close" data-close="month">닫기</button></div>`);
-  }
-  if(!DB_EMPTY && !NOTICE_HIDDEN.has('backup')){
-    const last = STATE.uiPrefs && STATE.uiPrefs.lastBackupAt;
-    const days = last ? Math.floor((Date.now() - Date.parse(last)) / 86400000) : null;
-    if(days===null || days>=7){
-      parts.push(`<div class="notice"><span>${days===null ? '이 브라우저에서 JSON 백업을 받은 적이 없어요.' : `마지막 JSON 백업이 ${days}일 전이에요.`} 실수로 지워도 되살릴 수 있게 백업을 받아두세요.</span>
-        <button type="button" class="sm" id="backupNowBtn">JSON 백업 받기</button>
-        <button type="button" class="ghost sm notice-close" data-close="backup">닫기</button></div>`);
-    }
-  }
-  holder.innerHTML = parts.join('');
-  holder.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', ()=>{ NOTICE_HIDDEN.add(b.dataset.close); renderNotices(); }));
-  const prep = document.getElementById('prepareMonthBtn'); if(prep) prep.addEventListener('click', prepareNextMonth);
-  const bk = document.getElementById('backupNowBtn'); if(bk) bk.addEventListener('click', handleJsonExport);
-}
-// 다음 달 시트가 없는 탭마다 '새 달 만들기'를 필요한 만큼 이어서 눌러줘요
-function prepareNextMonth(){
-  const st = nextMonthStatus(), target = st.target, made = [];
-  const run = (has, latest, add, label)=>{
-    for(let i=0; i<12 && !has(); i++){
-      const before = latest();
-      if(before && before >= target) break;
-      if(add(true)===false || latest()===before) break;
-    }
-    if(has()) made.push(label);
-  };
-  if(!st.event) run(()=> STATE.eventMonths.some(m=>m.key===target), ()=> STATE.eventMonths[STATE.eventMonths.length-1].key, addNewEventMonth, '이벤트');
-  if(!st.banner) run(()=> STATE.bannerMonths.some(m=>m.key===target), ()=> STATE.bannerMonths[STATE.bannerMonths.length-1].key, addNewBannerMonth, '배너');
-  if(!st.benefit) run(()=> STATE.benefitBlocks.some(b=> benefitBlockMonthKey(b.label)===target),
-    ()=> STATE.benefitBlocks[0] ? (benefitBlockMonthKey(STATE.benefitBlocks[0].label) || '') : '', addNewBenefitMonth, '혜택');
-  if(STATE.eventMonths.some(m=>m.key===target)) activeEventMonthKey = target;
-  if(STATE.bannerMonths.some(m=>m.key===target)) activeBannerMonthKey = target;
-  renderActiveTab(); renderNotices();
-  const left = nextMonthStatus();
-  if(left.event && left.banner && left.benefit) showToast(`${monthLabelOfKey(target)} 시트를 준비했어요 (${made.join(', ')}). 이전 달 내용을 복사했으니 확인해주세요.`);
-  else showError(`${monthLabelOfKey(target)} 시트를 일부만 만들었어요. 남은 탭은 각 탭에서 '새 달 만들기'로 만들어주세요.`);
-}
-
-/* ════════════════════════════════════════════════════════════
    접속자 표시 (Supabase Realtime presence, 테이블은 그대로)
    ════════════════════════════════════════════════════════════ */
 let RT_CHANNEL = null, PEERS = [], MY_EDITING = null;
@@ -1877,7 +1807,7 @@ function searchAll(query){
   const has = v => String(v ?? '').toLowerCase().includes(q);
   const hits = [];
   STATE.eventMonths.forEach(m=> m.events.forEach((ev,i)=>{
-    if(['name','id','owner','category','note','opUrl'].some(f=> has(ev[f])))
+    if(['name','id','category','note','opUrl'].some(f=> has(ev[f])))
       hits.push({tab:'events', kind:'이벤트', text: ev.name || '(제목없음)', where:`${m.label} ${i+1}행${ev.id ? ` · ID ${ev.id}` : ''}`, key:m.key, uid:ev._uid});
   }));
   STATE.bannerMonths.forEach(m=>{
@@ -1894,7 +1824,7 @@ function searchAll(query){
   return hits;
 }
 function goToHit(h){
-  if(h.tab==='events'){ activeEventMonthKey = h.key; activeEventStatusFilter = '전체'; activeEventOwnerFilter = '전체'; }
+  if(h.tab==='events'){ activeEventMonthKey = h.key; activeEventStatusFilter = '전체'; }
   if(h.tab==='banner' || h.tab==='pm') activeBannerMonthKey = h.key;
   if(h.tab==='benefit' && !h.current) expandedBenefitBlocks.add(h.block);
   switchMainTab(h.tab); renderActiveTab();
@@ -2105,13 +2035,7 @@ function buildMonthSummaryWorkbook(key){
   rows.push(['■ 이벤트 상태별'], ['상태', '건수']);
   STATUS_OPTIONS.forEach(st=> rows.push([st, mo.events.filter(ev=>ev.status===st).length]));
   rows.push(['합계', mo.events.length], []);
-  rows.push(['■ 담당자별'], ['담당자', '전체', '완료', '미완료']);
-  const owners = [...new Set(mo.events.map(ev=> String(ev.owner ?? '').trim() || NO_OWNER))].sort();
-  owners.forEach(o=>{
-    const list = mo.events.filter(ev=> (String(ev.owner ?? '').trim() || NO_OWNER)===o);
-    rows.push([o, list.length, list.filter(ev=>ev.status==='완료').length, list.filter(ev=>!DONE_STATUSES.has(ev.status)).length]);
-  });
-  rows.push([], ['■ 마감 지연·임박 (오늘 기준)'], ['구분', '이벤트명', '이벤트ID', '기준일', 'D-day']);
+  rows.push(['■ 마감 지연·임박 (오늘 기준)'], ['구분', '이벤트명', '이벤트ID', '기준일', 'D-day']);
   const {overdue, dueSoon} = scanDeadlines(mo.events);
   [...overdue, ...dueSoon].forEach(ev=> rows.push([ev.d<0 ? '지연' : '임박', ev.name, ev.id || '', ev.reflectStatus || ev.dueDate, ev.d<0 ? `D+${-ev.d}` : `D-${ev.d}`]));
   if(!overdue.length && !dueSoon.length) rows.push(['없음']);
@@ -2172,7 +2096,6 @@ async function startApp(){
   activeEventMonthKey = getDefaultActiveEventMonthKey();
   activeBannerMonthKey = getDefaultActiveBannerMonthKey();
   renderActiveTab();
-  renderNotices();
   trackPresence();
   if(!myName()) askName();
 }
@@ -2455,7 +2378,7 @@ function renderDeadlineBox(){
   holder.querySelectorAll('.deadline-row').forEach(row=>{
     const go = ()=>{
       const {uid:uidVal, key} = row.dataset;
-      if(key!==activeEventMonthKey){ activeEventMonthKey = key; activeEventStatusFilter = '전체'; activeEventOwnerFilter = '전체'; renderEventsTab(); }
+      if(key!==activeEventMonthKey){ activeEventMonthKey = key; activeEventStatusFilter = '전체'; renderEventsTab(); }
       flashHighlight(document.querySelector(`#eventsTbody tr[data-uid="${CSS.escape(uidVal)}"]`));
     };
     row.addEventListener('click', go);
@@ -2524,7 +2447,7 @@ function renderEventsTab(){
   });
 }
 function newEventRow(){
-  return {_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:"", owner:""};
+  return {_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""};
 }
 
 function renderEventHistoryAccordion(otherMonths){
@@ -2546,7 +2469,7 @@ function renderEventHistoryAccordion(otherMonths){
         </span>
         <span>
           <button class="ghost sm set-current-btn" data-key="${mo.key}">이 달을 현재로 보기</button>
-          <button class="ghost sm del-event-month-btn" data-key="${mo.key}" title="이 달 삭제">🗑️</button>
+          <button class="ghost sm del-event-month-btn icon-btn" data-key="${mo.key}" title="이 달 삭제" aria-label="이 달 삭제">${TRASH_ICON}</button>
         </span>
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
@@ -2627,7 +2550,7 @@ function eventRowHtml(ev, idx, cols, mode){
 
 // 상태 필터가 걸려 있으면 보이는 순서와 실제 순서가 달라서, 순서 이동·여러 칸 붙여넣기를 막아요
 function blockedByFilter(mode){
-  if(mode!=='current' || (activeEventStatusFilter==='전체' && activeEventOwnerFilter==='전체')) return false;
+  if(mode!=='current' || activeEventStatusFilter==='전체') return false;
   showToast("필터를 '전체'로 바꾼 뒤 이용해주세요", 'error');
   return true;
 }
@@ -2768,7 +2691,7 @@ function renderEventStatusFilterRow(){
   holder.innerHTML = filters.map(f=>{
     const count = f==='전체' ? mo.events.length : mo.events.filter(ev=>ev.status===f).length;
     return `<span class="chip ${activeEventStatusFilter===f?'active':''}" data-filter="${f}">${f} (${count})</span>`;
-  }).join('') + ownerFilterHtml(mo);
+  }).join('');
   holder.querySelectorAll('.chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
       activeEventStatusFilter = chip.dataset.filter;
@@ -2777,21 +2700,6 @@ function renderEventStatusFilterRow(){
       renderEventsRows();
     });
   });
-  const ownerSel = document.getElementById('ownerFilter');
-  if(ownerSel) ownerSel.addEventListener('change', ()=>{
-    activeEventOwnerFilter = ownerSel.value;
-    selectedEventUids = new Set();
-    renderEventStatusFilterRow();
-    renderEventsRows();
-  });
-}
-let activeEventOwnerFilter = '전체';
-const NO_OWNER = '(미지정)';
-function ownerFilterHtml(mo){
-  const owners = [...new Set(mo.events.map(ev=> String(ev.owner ?? '').trim()).filter(Boolean))].sort();
-  if(activeEventOwnerFilter!=='전체' && activeEventOwnerFilter!==NO_OWNER && !owners.includes(activeEventOwnerFilter)) owners.push(activeEventOwnerFilter);
-  const opt = v => `<option value="${escapeHtml(v)}" ${activeEventOwnerFilter===v?'selected':''}>${v==='전체' ? '담당자 전체' : escapeHtml(v)}</option>`;
-  return `<select id="ownerFilter" aria-label="담당자별 보기">${['전체', ...owners, NO_OWNER].map(opt).join('')}</select>`;
 }
 
 function renderEventFieldCell(ev, colKey){
@@ -2813,14 +2721,12 @@ function renderEventFieldCell(ev, colKey){
     return `<td><div class="idcell"><input type="text" class="ev-field${idCls}" data-field="id" value="${escapeHtml(ev.id)}" ${dups.length ? `title="${escapeHtml('같은 ID가 있어요: ' + dups.join(', '))}"` : ''}/>
       <button class="ghost sm id-link-btn" title="운영 페이지로 이동" ${url?'':'disabled'}>🔗</button></div></td>`;
   }
-  const placeholders = { name:'이벤트명을 입력해주세요', workType:'HTML 등', category:'파트너사 등', urlType:'신규', owner:'담당자' };
+  const placeholders = { name:'이벤트명을 입력해주세요', workType:'HTML 등', category:'파트너사 등', urlType:'신규' };
   const emptyRequired = (colKey==='name' && !ev.name) || (MISSING_MODE && isMissingField(ev, colKey)) ? ' empty-required' : '';
   return `<td><input type="text" class="ev-field${emptyRequired}" data-field="${colKey}" value="${escapeHtml(ev[colKey]||'')}" ${placeholders[colKey]?`placeholder="${placeholders[colKey]}"`:''}/></td>`;
 }
 
-const passesEventFilter = ev =>
-  (activeEventStatusFilter==='전체' || ev.status===activeEventStatusFilter) &&
-  (activeEventOwnerFilter==='전체' || (activeEventOwnerFilter===NO_OWNER ? !String(ev.owner ?? '').trim() : String(ev.owner ?? '').trim()===activeEventOwnerFilter));
+const passesEventFilter = ev => activeEventStatusFilter==='전체' || ev.status===activeEventStatusFilter;
 
 function renderEventsRows(){
   const mo = getEventMonth(activeEventMonthKey);
@@ -3803,7 +3709,6 @@ const LEGACY_FIELD_MAP = {
   opUrl: ['운영기url','운영url'],
   id: ['이벤트id'],
   note: ['주요특이사항','비고'],
-  owner: ['담당자'],
 };
 function normHeaderText(s){ return s==null ? '' : String(s).replace(/\s/g,'').toLowerCase(); }
 
@@ -4174,7 +4079,7 @@ function importFromWorkbook(wb){
         dueDate: normalizeDateValue(get(r,'dueDate')), reflectStatus: rsIso ? isoToDot(rsIso) : '',
         source: get(r,'source')||'', reviewUrl: get(r,'reviewUrl')||'',
         urlType: get(r,'urlType')||'', opUrl: get(r,'opUrl')||'',
-        id: (idVal!==null && idVal!==undefined) ? String(idVal) : '', note, owner: get(r,'owner')||''
+        id: (idVal!==null && idVal!==undefined) ? String(idVal) : '', note
       });
       r++;
     }
@@ -4520,8 +4425,6 @@ function downloadJson(data, prefix){
 }
 function handleJsonExport(){
   downloadJson(STATE, "알닷_운영데이터_백업_");
-  STATE.uiPrefs.lastBackupAt = new Date().toISOString();
-  saveUiPrefs(); renderNotices();
   showToast('백업 파일로 저장했어요.');
 }
 function handleJsonImportFile(file, btn){
@@ -4557,7 +4460,7 @@ if(SELFTEST) (function runSelfTest(){
   const sample = {
     eventMonths: [
       {key:'2026-08', label:'26년 8월', events:[ev('e1','여름 이벤트'), ev('e2','8월 쿠폰', {status:'완료', priority:'상'})]},
-      {key:'2026-09', label:'26년 9월', events:[ev('e3','가을 이벤트'), ev('e6',''), ev('e7',''), ev('e8',''), ev('e4','추석 특가', {reflectStatus:''}), ev('e5','9월 룰렛', {owner:'김운영'})]},
+      {key:'2026-09', label:'26년 9월', events:[ev('e3','가을 이벤트'), ev('e6',''), ev('e7',''), ev('e8',''), ev('e4','추석 특가', {reflectStatus:''}), ev('e5','9월 룰렛')]},
     ],
     bannerMonths: [
       {key:'2026-08', label:'26년 8월', columns:['메인 팝업','메인 상단'], hiddenColumns:[], cycleWeeks:4, weekAnchor:'2026-08-06T10:00', partners:[{name:'A모바일', week:1, rankInWeek:1}], changeLog:[],
@@ -4619,7 +4522,7 @@ if(SELFTEST) (function runSelfTest(){
     const imp = importFromWorkbook(wb);
     const strip = arr => arr.map(({_uid, ...rest})=> rest);
     const evFields = e => Object.fromEntries([...EVENT_FIELDS, 'id'].map(f=>[f, String(e[f] ?? '')]));
-    assert(deepEq(imp.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)})), sample.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)}))), '(c) 이벤트 월·모든 EVENT_FIELDS(담당자 포함)가 같음 (이름이 빈 행 3개가 이어져도 뒤 행이 살아남음)');
+    assert(deepEq(imp.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)})), sample.eventMonths.map(m=>({key:m.key, events:m.events.map(evFields)}))), '(c) 이벤트 월·모든 EVENT_FIELDS가 같음 (이름이 빈 행 3개가 이어져도 뒤 행이 살아남음)');
     const rankView = mo => ({key:mo.key, columns:mo.columns, ranks:mo.ranks.map(r=> mo.columns.map(c=> r.values[c] ?? ''))});
     assert(deepEq(imp.bannerMonths.map(rankView), sample.bannerMonths.map(rankView)), '(c) 배너 구좌 순위가 같음');
     assert(deepEq(imp.benefitBlocks.map(b=>({label:b.label, items:strip(b.items)})), sample.benefitBlocks.map(b=>({label:b.label, items:strip(b.items)}))), '(c) 혜택 항목과 expiryDate가 같음');
