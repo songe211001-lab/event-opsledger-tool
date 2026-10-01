@@ -153,7 +153,6 @@
   .statusboard button.sb-item[aria-pressed="true"]{background:var(--fatal-soft);}
   table.edittable input.dup-id{border:1.5px solid var(--fatal-border); background:var(--fatal-soft);}
   .pm-rank-actions{display:flex; gap:8px; margin-top:8px;}
-  .deadline-row .dl-month{flex-shrink:0; font-size:11px; color:var(--ink-soft);}
   @media (prefers-reduced-motion: reduce){ .sync-status.saving .dot{animation:none;} }
   @keyframes save-pulse{ 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.4; transform:scale(.7);} }
 
@@ -246,7 +245,7 @@
   .pm-status-item .pm-readonly.badge-ready{color:var(--minor-text); background:var(--minor-soft);}
   .pm-status-item .pm-readonly.badge-live{color:var(--pass-text); background:var(--pass-soft);}
 
-  .idcell input{width:56px !important; flex:none;}
+  .idcell input{width:92px !important; flex:none;}
 
   .callout{background:var(--minor-soft); border:1px solid var(--minor-border); color:var(--minor-text); border-radius:7px; padding:12px 14px; font-size:12.5px; line-height:1.6; margin-bottom:14px;}
 
@@ -333,7 +332,7 @@
   /* 포커스 표시는 임의로 제거하지 않음 */
   a:focus-visible, button:focus-visible, .chip:focus-visible{ outline:2px solid var(--primary-dark); outline-offset:2px; }
 
-  /* 하이라이트 플래시 (마감 알림 이동 후 강조) */
+  /* 하이라이트 플래시 (검색·이동 후 강조) */
   @keyframes flash-pulse{
     0%{background:var(--primary-soft);} 60%{background:var(--primary-soft);} 100%{background:transparent;}
   }
@@ -346,35 +345,7 @@
     display:flex; align-items:center; gap:10px; font-size:13px; color:var(--minor-text);
   }
 
-  /* 마감 임박/지연 알림 (컴팩트 요약형) */
-  .deadline-box{border-radius:9px; padding:14px 16px; margin-bottom:16px;}
-  .deadline-box.has-overdue{background:var(--critical-soft); border:1px solid var(--fatal-border);}
-  .deadline-box.only-soon{background:var(--minor-soft); border:1px solid var(--minor-border);}
-  .deadline-box .db-title{
-    font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  }
-  .db-pill{
-    font-family:inherit; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px;
-  }
-  .db-pill.over{background:var(--fatal); color:#fff;}
-  .db-pill.soon{background:var(--minor); color:var(--minor-text);}
-  .deadline-rows{display:flex; flex-direction:column; gap:2px;}
-  .deadline-row{
-    display:flex; align-items:center; gap:8px; padding:6px 8px; font-size:12.5px; cursor:pointer;
-    border-radius:5px; transition:background .12s var(--ease);
-  }
-  .deadline-row:hover{background:rgba(255,255,255,.5);}
-  .deadline-row .dtag{
-    flex-shrink:0; font-weight:700; font-size:10.5px; padding:2px 7px; border-radius:6px; min-width:38px; text-align:center;
-  }
-  .deadline-row .dtag.over{background:var(--fatal); color:#fff;}
-  .deadline-row .dtag.soon{background:var(--minor); color:var(--minor-text);}
-  .deadline-row .dl-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:var(--ink);}
 
-  .deadline-toggle-btn{
-    margin-top:8px; background:transparent; border:none; color:var(--ink-soft); font-size:12px; font-weight:700;
-    padding:4px 2px; cursor:pointer; text-decoration:underline;
-  }
 
   /* 반응형 */
   @media (max-width:720px){
@@ -484,6 +455,12 @@
     </div>
   </div>
 </div>
+
+<datalist id="eventLinkOptions">
+  <option value="친구추천"></option>
+  <option value="삼성카드"></option>
+  <option value="롯데카드"></option>
+</datalist>
 
 <div id="panelModalOverlay" class="modal-overlay hidden">
   <div class="modal" role="dialog" aria-labelledby="panelModalTitle">
@@ -633,6 +610,8 @@ const EVENT_FIELD_LABELS = {
   urlType:"URL유형", opUrl:"운영URL", note:"주요특이사항"
 };
 const STATUS_OPTIONS = ["완료","진행","대기","연장","비노출"];
+// 작업유형·구분 선택지 (바꾸려면 여기만 고치세요)
+const EVENT_SELECT_OPTIONS = { workType:['HTML','단순 업로드'], category:['알닷','파트너사','기타파일'] };
 const PRIORITY_OPTIONS = ["상","중","하"];
 const DONE_STATUSES = new Set(["완료","연장","비노출"]);
 const CARRY_STATUSES = new Set(["연장"]);
@@ -1444,7 +1423,6 @@ function afterRemoteRecord(cid, id, structural){
     if(activeMainTab==='events' && cid==='event:'+activeEventMonthKey){
       renderStatusboard(); renderEventStatusFilterRow(); renderBulkBar();
     }
-    if(activeMainTab==='events') renderDeadlineBox(); // 마감 알림은 모든 달을 봐요
     refreshCounts();
     if(cid===SETTINGS_ID){ renderActivityLogIfOpen(); renderTrashIfOpen(); }
   }finally{ REMOTE_RENDER = false; }
@@ -2246,11 +2224,19 @@ function defaultWeekAnchor(key){
 
 function uid(){ return Math.random().toString(36).slice(2,9); }
 
+// 이벤트ID 칸에 숫자 대신 넣을 수 있는 전용 페이지 (새 페이지가 생기면 여기에 추가하세요)
+const SPECIAL_EVENT_LINKS = {
+  '친구추천': 'https://www.uplusmvno.com/benefit/recommendation',
+  '롯데카드': 'https://www.uplusmvno.com/benefit/affiliate-card',
+  '삼성카드': 'https://www.uplusmvno.com/benefit/affiliate-card?mvnopPpCprtCardId=CC0000000029',
+};
 function eventIdToUrl(id){
-  const digits = String(id||'').trim();
-  if(!/^\d{1,10}$/.test(digits)) return '';
-  const padded = digits.padStart(10,'0');
-  return `https://www.uplusmvno.com/benefit/event/detail?mvnopEvetId=EV${padded}`;
+  const v = String(id||'').trim();
+  if(SPECIAL_EVENT_LINKS[v]) return SPECIAL_EVENT_LINKS[v];
+  const card = v.match(/^CC(\d{1,10})$/i); // 제휴카드 ID (예: CC0000000029)
+  if(card) return `https://www.uplusmvno.com/benefit/affiliate-card?mvnopPpCprtCardId=CC${card[1].padStart(10,'0')}`;
+  if(!/^\d{1,10}$/.test(v)) return '';
+  return `https://www.uplusmvno.com/benefit/event/detail?mvnopEvetId=EV${v.padStart(10,'0')}`;
 }
 
 function nextCalendarMonthKey(){
@@ -2327,66 +2313,17 @@ function missingCount(mo){ return mo.events.filter(ev=> REQUIRED_EVENT_FIELDS.so
 // 같은 이벤트ID를 가진 다른 행 ('26년 9월 3행' 형식)
 function idOwners(id, exceptUid){
   const key = String(id ?? '').trim();
-  if(!key) return [];
+  if(!key || SPECIAL_EVENT_LINKS[key]) return [];
+  const mo = STATE.eventMonths.find(m=> m.events.some(ev=> ev._uid===exceptUid));
+  if(!mo) return [];
   const out = [];
-  STATE.eventMonths.forEach(m=> m.events.forEach((ev,i)=>{ if(ev._uid!==exceptUid && String(ev.id ?? '').trim()===key) out.push(`${m.label} ${i+1}행`); }));
+  mo.events.forEach((ev,i)=>{ if(ev._uid!==exceptUid && String(ev.id ?? '').trim()===key) out.push(`${mo.label} ${i+1}행`); });
   return out;
 }
 function markDupId(inp, ev){
   const dups = idOwners(inp.value, ev._uid);
   inp.classList.toggle('dup-id', dups.length>0);
   inp.title = dups.length ? `같은 ID가 있어요: ${dups.join(', ')}` : '';
-}
-
-let deadlineBoxExpanded = false;
-
-function renderDeadlineBox(){
-  const holder = document.getElementById('deadlineBoxHolder');
-  if(!holder) return;
-  // 모든 달의 미완료 이벤트를 봐요 (지난달에 끝나지 않은 건도 놓치지 않게)
-  const tagged = STATE.eventMonths.flatMap(m=> m.events.map(ev=> ({...ev, __key:m.key, __label:m.label})));
-  const {overdue, dueSoon} = scanDeadlines(tagged);
-  if(!overdue.length && !dueSoon.length){ holder.innerHTML=''; return; }
-
-  const all = [...overdue, ...dueSoon];
-  const boxClass = overdue.length ? 'has-overdue' : 'only-soon';
-  const PREVIEW_COUNT = 3;
-  const visibleItems = deadlineBoxExpanded ? all : all.slice(0, PREVIEW_COUNT);
-  const hiddenCount = all.length - visibleItems.length;
-
-  const rowHtml = (ev)=>{
-    const isOver = ev.d < 0;
-    const tag = isOver ? `D+${Math.abs(ev.d)}` : (ev.d===0?'오늘':'D-'+ev.d);
-    return `<div class="deadline-row" data-uid="${escapeHtml(ev._uid)}" data-key="${ev.__key}" role="button" tabindex="0">
-      <span class="dtag ${isOver?'over':'soon'}">${tag}</span>
-      <span class="dl-name">${escapeHtml(ev.name||'(제목없음)')}</span>
-      <span class="dl-month">${escapeHtml(ev.__label)}</span>
-    </div>`;
-  };
-
-  holder.innerHTML = `
-    <div class="deadline-box ${boxClass}">
-      <div class="db-title">
-        <span>⏰ 마감 알림 · 전체 달</span>
-        ${overdue.length ? `<span class="db-pill over">지연 ${overdue.length}</span>` : ''}
-        ${dueSoon.length ? `<span class="db-pill soon">임박 ${dueSoon.length}</span>` : ''}
-      </div>
-      <div class="deadline-rows">${visibleItems.map(rowHtml).join('')}</div>
-      ${all.length > PREVIEW_COUNT ? `<button class="deadline-toggle-btn">${deadlineBoxExpanded ? '접기' : `+${hiddenCount}건 더 보기`}</button>` : ''}
-    </div>`;
-
-  holder.querySelectorAll('.deadline-row').forEach(row=>{
-    const go = ()=>{
-      const {uid:uidVal, key} = row.dataset;
-      if(key!==activeEventMonthKey){ activeEventMonthKey = key; activeEventStatusFilter = '전체'; renderEventsTab(); }
-      flashHighlight(document.querySelector(`#eventsTbody tr[data-uid="${CSS.escape(uidVal)}"]`));
-    };
-    row.addEventListener('click', go);
-    row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); go(); } });
-  });
-
-  const toggleBtn = holder.querySelector('.deadline-toggle-btn');
-  if(toggleBtn) toggleBtn.addEventListener('click', ()=>{ deadlineBoxExpanded = !deadlineBoxExpanded; renderDeadlineBox(); });
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -2413,7 +2350,6 @@ function renderEventsTab(){
           <button class="primary" id="addEventMonthBtn">새 달 만들기</button>
         </div>
       </div>
-      <div id="deadlineBoxHolder"></div>
       <div class="status-filter-row" id="eventStatusFilterRow"></div>
       <div id="bulkBarHolder"></div>
       <div class="tblwrap">
@@ -2431,7 +2367,6 @@ function renderEventsTab(){
   `;
   renderEventsTableHeader();
   renderStatusboard();
-  renderDeadlineBox();
   renderEventStatusFilterRow();
   renderEventsRows();
   renderEventHistoryAccordion(otherMonths);
@@ -2443,7 +2378,7 @@ function renderEventsTab(){
   if(addRowBtn) addRowBtn.addEventListener('click', ()=>{
     const mo = getEventMonth(activeEventMonthKey);
     mo.events.push(newEventRow());
-    syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+    syncChanges(); renderEventsRows(); renderStatusboard(); renderEventStatusFilterRow();
   });
 }
 function newEventRow(){
@@ -2561,7 +2496,7 @@ function bindEventRow(tr, key, mode){
   const getMo = ()=> getEventMonth(key);
   const getEv = ()=>{ const m = getMo(); return m ? m.events.find(e=>e._uid===uidVal) : null; };
   const rerender = mode==='current'
-    ? ()=>{ renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+    ? ()=>{ renderEventsRows(); renderStatusboard(); renderEventStatusFilterRow(); }
     : ()=> renderHistoryMonthTable(key);
   const move = (delta)=>{
     if(blockedByFilter(mode)) return;
@@ -2581,7 +2516,7 @@ function bindEventRow(tr, key, mode){
       ev[field] = value;
       if(field==='status'){
         inp.className = 'ev-field status-select ' + inp.value;
-        if(mode==='current'){ renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+        if(mode==='current'){ renderStatusboard(); renderEventStatusFilterRow(); }
       }
       if(field==='priority') inp.className = 'ev-field priority-select ' + inp.value;
       if(field==='name') inp.classList.toggle('empty-required', !inp.value.trim());
@@ -2711,6 +2646,12 @@ function renderEventFieldCell(ev, colKey){
     const opts = STATUS_OPTIONS.map(o=>`<option value="${o}" ${ev.status===o?'selected':''}>${o}</option>`).join('');
     return `<td><select class="ev-field status-select ${ev.status}" data-field="status">${opts}</select></td>`;
   }
+  if(EVENT_SELECT_OPTIONS[colKey]){
+    const cur = String(ev[colKey] ?? '');
+    const opts = ['', ...EVENT_SELECT_OPTIONS[colKey]];
+    if(cur && !opts.includes(cur)) opts.push(cur);
+    return `<td><select class="ev-field" data-field="${colKey}" aria-label="${EVENT_FIELD_LABELS[colKey]}">${opts.map(o=>`<option value="${escapeHtml(o)}" ${o===cur?'selected':''}>${o ? escapeHtml(o) : '선택'}</option>`).join('')}</select></td>`;
+  }
   if(colKey==='dueDate' || colKey==='reflectStatus'){
     return `<td><input type="date" class="ev-field${MISSING_MODE && isMissingField(ev, colKey) ? ' empty-required' : ''}" data-field="${colKey}" value="${dotToIso(ev[colKey])}"/></td>`;
   }
@@ -2718,10 +2659,10 @@ function renderEventFieldCell(ev, colKey){
     const url = eventIdToUrl(ev.id);
     const dups = idOwners(ev.id, ev._uid);
     const idCls = (MISSING_MODE && isMissingField(ev, 'id') ? ' empty-required' : '') + (dups.length ? ' dup-id' : '');
-    return `<td><div class="idcell"><input type="text" class="ev-field${idCls}" data-field="id" value="${escapeHtml(ev.id)}" ${dups.length ? `title="${escapeHtml('같은 ID가 있어요: ' + dups.join(', '))}"` : ''}/>
+    return `<td><div class="idcell"><input type="text" class="ev-field${idCls}" data-field="id" value="${escapeHtml(ev.id)}" list="eventLinkOptions" placeholder="ID…" aria-label="이벤트ID" ${dups.length ? `title="${escapeHtml('같은 ID가 있어요: ' + dups.join(', '))}"` : ''}/>
       <button class="ghost sm id-link-btn" title="운영 페이지로 이동" ${url?'':'disabled'}>🔗</button></div></td>`;
   }
-  const placeholders = { name:'이벤트명을 입력해주세요', workType:'HTML 등', category:'파트너사 등', urlType:'신규' };
+  const placeholders = { name:'이벤트명을 입력해주세요', urlType:'신규' };
   const emptyRequired = (colKey==='name' && !ev.name) || (MISSING_MODE && isMissingField(ev, colKey)) ? ' empty-required' : '';
   return `<td><input type="text" class="ev-field${emptyRequired}" data-field="${colKey}" value="${escapeHtml(ev[colKey]||'')}" ${placeholders[colKey]?`placeholder="${placeholders[colKey]}"`:''}/></td>`;
 }
@@ -2783,7 +2724,7 @@ function handleTablePaste(e, key, startUid, startField, mode){
   const startFieldIdx = fieldOrder.indexOf(startField);
   if(startFieldIdx===-1) return;
   const rerender = mode==='current'
-    ? ()=>{ renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow(); }
+    ? ()=>{ renderEventsRows(); renderStatusboard(); renderEventStatusFilterRow(); }
     : ()=> renderHistoryMonthTable(key);
 
   const snapshot = []; // 덮어쓰기 전 원래 값 (실행취소용)
@@ -2838,7 +2779,7 @@ function renderBulkBar(){
       const count = selectedEventUids.size;
       mo.events.forEach(ev=>{ if(selectedEventUids.has(ev._uid)) ev.status = btn.dataset.status; });
       logActivity('☑️', `이벤트 ${count}건 상태를 '${btn.dataset.status}'로 일괄 변경`, mo.label, 'events', mo.key);
-      syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+      syncChanges(); renderEventsRows(); renderStatusboard(); renderEventStatusFilterRow();
       showToast(`${count}건을 '${btn.dataset.status}' 상태로 바꿨어요.`);
     });
   });
@@ -2851,7 +2792,7 @@ function renderBulkBar(){
       moveToTrash('rows', `${mo.label} 이벤트 ${removedRows.length}건 (일괄 삭제)`, removedRows, {cid:'event:'+mo.key, recKind:'event'});
       selectedEventUids = new Set();
       logActivity('🗑️', `이벤트 ${count}건 일괄 삭제`, mo.label, 'events', mo.key);
-      syncChanges(); renderEventsRows(); renderStatusboard(); renderDeadlineBox(); renderEventStatusFilterRow();
+      syncChanges(); renderEventsRows(); renderStatusboard(); renderEventStatusFilterRow();
     });
   });
 }
@@ -4500,8 +4441,13 @@ if(SELFTEST) (function runSelfTest(){
     const nextMaps = rowsToMaps(stateToRows(withLog, (id,i)=> id==='a3' ? -1 : (maps.records.get(id)||{}).sort_order ?? i));
     const [mainOp, auxOp] = splitAuxOp(diffRows(maps, nextMaps), maps, nextMaps);
     assert(mainOp && mainOp.p && !mainOp.r && auxOp && auxOp.aux && auxOp.r.length===1 && auxOp.r[0].kind==='activity', '(a) 활동 기록은 편집과 다른 묶음으로 보냄');
-    STATE = structuredClone(sample); STATE.eventMonths[1].events[5].id = STATE.eventMonths[0].events[0].id;
-    assert(idOwners(STATE.eventMonths[0].events[0].id, STATE.eventMonths[0].events[0]._uid).includes('26년 9월 6행'), '(a) 같은 이벤트ID를 다른 달에서 찾아냄');
+    STATE = structuredClone(sample);
+    STATE.eventMonths[1].events[0].id = '7001'; STATE.eventMonths[1].events[5].id = '7001'; STATE.eventMonths[0].events[0].id = '7001';
+    const dupHere = idOwners('7001', STATE.eventMonths[1].events[0]._uid);
+    assert(dupHere.length===1 && dupHere[0]==='26년 9월 6행', '(a) 같은 달 안의 같은 이벤트ID만 중복으로 봄 (다른 달 이월 건은 제외)');
+    STATE.eventMonths[1].events[1].id = '친구추천'; STATE.eventMonths[1].events[2].id = '친구추천';
+    assert(idOwners('친구추천', STATE.eventMonths[1].events[1]._uid).length===0, '(a) 친구추천 같은 전용 페이지 이름은 중복으로 보지 않음');
+    assert(eventIdToUrl('친구추천').endsWith('/benefit/recommendation') && eventIdToUrl('롯데카드').endsWith('/benefit/affiliate-card') && eventIdToUrl('삼성카드').endsWith('mvnopPpCprtCardId=CC0000000029') && eventIdToUrl('CC29').endsWith('CC0000000029') && eventIdToUrl('1203').endsWith('EV0000001203'), '(a) 이벤트ID별 링크: 이벤트·친구추천·롯데카드·삼성카드·카드ID');
     assert(buildMonthSummaryWorkbook('2026-09').SheetNames[0]==='요약', '(a) 월간 요약 시트 생성');
     STATE = null;
 
