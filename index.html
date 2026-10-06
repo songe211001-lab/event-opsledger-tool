@@ -3351,12 +3351,7 @@ function renderBenefitTab(){
     </div>
 
     <div class="panel" style="margin-top:18px;">
-      <div class="panel-head-row">
-        <div><h3>이력 (${otherBlocks.length}건)</h3></div>
-        <div class="panel-head-actions">
-          <button class="sm" id="addBenefitBlockBtn">이름 직접 정해서 만들기</button>
-        </div>
-      </div>
+      <h3>이력 (${otherBlocks.length}건)</h3>
       <div id="benefitHistoryAccordion"></div>
     </div>
   `;
@@ -3372,8 +3367,6 @@ function renderBenefitTab(){
   });
   const addMonthBtn = document.getElementById('addBenefitMonthBtn');
   if(addMonthBtn) addMonthBtn.addEventListener('click', ()=> addNewBenefitMonth());
-  const addBlockBtn = document.getElementById('addBenefitBlockBtn');
-  if(addBlockBtn) addBlockBtn.addEventListener('click', addNewBenefitBlock);
 }
 
 function getBenefitBlock(blockUid){ return STATE.benefitBlocks.find(b=>b._blockUid===blockUid); }
@@ -3547,7 +3540,7 @@ function addNewBenefitMonth(silent){
   const { label: nextLabel } = baseKey ? nextMonthOf(baseKey) : nextMonthOf(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`);
 
   if(STATE.benefitBlocks.some(b=>b.label===nextLabel)){
-    if(!silent) showError(`'${nextLabel}' 블록은 이미 있어요. 이름을 다르게 하려면 "이름 직접 정해서 만들기"를 이용해주세요.`);
+    if(!silent) showError(`'${nextLabel}' 블록은 이미 있어요.`);
     return false;
   }
   const items = copyFrom ? copyFrom.items.map(it=>({...it, _uid:uid()})) : [];
@@ -3572,24 +3565,6 @@ function formatBenefitLabel(label){
     return `${yy}년 ${m[1]}월`;
   }
   return label;
-}
-
-function addNewBenefitBlock(){
-  showPromptModal('새 블록 이름을 입력하세요 (예: 8월)', '', (label)=>{
-    const copyFrom = STATE.benefitBlocks[0];
-    const finish = (doCopy)=>{
-      const items = doCopy ? copyFrom.items.map(it=>({...it, _uid:uid()})) : [];
-      const newBlockUid = uid();
-      STATE.benefitBlocks.unshift({label, items, _blockUid: newBlockUid});
-      logActivity('🎁', `'${label}' 혜택 블록 생성`, doCopy ? '이전 블록 항목 복사' : '', 'benefit');
-      syncChanges(); renderBenefitTab();
-    };
-    if(copyFrom && copyFrom.items.length){
-      showConfirmModal('직전 블록의 항목을 복사해서 시작할까요?', ()=> finish(true), ()=> finish(false), '복사해서 만들기', '빈 블록으로 만들기');
-    }else{
-      finish(false);
-    }
-  });
 }
 
 /* ════════════════════════════════════════════════════════════
