@@ -3171,12 +3171,13 @@ function renderPmWeekPreview(key){
   }
 
   if(!holder.querySelector('table')){
-    holder.innerHTML = `<div class="tblwrap"><table class="edittable"><thead></thead><tbody></tbody></table></div>
-      <div class="pm-rank-actions"><button type="button" class="sm pm-add-rank">+ 순위 추가</button><button type="button" class="sm pm-del-rank">마지막 순위 지우기</button></div>`;
-    holder.querySelector('.pm-add-rank').addEventListener('click', ()=> changePmRanks(key, +1));
-    holder.querySelector('.pm-del-rank').addEventListener('click', ()=> changePmRanks(key, -1));
+    const isCurrent = key===activeBannerMonthKey; // 이력(지난 달)에는 순위 버튼을 두지 않아요
+    holder.innerHTML = `<div class="tblwrap"><table class="edittable"><thead></thead><tbody></tbody></table></div>`
+      + (isCurrent ? `<div class="pm-rank-actions"><button type="button" class="sm pm-del-rank">마지막 순위 지우기</button></div>` : '');
+    if(isCurrent) holder.querySelector('.pm-del-rank').addEventListener('click', ()=> changePmRanks(key, -1));
   }
-  holder.querySelector('.pm-del-rank').disabled = maxRank <= 6;
+  const delRank = holder.querySelector('.pm-del-rank');
+  if(delRank) delRank.disabled = maxRank <= 6;
   const table = holder.querySelector('table');
   table.tHead.innerHTML = `<tr><th style="width:60px;">순위</th>${headCols}</tr>`;
   fillTbody(table.tBodies[0], {
@@ -3227,6 +3228,8 @@ function renderPmTab(){
       <div class="panel-head-row">
         <div><h3>현재 현황 · ${escapeHtml(currentMo.label)}</h3></div>
         <div class="panel-head-actions">
+          <button id="addPmRowBtn">+ 행 추가하기</button>
+          <button class="primary" id="addPmMonthBtn">새 달 만들기</button>
           <button id="convertPmRawBtn">🔄 사업팀 원본파일 변환하기</button>
           <input type="file" id="pmRawFileInput" accept=".xlsx,.xlsm" />
         </div>
@@ -3243,6 +3246,14 @@ function renderPmTab(){
   renderPmStatusGrid(currentMo.key);
   renderPmWeekPreview(currentMo.key);
   renderPmHistoryAccordion(otherMonths);
+
+  document.getElementById('addPmRowBtn').addEventListener('click', ()=> changePmRanks(currentMo.key, +1));
+  // 프리마케팅은 배너 구좌와 같은 달 데이터를 써요. 새 달을 만들면 배너 구좌 탭에도 같은 달이 생겨요.
+  document.getElementById('addPmMonthBtn').addEventListener('click', ()=>{
+    if(addNewBannerMonth(true)===false){ showError(`'${nextMonthOf(STATE.bannerMonths[STATE.bannerMonths.length-1].key).label}' 은 이미 있어요.`); return; }
+    renderPmTab();
+    showToast(`'${getBannerMonth(activeBannerMonthKey).label}' 달을 만들었어요. 이전 달의 프리마케팅·배너 구성을 복사했어요.`);
+  });
 
   const convertBtn = document.getElementById('convertPmRawBtn');
   const rawInput = document.getElementById('pmRawFileInput');
@@ -3278,7 +3289,6 @@ function renderPmHistoryAccordion(otherMonths){
       </div>
       <div class="event-history-body ${isOpen?'':'hidden'}">
         <div id="pmWeekPreviewHolder_${mo.key}"></div>
-        <div id="pmStatusGridHolder_${mo.key}"></div>
       </div>
     </div>`;
   }).join('');
@@ -3296,7 +3306,7 @@ function renderPmHistoryAccordion(otherMonths){
     btn.addEventListener('click', (e)=>{ e.stopPropagation(); activeBannerMonthKey = btn.dataset.key; renderPmTab(); });
   });
   otherMonths.forEach(mo=>{
-    if(expandedPmMonths.has(mo.key)){ renderPmStatusGrid(mo.key); renderPmWeekPreview(mo.key); }
+    if(expandedPmMonths.has(mo.key)) renderPmWeekPreview(mo.key);
   });
 }
 
