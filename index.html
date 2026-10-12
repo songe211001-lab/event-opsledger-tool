@@ -207,7 +207,7 @@
   table.edittable input.empty-required:focus{border-style:solid; border-color:var(--primary); background:var(--panel);}
   .tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:7px; background:var(--panel);}
   .tblwrap table.edittable{font-size:12.5px;}
-  .status-select, .priority-select{
+  .status-select{
     border-radius:999px !important; padding:4px 12px !important; font-weight:700; font-size:12px !important;
     text-align:center; text-align-last:center; border:1px solid transparent !important; width:auto !important; min-width:76px;
     appearance:none; -webkit-appearance:none; -moz-appearance:none; background-image:none !important;
@@ -217,10 +217,7 @@
   .status-select.대기{background:var(--na-soft); color:var(--ink-soft);}
   .status-select.연장{background:var(--major-soft); color:var(--primary-dark);}
   .status-select.비노출{background:var(--grey-100); color:var(--hidden-muted);}
-  .priority-select.상{background:var(--fatal-soft); color:var(--fatal-text);}
-  .priority-select.중{background:var(--minor-soft); color:var(--minor-text);}
-  .priority-select.하{background:var(--na-soft); color:var(--ink-soft);}
-  .status-select:focus, .priority-select:focus{outline:none; border-color:var(--primary) !important;}
+  .status-select:focus{outline:none; border-color:var(--primary) !important;}
 
   .idcell{display:flex; gap:4px; align-items:center;}
 
@@ -384,6 +381,7 @@
       <button id="importDataBtn">⬆ JSON 가져오기</button>
       <button id="xlsxExportBtn">⬇ 엑셀 내보내기</button>
       <button id="xlsxImportBtn">⬆ 엑셀 불러오기</button>
+      <button id="addAllMonthsBtn" title="이벤트·배너·프리마케팅·혜택의 다음 달을 한 번에 만들어요">📅 다음 달 한 번에 만들기</button>
       <button type="button" class="sync-status" id="savebar" aria-expanded="false" aria-controls="syncLog" title="동기화 기록 보기"><span class="dot" aria-hidden="true"></span><span id="savebarText">저장됨</span><span class="sync-time" id="syncTime"></span></button>
       <div class="sync-log hidden" id="syncLog" role="dialog" aria-label="동기화·활동 기록">
         <div class="modal">
@@ -603,7 +601,7 @@ function resetBtn(btn){
   if(btn.dataset.originalLabel) btn.innerHTML = btn.dataset.originalLabel;
 }
 
-const EVENT_FIELDS = ["priority","status","name","workType","category","dueDate","reflectStatus","source","reviewUrl","urlType","opUrl","note"];
+const EVENT_FIELDS = ["status","name","workType","category","dueDate","reflectStatus","source","reviewUrl","urlType","opUrl","note"];
 // 화면·엑셀에 보이는 이름만 바꿨어요. 저장 필드 이름(dueDate, reflectStatus)은 그대로예요.
 const EVENT_FIELD_LABELS = {
   priority:"우선순위", status:"작업상태", name:"이벤트명", workType:"작업유형", category:"구분",
@@ -613,7 +611,6 @@ const EVENT_FIELD_LABELS = {
 const STATUS_OPTIONS = ["완료","진행","대기","연장","비노출"];
 // 작업유형·구분 선택지 (바꾸려면 여기만 고치세요)
 const EVENT_SELECT_OPTIONS = { workType:['HTML','단순 업로드'], category:['알닷','파트너사','기타파일'] };
-const PRIORITY_OPTIONS = ["상","중","하"];
 const DONE_STATUSES = new Set(["완료","연장","비노출"]);
 const CARRY_STATUSES = new Set(["연장"]);
 const DEFAULT_BANNER_COLUMNS = ["메인 팝업","메인 상단","메인 하단","이벤트/썸네일"];
@@ -916,15 +913,29 @@ let QUEUE = [];
 let FLUSHING = false, SEND_FAILED = false, RT_DOWN = false;
 let DB_EMPTY = false, MIGRATED = false;
 
+// 대기열은 탭마다 'alddot_pending:<탭 id>'에 {at, q}로 저장해요 (같은 브라우저의 다른 탭이 덮어쓰지 않게).
+// 열 때 내 것과, 2분 넘게 갱신이 없는(닫힌) 탭의 것, 예전 형식('alddot_pending')을 합쳐서 이어 보내요.
+const MY_PENDING_KEY = PENDING_KEY + ':' + CLIENT_ID;
+const PENDING_STALE_MS = 120000;
 function loadPendingQueue(){
-  try{ const raw = localStorage.getItem(PENDING_KEY); QUEUE = raw ? JSON.parse(raw) : []; }
-  catch(e){ QUEUE = []; }
-  if(!Array.isArray(QUEUE)) QUEUE = [];
+  QUEUE = [];
+  try{
+    Object.keys(localStorage).filter(k=> k===PENDING_KEY || k.startsWith(PENDING_KEY + ':')).forEach(k=>{
+      const v = JSON.parse(localStorage.getItem(k));
+      const mine = k===MY_PENDING_KEY;
+      if(Array.isArray(v)){ QUEUE.push(...v); localStorage.removeItem(k); return; } // 예전 형식
+      if(!v || !Array.isArray(v.q)) return;
+      if(!mine && Date.now() - v.at < PENDING_STALE_MS) return; // 아직 열려 있는 다른 탭 것
+      QUEUE.push(...v.q);
+      if(!mine) localStorage.removeItem(k);
+    });
+  }catch(e){ /* 읽을 수 없으면 빈 대기열로 시작 */ }
+  persistQueue();
 }
 function persistQueue(){
   try{
-    if(QUEUE.length) localStorage.setItem(PENDING_KEY, JSON.stringify(QUEUE));
-    else localStorage.removeItem(PENDING_KEY);
+    if(QUEUE.length) localStorage.setItem(MY_PENDING_KEY, JSON.stringify({at: Date.now(), q: QUEUE}));
+    else localStorage.removeItem(MY_PENDING_KEY);
   }catch(e){ /* 저장 공간 부족 — 메모리 큐로 계속 재시도 */ }
 }
 function loadUiPrefs(){
@@ -1039,6 +1050,29 @@ function undoLast(){
   renderActiveTab();
   showToast('되돌렸어요.');
 }
+document.addEventListener('keydown', e=>{
+  const el = e.target;
+  if(e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return; // 한글 조합 중에는 건드리지 않아요
+  if(el.classList && el.classList.contains('accordion-toggle') && (e.key==='Enter' || e.key===' ')){
+    e.preventDefault();
+    const sel = el.dataset.key ? `.accordion-toggle[data-key="${el.dataset.key}"]` : `.accordion-toggle[data-blockuid="${el.dataset.blockuid}"]`;
+    const holder = el.parentElement.parentElement;
+    el.click();
+    const again = holder.querySelector(sel); if(again) again.focus(); // 다시 그려진 헤더로 포커스를 돌려요
+    return;
+  }
+  if(!el.matches || !el.matches('.edittable tbody input:not([type=checkbox]), .edittable tbody select')) return;
+  const isText = el.tagName==='INPUT' && el.type!=='date' && el.type!=='checkbox';
+  const dir = e.key==='Enter' ? (e.shiftKey ? -1 : 1) : (isText && e.key==='ArrowDown') ? 1 : (isText && e.key==='ArrowUp') ? -1 : 0;
+  if(!dir || (el.tagName==='SELECT' && e.key!=='Enter')) return;
+  const td = el.closest('td'), tr = td.parentElement;
+  const next = dir>0 ? tr.nextElementSibling : tr.previousElementSibling;
+  const target = next && next.children[td.cellIndex] && next.children[td.cellIndex].querySelector('input, select');
+  if(!target) return;
+  e.preventDefault();
+  target.focus();
+  if(target.select && target.type==='text') target.select();
+});
 document.addEventListener('input', e=>{ if(e.inputType==='historyUndo'){ NATIVE_UNDO = true; setTimeout(()=>{ NATIVE_UNDO = false; }); } }, true);
 document.addEventListener('keydown', e=>{
   if(!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase()!=='z' || !STATE) return;
@@ -1186,7 +1220,7 @@ function renderSavebar(){
 }
 
 window.addEventListener('online', flushQueue);
-setInterval(flushQueue, 30000);
+setInterval(()=>{ if(QUEUE.length) persistQueue(); flushQueue(); }, 30000); // 대기열이 있으면 '아직 열려 있음' 시각도 갱신
 window.addEventListener('beforeunload', (e)=>{
   if(!pendingCount()) return;
   flushDebounces(); // 입력 대기 중이던 값도 큐에 넣어두면 다음에 열 때 이어서 보내요
@@ -1331,6 +1365,7 @@ function onRealtime(table, payload){
       if(!id) return;
       if(MY_DELETES.delete(t + ':' + id)) return; // 내가 지운 것이 되돌아온 이벤트
       const gone = t==='r' ? (findRecord(id)||{}).cid : (findContainer(id) ? id : null);
+      noteRemoteDelete(t, id);
       t==='r' ? remoteDeleteRecord(id) : remoteDeleteContainer(id);
       if(gone && gone!==SETTINGS_ID) logRemote(gone, t==='r', '삭제');
       return;
@@ -1428,6 +1463,30 @@ function applyTheirs(id, kind, f, v){
   });
 }
 
+// 다른 사람이 달·블록·행을 지우면 알려요. 줄줄이 오는 삭제(달 삭제 때 그 안의 행들)는 0.5초 모아서 한 번만 알려요.
+let REMOTE_DEL = null;
+function noteRemoteDelete(t, id){
+  const editingUid = (document.activeElement && document.activeElement.closest && document.activeElement.closest('tr[data-uid]') || {dataset:{}}).dataset.uid;
+  const typing = u=> u===editingUid || [...DEBOUNCE.values()].some(e=> e.id===u);
+  const d = REMOTE_DEL || (REMOTE_DEL = {labels:[], rows:0, editing:false});
+  if(t==='c'){
+    const loc = findContainer(id);
+    if(!loc || loc.kind==='settings') return;
+    d.labels.push(loc.kind==='benefit_block' ? formatBenefitLabel(loc.obj.label) : loc.obj.label);
+    if(editingUid && (findRecord(editingUid)||{}).cid===id) d.editing = true;
+  }else{
+    const loc = findRecord(id);
+    if(!loc || AUX_KINDS.has(loc.kind)) return;
+    d.rows++;
+    if(typing(id)) d.editing = true;
+  }
+  clearTimeout(d.timer);
+  d.timer = setTimeout(()=>{
+    REMOTE_DEL = null;
+    const what = d.labels.length ? `'${d.labels.join("', '")}'` : `행 ${d.rows}개`;
+    showToast(`${d.editing ? '입력 중이던 행이 삭제됐어요. ' : ''}다른 사람이 ${what}을(를) 삭제했어요. 휴지통에서 복구할 수 있어요.`, d.editing ? 'error' : 'success');
+  }, 500);
+}
 function remoteDeleteRecord(id){
   const loc = findRecord(id);
   if(!loc) return;
@@ -2313,7 +2372,6 @@ function logActivity(icon, action, detail, tab, monthKey){
 let activeMainTab = 'events';
 let activeEventMonthKey = null;
 let activeBannerMonthKey = null;
-let activeBenefitIndex = 0;
 let activeEventStatusFilter = '전체';
 let selectedEventUids = new Set();
 
@@ -2426,7 +2484,7 @@ function renderEventsTab(){
   });
 }
 function newEventRow(){
-  return {_uid:uid(), priority:"중", status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""};
+  return {_uid:uid(), status:"대기", name:"", workType:"", category:"", dueDate:"", reflectStatus:"", source:"", reviewUrl:"", urlType:"", opUrl:"", note:"", id:""};
 }
 
 function renderEventHistoryAccordion(otherMonths){
@@ -2440,7 +2498,7 @@ function renderEventHistoryAccordion(otherMonths){
     const isOpen = expandedEventMonths.has(mo.key);
     return `
     <div class="benefit-block" data-key="${mo.key}">
-      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}" role="button" tabindex="0" aria-expanded="${isOpen}">
         <span class="bb-title">
           <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
           ${escapeHtml(mo.label)}
@@ -2578,7 +2636,6 @@ function bindEventRow(tr, key, mode){
         inp.className = 'ev-field status-select ' + inp.value;
         if(mode==='current'){ renderStatusboard(); renderEventStatusFilterRow(); }
       }
-      if(field==='priority') inp.className = 'ev-field priority-select ' + inp.value;
       if(field==='name') inp.classList.toggle('empty-required', !inp.value.trim());
       if(field==='id'){
         const linkBtn = tr.querySelector('.id-link-btn');
@@ -2697,10 +2754,6 @@ function renderEventStatusFilterRow(){
 }
 
 function renderEventFieldCell(ev, colKey){
-  if(colKey==='priority'){
-    const opts = PRIORITY_OPTIONS.map(o=>`<option value="${o}" ${ev.priority===o?'selected':''}>${o}</option>`).join('');
-    return `<td><select class="ev-field priority-select ${ev.priority}" data-field="priority">${opts}</select></td>`;
-  }
   if(colKey==='status'){
     const opts = STATUS_OPTIONS.map(o=>`<option value="${o}" ${ev.status===o?'selected':''}>${o}</option>`).join('');
     return `<td><select class="ev-field status-select ${ev.status}" data-field="status">${opts}</select></td>`;
@@ -2862,6 +2915,22 @@ function renderBulkBar(){
   });
 }
 
+// 이벤트·배너(프리마케팅)·혜택의 다음 달을 한 번에 만들어요. Ctrl+Z 한 번으로 모두 되돌려요.
+function addAllNextMonths(){
+  const prev = SHADOW, before = UNDO.length;
+  const made = [];
+  UNDO_OFF = true;
+  try{
+    if(addNewEventMonth(true)) made.push(`이벤트 ${getEventMonth(activeEventMonthKey).label}`);
+    if(addNewBannerMonth(true)) made.push(`배너·프리마케팅 ${getBannerMonth(activeBannerMonthKey).label}`);
+    if(addNewBenefitMonth(true)) made.push(`혜택 ${formatBenefitLabel(STATE.benefitBlocks[0].label)}`);
+  }finally{ UNDO_OFF = false; }
+  const op = diffRows(prev, SHADOW);
+  if(op && UNDO.length===before) recordUndo(op, prev);
+  renderActiveTab();
+  if(made.length) showToast(`새 달을 만들었어요: ${made.join(', ')}`);
+  else showToast('다음 달이 이미 모두 있어요.', 'error');
+}
 function addNewEventMonth(silent){
   const last = STATE.eventMonths[STATE.eventMonths.length-1];
   const {key, label} = nextMonthOf(last.key);
@@ -2973,7 +3042,7 @@ function renderBannerHistoryAccordion(otherMonths){
     const isOpen = expandedBannerMonths.has(mo.key);
     return `
     <div class="benefit-block" data-key="${mo.key}">
-      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}" role="button" tabindex="0" aria-expanded="${isOpen}">
         <span class="bb-title">
           <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
           ${escapeHtml(mo.label)}
@@ -3045,7 +3114,7 @@ function bannerRowHtml(r, idx, cols, mode){
           </div>
         </td>
         ${cols.map(col=>`<td><input type="text" class="bn-field" data-col="${escapeHtml(col)}" value="${escapeHtml(r.values[col]||'')}"/></td>`).join('')}
-        <td><button class="ghost del-row-btn icon-btn">${TRASH_ICON}</button></td>
+        <td><button class="ghost del-row-btn icon-btn" title="행 삭제" aria-label="행 삭제">${TRASH_ICON}</button></td>
       </tr>`;
 }
 function bannerVisibleCols(mo){ const hidden = mo.hiddenColumns||[]; return mo.columns.filter(c=>!hidden.includes(c)); }
@@ -3372,7 +3441,7 @@ function renderPmHistoryAccordion(otherMonths){
     const filledCount = (mo.preMarketingPartners||[]).filter(p=>p.name).length;
     return `
     <div class="benefit-block" data-key="${mo.key}">
-      <div class="bb-head accordion-toggle" data-key="${mo.key}">
+      <div class="bb-head accordion-toggle" data-key="${mo.key}" role="button" tabindex="0" aria-expanded="${isOpen}">
         <span class="bb-title">
           <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
           ${escapeHtml(mo.label)}
@@ -3568,7 +3637,7 @@ function renderBenefitHistoryAccordion(otherBlocks){
     const isOpen = expandedBenefitBlocks.has(block._blockUid);
     return `
     <div class="benefit-block" data-blockuid="${escapeHtml(block._blockUid)}">
-      <div class="bb-head accordion-toggle" data-blockuid="${escapeHtml(block._blockUid)}">
+      <div class="bb-head accordion-toggle" data-blockuid="${escapeHtml(block._blockUid)}" role="button" tabindex="0" aria-expanded="${isOpen}">
         <span class="bb-title">
           <span class="accordion-chevron">${isOpen?'▾':'▸'}</span>
           ${escapeHtml(formatBenefitLabel(block.label))}
@@ -3680,6 +3749,7 @@ function formatBenefitLabel(label){
    탭 전환 & 상호 링크 이동
    ════════════════════════════════════════════════════════════ */
 document.getElementById('globalErrorClose').addEventListener('click', clearError);
+document.getElementById('addAllMonthsBtn').addEventListener('click', ()=> showConfirmModal(`이벤트·배너(프리마케팅)·혜택의 다음 달을 한 번에 만들까요? (이벤트 기준 ${nextMonthOf(STATE.eventMonths[STATE.eventMonths.length-1].key).label})`, addAllNextMonths, null, '만들기'));
 
 const ALL_TABS = ['events','banner','pm','benefit'];
 
@@ -4571,7 +4641,9 @@ if(SELFTEST) (function runSelfTest(){
 
     // (e) 중복 ID 막기 · 칸 설정 없음 · Ctrl+Z · 이 달을 현재로 보기
     //     sb는 가짜, CONNECTED=false라 아무것도 보내지 않아요. 저장 대기열(localStorage)은 끝나면 원래대로 돌려놔요.
-    const savedPending = localStorage.getItem(PENDING_KEY);
+    // 이 브라우저에 남아 있던 실제 전송 대기열은 통째로 보관했다가 끝나면 그대로 돌려놔요
+    const pendingKeys = ()=> Object.keys(localStorage).filter(k=> k===PENDING_KEY || k.startsWith(PENDING_KEY + ':'));
+    const savedPending = pendingKeys().map(k=> [k, localStorage.getItem(k)]);
     try{
       sb = {};
       STATE = structuredClone(sample); STATE.uiPrefs = {}; ensureStateShape();
@@ -4605,9 +4677,31 @@ if(SELFTEST) (function runSelfTest(){
       ctrlZ();
       assert(getEventMonth('2026-09') && getEventMonth('2026-09').events.length===6 && activeEventMonthKey==='2026-09' && !STATE.trash.some(t=>t.type==='event_month'), '(e) Ctrl+Z → 지운 달과 현재 달이 돌아옴');
       assert([...SHADOW.records.keys()].every(Boolean) && STATE.activityLog.every(a=>a._uid), '(e) 새 활동 기록도 행 id(_uid)를 가짐');
+
+      // (f) 다음 달 한 번에 만들기 → Ctrl+Z 한 번에 모두 되돌림
+      const nUndo = UNDO.length;
+      addAllNextMonths();
+      assert(getEventMonth('2026-10') && getBannerMonth('2026-10') && STATE.benefitBlocks[0].label==='26년 10월' && UNDO.length===nUndo+1, '(f) 다음 달 한 번에 만들기 → 이벤트·배너·혜택 10월이 생기고 되돌리기 기록은 한 단계');
+      ctrlZ();
+      assert(!getEventMonth('2026-10') && !getBannerMonth('2026-10') && STATE.benefitBlocks[0].label==='26년 9월', '(f) Ctrl+Z 한 번 → 세 탭의 새 달이 모두 사라짐');
+
+      // (f) 다른 사람이 달을 지우면 알림을 모아요
+      onRealtime('containers', {eventType:'DELETE', old:{id:'event:2026-08'}});
+      assert(!getEventMonth('2026-08') && REMOTE_DEL && REMOTE_DEL.labels.includes('26년 8월'), '(f) 다른 사람이 지운 달은 알림 대기열에 이름이 올라감');
+      clearTimeout(REMOTE_DEL.timer); REMOTE_DEL = null;
+
+      // (f) 탭마다 따로 저장하는 대기열: 닫힌 탭·예전 형식은 이어받고, 열려 있는 다른 탭 것은 건드리지 않음
+      pendingKeys().forEach(k=> localStorage.removeItem(k));
+      localStorage.setItem(PENDING_KEY + ':dead', JSON.stringify({at: Date.now() - PENDING_STALE_MS - 1, q:[{dr:['x']}]}));
+      localStorage.setItem(PENDING_KEY + ':live', JSON.stringify({at: Date.now(), q:[{dr:['y']}]}));
+      localStorage.setItem(PENDING_KEY, JSON.stringify([{dr:['z']}]));
+      loadPendingQueue();
+      const got = QUEUE.map(o=> o.dr[0]).sort().join();
+      assert(got==='x,z' && localStorage.getItem(PENDING_KEY + ':live') && !localStorage.getItem(PENDING_KEY + ':dead') && !localStorage.getItem(PENDING_KEY) && JSON.parse(localStorage.getItem(MY_PENDING_KEY)).q.length===2, '(f) 대기열: 닫힌 탭·예전 형식은 이어 보내고 열린 탭 것은 그대로 둠');
     }finally{
       DEBOUNCE.forEach(e=> clearTimeout(e.timer)); DEBOUNCE.clear(); QUEUE.length = 0;
-      if(savedPending===null) localStorage.removeItem(PENDING_KEY); else localStorage.setItem(PENDING_KEY, savedPending);
+      pendingKeys().forEach(k=> localStorage.removeItem(k));
+      savedPending.forEach(([k, v])=> localStorage.setItem(k, v));
       sb = null;
     }
 
