@@ -63,7 +63,7 @@
   body{background:var(--bg); color:var(--ink); font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif; padding:26px var(--page-gutter) 70px;}
   .wrap{margin:0;} /* 폭 제한 없이 화면 전체를 써요 */
 
-  .topbar{display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
+  .topbar{display:flex; flex-direction:column; align-items:flex-start; gap:16px; margin-bottom:18px;} /* 제목·설명 아래에 버튼 줄 */
 
   .brand h1{font-weight:800; font-size:30px; letter-spacing:-0.02em; margin:2px 0 0; color:var(--ink); line-height:1.25;}
   .brand .subtitle{font-size:13.5px; color:var(--muted); margin:6px 0 0; line-height:1.6; font-weight:400;}
@@ -351,7 +351,6 @@
 
   /* 반응형 */
   @media (max-width:720px){
-    .topbar{align-items:flex-start;}
     .statusboard{flex-direction:column;}
     .panel-head-actions{flex-shrink:1;}
     .statusboard button.sb-item{border-right:none; border-bottom:1px solid var(--line);}
@@ -2788,6 +2787,7 @@ function handleTablePaste(e, key, startUid, startField, mode){
     : ()=> renderHistoryMonthTable(key);
 
   const snapshot = []; // 덮어쓰기 전 원래 값 (실행취소용)
+  const dupSkipped = [];
   rows.forEach((cols, rOffset)=>{
     let targetEv = mo.events[startIdx + rOffset];
     let isNew = false;
@@ -2799,11 +2799,16 @@ function handleTablePaste(e, key, startUid, startField, mode){
     snapshot.push({ uid: targetEv._uid, isNew, before: isNew ? null : {...targetEv} });
     cols.forEach((val, cOffset)=>{
       const field = fieldOrder[startFieldIdx + cOffset];
-      if(field) targetEv[field] = val.trim();
+      if(!field) return;
+      const v = val.trim();
+      // 같은 달(이번에 붙여넣은 행 포함)에 이미 있는 이벤트ID는 넣지 않고 원래 값을 둬요
+      if(field==='id' && idOwners(v, targetEv._uid).length){ dupSkipped.push(`${startIdx+rOffset+1}행 '${v}'`); return; }
+      targetEv[field] = v;
     });
   });
   syncChanges();
   rerender();
+  if(dupSkipped.length) showToast(`이미 사용 중인 ID라 넣지 않았어요: ${dupSkipped.join(', ')}`, 'error');
   showUndoToast(`${rows.length}행을 붙여넣었어요. (자동 반영된 내용이니 한 번 확인해주세요)`, ()=>{
     // 새로 만든 행은 제거하고, 기존 행은 붙여넣기 전 값으로 되돌린다
     const m = getEventMonth(key); if(!m) return;
@@ -4584,6 +4589,10 @@ if(SELFTEST) (function runSelfTest(){
       idInp.dispatchEvent(new Event('input')); idInp.dispatchEvent(new Event('change'));
       assert(evOf('e3').id===origId && idInp.value===origId && SHADOW.records.get('e3').data.id===origId
         && /이미 사용 중인 ID예요: 26년 9월 6행/.test(document.getElementById('toastStack').textContent), '(e) 같은 달 중복 ID는 알림 후 직전 값으로 되돌리고 저장하지 않음');
+      const ids0 = ['e6','e7','e8'].map(u=> evOf(u).id);
+      handleTablePaste({clipboardData:{getData:()=> evOf('e5').id + '\n8888\n8888'}, preventDefault(){}}, '2026-09', 'e6', 'id', 'current');
+      assert(evOf('e6').id===ids0[0] && evOf('e7').id==='8888' && evOf('e8').id===ids0[2], '(e) 붙여넣기도 중복 ID(기존 행·같이 붙여넣은 행)는 넣지 않고 원래 값을 둠');
+      UNDO.pop(); evOf('e7').id = ids0[1]; SHADOW = snapshotRows();
       const nameInp = document.querySelector('#tab-events tr[data-uid="e3"] input[data-field="name"]');
       nameInp.value = '바뀐 이름'; nameInp.dispatchEvent(new Event('input'));
       assert(evOf('e3').name==='바뀐 이름', '(e) 칸 수정이 STATE에 반영됨');
